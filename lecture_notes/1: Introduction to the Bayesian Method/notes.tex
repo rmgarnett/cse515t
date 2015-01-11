@@ -1,0 +1,227 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+ \usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{microtype}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+
+\begin{document}
+
+\section*{Inference}
+
+In this course, we will focus on \emph{probabilistic inference.}  This
+is the process of inferring unknown properties of a system given
+observations via the mechanics of probability theory.
+
+For example, suppose we want to understand some aspect of the
+population of the United States, such as the portion of adults who
+prefer Coca Cola over Pepsi.  Let this unknown value be called
+$\theta$.  How can I gain insight into this value?
+
+One thing I could do is ask people what they believe about $\theta$,
+which they might reasonably compactly communicate via a probability
+distribution (or equivalently by a drawing curve on a piece of paper).
+Note that different people might give different answers to this
+question!  (What do \emph{you} think are plausible values of
+$\theta$?)
+
+Of course, the Coca Cola corporation probably wouldn't be too happy if
+I simply drew my personal beliefs about this value and submitted a
+report.  Instead, we could conduct a survey to gain some more
+information about $\theta$.  So we contact some adults and ask them if
+they prefer Coca Cola over Pepsi, and record the results.  Let's call
+the results of this experiment $\data$ (for ``data'').
+
+What do we do with this data once we've measured it?  The goal of
+probabilistic inference is to make some statements about $\theta$
+given these observations.
+
+\section*{Probability}
+
+There are just two laws of probability you need to know.  The first is
+the \emph{sum rule,} also called the \emph{rule of total probability.}
+Suppose $X$ is some event (an event is simply a collection of things
+that could be true, for example ``the total value shown on two dice is
+less than six''), and suppose $\{Y_i\}_{i = 1}^N$ are some mutually
+exclusive and exhaustive events (``for example, $Y_i$ could be the
+event ``the first rolled die has value $i$,'' for $i \in \{1, 2,
+\dotsc, 6\}$).  Then:
+\begin{equation*}
+  \Pr(X) = \sum_{i = 1}^N \Pr(X, Y_i),
+\end{equation*}
+so the total probability of $X$ is the sum of the probabilities of $X$
+occurring alongside each of the scenarios described by the $\{Y_i\}$.
+
+The second law of probability to know is the \emph{product rule:}
+\begin{equation*}
+  \Pr(X, Y) = \Pr(Y \given X)\Pr(X).
+\end{equation*}
+Here $\Pr(Y \given X)$, read ``the probability of $Y$ given $X$,'' is
+the probability of event $Y$ when we restrict to only cases where $X$
+is true.  This is easy to see from a Venn diagram.  By manipulating
+the product rule, we arrive at \emph{Bayes' theorem:}
+\begin{align*}
+  \Pr(Y \given X) &= \frac{\Pr(X \given Y)\Pr(Y)}{\Pr(X)} \\
+                  &= \frac{\Pr(X \given Y)\Pr(Y)}{\sum \Pr(X \given Y)\Pr(Y)}.
+\end{align*}
+One possible way to interpret this result is as follows.  Suppose we
+are interested in the truth of $Y$.  We begin with a prior belief
+about $Y$, $\Pr(Y)$.  We then learn that $X$ is true.  We use the
+formula above to update our belief about $Y$ by conditioning on this
+new information, giving $\Pr(Y \given X)$.  Bayes' theorem therefore
+gives a probabilistically consistent way to update one's beliefs given
+new information.  In this context the value $\Pr(Y)$ is called a
+\emph{prior probability}, as it represents our beliefs prior to
+observing $X$.  The output, $\Pr(Y \given X)$ is called the
+\emph{posterior probability.}
+
+The process of updating beliefs in this way is often called
+\emph{probability inversion,} because after observing $X$, we first
+calculate $\Pr(X \given Y)$ (``how likely was it to observe $X$ if $Y$
+were true?''), then invert it using Bayes' theorem to give the desired
+probability (``how likely is $Y$ now that I've seen $X$?'').  Many
+classical paradoxes arise because these probabilities can be quite
+different from each other, depending on the prior $\Pr(Y)$.
+
+What is the prior probability that the outcome of rolling two dice is
+less than six?  What if I told you that the value of the first die was
+a five, does that change anything?
+
+The above results are only valid for discrete random variables $X$.
+Although this can be useful in machine learning (for example, if these
+variables correspond to different hypotheses we wish to compare), in
+practice, we will often be interested in continuous variables, such as
+$\theta$ above.  Thankfully, we above formulas are perfectly valid for
+continuous random variables $x$ and $\theta$, where we replace
+probabilities $\Pr$ with probability density functions $p$ and replace
+sums with integrals:
+\begin{align*}
+  p(x) &= \int p(x, y) \intd{y}; \\
+  p(y \given x) &= \frac{p(x \given y) p(y)}{\int p(x \given y) p(y) \intd{y}}.
+\end{align*}
+We will always assume that probability density functions exist,
+because the cases where they don't are not typically encountered in
+machine learning.  It also saves us from having to state ``when the
+density exists'' all the time.
+
+Returning to our survey example, we might begin with a prior belief
+about the value of $\theta$, represented by a prior probability
+distribution $p(\theta)$. To couple our observations $\data$ to the
+value of interest, we construct a probabilistic model $\Pr(\data
+\given \theta)$, which describes how likely we would see a particular
+survey result $\data$ given a particular value of $\theta$.  Note that
+this model could have any form and we are free to make it as
+complicated as we'd like: was there bias in the sampling mechanism?
+Do people always tell the truth?
+
+Finally, we use these to compute the posterior probability of $\theta$
+given the survey results, $p(\theta \given \data)$.  This posterior
+distribution encapsulates our entire belief about $\theta$! We can
+use it to answer various questions we might be about $\theta$.
+
+\section*{The Bayesian Method}
+
+There are four main steps to the Bayesian approach to probabilistic
+inference:\footnote{These are summarized from Tony O'Hagan and
+  Jonathan Forster's eloquent introduction in \emph{Kendall's Advanced
+    Theory of Statistics Volume 2B.}}
+\begin{itemize}
+\item \textbf{Likelihood.} First, we construct the likelihood (or
+  \emph{model}), $p(\data \given \theta)$.  This serves to describe
+  the mechanism giving rise our observations $\data$ given a
+  particular value of the parameter of interest $\theta$.
+\item \textbf{Prior.} Next, we summarize our prior beliefs about the
+  parameters $\theta$, which we encode via a probability distribution
+  $p(\theta)$.
+\item \textbf{Posterior.} Given some observations $\data$, we obtain
+  the posterior distribution $p(\theta \given \data)$ using Bayes'
+  theorem.
+\item \textbf{Inference.} We now use the posterior distribution to
+  draw further conclusions as required.
+\end{itemize}
+The last step is purposely open-ended. For example, we can use it to
+make predictions about new data (as in supervised learning), we can
+summarize it in various ways (for example, point estimation if we must
+report a single ``best guess'' of $\theta$), use to compare
+alternative models (giving rise to Bayesian model comparison),
+determine which data to obtain next (optimal design of experiments,
+called ``active learning'' in machine learning), and more.  We will
+consider several of these in this course.
+
+\section*{Issues}
+
+Bayesian inference is a completely consistent system for probabilistic
+reasoning.  Unfortunately, it is not without its issues, some of which
+we list below.
+
+\subsection*{Origin of priors}
+
+In contrast to the model $p(\data \given \theta)$, it is not usually
+clear where the prior $p(\theta)$ should come from.  There is an
+entire branch of study concerning prior elicitation, but for now we
+will simply treat it as given.  We will continue to discuss this
+throughout the course.  Indeed, we will see that several ``tricks''
+often encountered in alternative approaches (such as
+\emph{regularization}) can be interpreted as implicitly placing
+particular prior beliefs on $\theta$.
+
+\subsection*{The meaning of probability}
+
+Another problem is what exactly \emph{probability} means.  The
+dominant statistical practice for many years (known as the
+\emph{classical} or \emph{frequentist} theory) defines probability in
+terms of the limit of conducting infinitely many random experiments.
+Therefore it is impossible to consider the ``probability'' of a
+statement such as ``at least 50\% of adults prefer Coca Cola.''  This
+statement is either true or false, so its frequentist probability is
+either zero or one (but we might not know which).  In the Bayesian
+interpretation, we allow probabilities instead to describe
+\emph{degrees of belief} in such a proposition.  In this way, we can
+treat everything as a random variable and use the tools of probability
+to carry out all inference.  That is, in Bayesian probability,
+parameters, data, and hypotheses are all treated the same.  This
+viewpoint is not universally accepted, and there is a lot of
+fascinating philosophical writing on the subject, which we will
+largely avoid.
+
+Note that the two interpretations of probability agree on the axioms
+and theorems of probability theory.  No one argues the true of Bayes'
+theorem.  The main difference is that a frequentist would not allow a
+probability distribution to be placed on parameters such as $\theta$,
+so the use of Bayes' theorem to update beliefs about parameters in
+light of data is not allowed in that framework.
+
+\subsection*{Intractable integrals}
+
+Unfortunately, the integral in the denominator of Bayes' theorem:
+\begin{equation*}
+  p(x) = \int p(x \given y) p(y) \intd{y}
+\end{equation*}
+is not in general tractable for arbitrary combinations of priors and
+likelihoods.  For this reason, we will spend a lot of time discussing
+various schemes to approximate the posterior distribution in such
+cases.  Sometimes this can be more of an art than a science.
+
+\end{document}
