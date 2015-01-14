@@ -56,7 +56,7 @@ xlabel('$\theta$');
 set(gca, 'box', 'off');
 
 % make tikz plot if possible
-if (exist('matlab2tikz', 2))
+if (exist('matlab2tikz', 'file'))
   figure_name = 'beta_example';
   matlab2tikz(sprintf('%s/%s.tex', figures_directory, figure_name), ...
               'height',       '\figureheight', ...
