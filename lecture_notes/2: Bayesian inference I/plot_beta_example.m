@@ -1,10 +1,19 @@
+% This file will plot the prior, likelihood, and posterior
+% distribution for a beta-binomial model.
+%
+% The output will be a .tex file that you can \input{} into a LaTeX
+% document and produce a plot.  This will require matlab2tikz
+% (https://github.com/matlab2tikz/matlab2tikz) and pgfplots.
+%
+% Roman Garnett (garnett@wustl.edu)
+
 % parameters of prior distribution
 alpha = 3; % pseudocount of positive observations
 beta  = 5; % pseudocount of negative observations
 
 % observed data
 x = 7; % number of positive observations
-n = 8;  % total number of observations
+n = 8; % total number of observations
 
 % plot colors (from http://colorbrewer2.org/)
 colors = [ 31, 120, 180; ...
@@ -14,12 +23,13 @@ colors = [ 31, 120, 180; ...
 % location of tikz output
 figures_directory = 'figures';
 
-theta = linspace(0, 1, 1000);
-
-% see notes
+% function handles for prior, likelihood, and posterior; see notes
 prior      = @(theta) betapdf(theta, alpha, beta);
 likelihood = @(theta) binopdf(x, n, theta);
 posterior  = @(theta) betapdf(theta, alpha + x, beta + n - x);
+
+% range of theta values to plot
+theta = linspace(0, 1, 1000);
 
 clf;
 hold('off');
@@ -45,10 +55,13 @@ xlabel('$\theta$');
 
 set(gca, 'box', 'off');
 
-figure_name = 'beta_example';
-matlab2tikz(sprintf('%s/%s.tex', figures_directory, figure_name), ...
-              'height',           '\figureheight', ...
-              'width',            '\figurewidth',  ...
-              'parseStrings',     false,           ...
-              'showInfo',         false,           ...
-              'extraCode',        sprintf('\\tikzsetnextfilename{%s}', figure_name));
+% make tikz plot if possible
+if (exist('matlab2tikz', 2))
+  figure_name = 'beta_example';
+  matlab2tikz(sprintf('%s/%s.tex', figures_directory, figure_name), ...
+              'height',       '\figureheight', ...
+              'width',        '\figurewidth',  ...
+              'parseStrings', false,           ...
+              'showInfo',     false,           ...
+              'extraCode',    sprintf('\\tikzsetnextfilename{%s}', figure_name));
+end
