@@ -39,7 +39,7 @@ Due Wednesday, 28 January 2015 \\
   (Barber.)
   Suppose that a study shows that 90\% of people who have contracted
   Creutzfeldt--Jakob disease (``mad cow disease'') ate hamburgers
-  prior to contracting the disease.  Crreutzfeldt--Jakob disease is
+  prior to contracting the disease.  Creutzfeldt--Jakob disease is
   incredibly rare; suppose only one in a million people have the
   disease.
 
@@ -68,7 +68,7 @@ Due Wednesday, 28 January 2015 \\
   (\alpha + x, \beta + 1)$.
 
 \item
-  (Optimal Price is Right bidding.)
+  (Optimal \emph{Price is Right} bidding.)
   Suppose you have a standard normal belief about an unknown parameter
   $\theta$, $p(\theta) = \mc{N}(\theta; 0, 1^2)$.  You are asked to
   give a point estimate $\hat{\theta}$ of $\theta$, but are told that
@@ -77,8 +77,8 @@ Due Wednesday, 28 January 2015 \\
     \ell(\hat{\theta}, \theta; c)
     =
     \begin{cases}
-      (\theta - \hat{\theta})^2 & \theta  <   \hat{\theta} \\
-      c                         & \theta \geq \hat{\theta}
+      (\theta - \hat{\theta})^2 & \hat{\theta}  <   \theta; \\
+      c                         & \hat{\theta} \geq \theta
     \end{cases},
   \end{equation*}
   where $c > 0$ is a constant cost for overestimating.  What is the
@@ -87,7 +87,6 @@ Due Wednesday, 28 January 2015 \\
 
 \item
   (Maximum-likelihood estimation.)
-
   Suppose you flip a coin with unknown bias $\theta$, $\Pr(x =
   \text{H}) = \theta$, three times and observe the outcome HHH.  What
   is the maximum likelihood estimator for $\theta$?  Do you think this
@@ -96,7 +95,7 @@ Due Wednesday, 28 January 2015 \\
   Consider a Bayesian analysis of $\theta$ with a beta prior $p(\theta
   \given \alpha, \beta) = \mc{B}(\theta; \alpha, \beta)$.  What is the
   posterior mean of $\theta$?  What is the posterior mode?  Consider
-  $(\alpha, \beta) = (\nicefrac{1}{2}, \nicefrac{1}{2})$.  Plot the
+  $(\alpha, \beta) = (\nicefrac{1}{5}, \nicefrac{1}{5})$.  Plot the
   posterior density in this case.  Is the posterior mean a good
   summary of the distribution?
 
@@ -106,7 +105,7 @@ Due Wednesday, 28 January 2015 \\
   distributed real-valued random variables with distribution $p(x_i
   \given \theta) = \mc{N}(x_i; \theta, \sigma^2)$.  Suppose the
   variance $\sigma^2$ is known but the mean $\theta$ is unknown with
-  prior distribution $p(\theta) = \mc{N}(\theta; 0, 1)$.
+  prior distribution $p(\theta) = \mc{N}(\theta; 0, 1^2)$.
   \begin{itemize}
   \item
     What is the likelihood of the full observation vector $p(\bm{x}
