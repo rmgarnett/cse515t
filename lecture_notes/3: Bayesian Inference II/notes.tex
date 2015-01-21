@@ -42,9 +42,9 @@
 Suppose we are interested in the value of a parameter $\theta$, for
 example the unknown bias of a coin.  We have already seen how one may
 use the Bayesian method to reason about $\theta$; namely, we select a
-likelihood function $p(x \given \data)$, explaining how observed data
-$\data$ are expected to be generated given the value of $\theta$.
-Then we select prior distribution $p(\theta)$ reflecting our initial
+likelihood function $p(\data \given \theta)$, explaining how observed
+data $\data$ are expected to be generated given the value of $\theta$.
+Then we select a prior distribution $p(\theta)$ reflecting our initial
 beliefs about $\theta$.  Finally, we conduct an experiment to gather
 data and use Bayes' theorem to derive the posterior $p(\theta \given
 \data)$.
@@ -86,18 +86,18 @@ $\hat{\theta}$ are exactly those in the parameter space, so $\mc{A} =
 will have a likelihood function $p(\data \given \theta)$ linking
 potential observations to the parameter space.
 
-After conducting an experiment and observing data $\data$, we are
-compelled to select an action $a \in \mc{A}$.  We define a
-(deterministic) \emph{decision rule} as a function $\delta\colon
-\mc{X} \to \mc{A}$ that selects an action $a$ given the observations
-$\data$.\footnote{We may also consider \emph{randomized} decision rules,
-  where $\delta$ maps observed data $\data$ to a probability
-  distribution over $\mc{A}$, which we select a sample from.  This can
-  be useful, for example, when facing an intelligent adversary.  Most
-  of the expressions we will derive can be derived analogously for
-  this case; however, we will not do so here.}  In general, this
-decision rule can be any arbitrary function.  How do we select which
-decision rule to use?
+After conducting an experiment and observing data, we are compelled to
+select an action $a \in \mc{A}$.  We define a (deterministic)
+\emph{decision rule} as a function $\delta\colon \mc{X} \to \mc{A}$
+that selects an action $a$ given the observations $\data$.\footnote{We
+  may also consider \emph{randomized} decision rules, where $\delta$
+  maps observed data $\data$ to a probability distribution over
+  $\mc{A}$, which we select a sample from.  This can be useful, for
+  example, when facing an intelligent adversary.  Most of the
+  expressions we will derive can be derived analogously for this case;
+  however, we will not do so here.}  In general, this decision rule
+can be any arbitrary function.  How do we select which decision rule
+to use?
 
 To guide our selection, we will define a \emph{loss function,} which
 is a function $L\colon \Theta \times \mc{A} \to \R$.  The value
@@ -234,26 +234,29 @@ $\hat{\theta}$ and equating to zero:
   0,
 \end{equation*}
 from which we may derive $\hat{\theta} = \mathbb{E}[\theta \given
-  \data]$.  Examining the second derivative, we see $\partial^2
-\mathbb{E}\bigl[L(\theta, \hat{\theta}) \given \data \bigr] / \partial
-\hat{\theta}^2 = 2 > 0$, so this is indeed a minimum.  Therefore we
-have shown that the Bayes estimator in the case of squared loss is the
-posterior mean $\hat{\theta}(\data) = \mathbb{E}[\theta \given
-  \data].$
+  \data]$.  Examining the second derivative, we see
+\begin{equation*}
+  \frac{\partial^2\mathbb{E}\bigl[L(\theta, \hat{\theta}) \given \data \bigr]}
+       {\partial \hat{\theta}^2}
+  = 2 > 0,
+\end{equation*}
+so this is indeed a minimum.  Therefore we have shown that the Bayes
+estimator in the case of squared loss is the posterior mean
+$\hat{\theta}(\data) = \mathbb{E}[\theta \given \data].$
 
 A similar analysis shows that the Bayes estimator for the absolute
 deviation loss $L(\theta, \hat{\theta}) = \lvert \theta - \hat{\theta}
-\rvert$ is the posterior median, and the Bayes estimator for the a
-relaxed 0--1 loss
+\rvert$ is the posterior median, and the Bayes estimators for a
+relaxed 0--1 loss:
 \begin{equation*}
   L(\theta, \hat{\theta}; \varepsilon)
   =
   \begin{cases}
-    0 & \lvert \theta - \hat{\theta} \rvert   < \varepsilon \\
-    1 & \lvert \theta - \hat{\theta} \rvert \geq \varepsilon
+    0 & \lvert \theta - \hat{\theta} \rvert   < \varepsilon; \\
+    1 & \lvert \theta - \hat{\theta} \rvert \geq \varepsilon,
   \end{cases}
 \end{equation*}
-converges to the posterior mode for small $\varepsilon$.
+converge to the posterior mode for small $\varepsilon$.
 
 The posterior mode, also called the \emph{maximum a posteriori}
 (\acro{MAP}) estimate of $\theta$ and written
@@ -269,8 +272,8 @@ by maximizing the \emph{unnormalized} posterior
 \end{equation*}
 where we have avoided computing the normalization constant $p(\data) =
 \int p(\data \given \theta) p(\theta) \intd{\theta}.$ An important
-caveat about the \acro{MAP} estimator is that it is not invariant to
-nonlinear transformations of $\theta$!
+caveat is that the \acro{MAP} estimator is not invariant to nonlinear
+transformations of $\theta$!
 
 \subsection*{Frequentist decision theory}
 
@@ -343,18 +346,14 @@ decision rules, making identifying a unique decision rule easier.  Any
 $\delta$ minimizing Bayes risk is called a \emph{Bayes rule.}  We have
 seen this term before!  It turns out that given a prior $p(\theta)$,
 the Bayesian procedure described above for defining a decision
-function by selecting an action with minimum posterior loss is
-guaranteed to minimize Bayes risk and therefore produce a Bayes rule
-with respect to $p(\theta)$.  Note, however, that it is unusual in the
-Bayesian perspective to first find an entire decision rule $\delta$
-and then apply it to a particular dataset $\data$.  Instead, it is
-almost always easier to minimize the expected posterior loss only at
-the actual observed data.  After all, why would we want to make
-decisions with other data?
-
-With this definition, we may compute the Bayes risk of estimating
-$\theta$ under squared loss: it is the posterior variance $\var[\theta
-  \given \data]$.
+function by selecting an action with minimum posterior expected loss
+is guaranteed to minimize Bayes risk and therefore produce a Bayes
+rule with respect to $p(\theta)$.  Note, however, that it is unusual
+in the Bayesian perspective to first find an entire decision rule
+$\delta$ and then apply it to a particular dataset $\data$.  Instead,
+it is almost always easier to minimize the expected posterior loss
+only at the actual observed data.  After all, why would we need to know
+what decision we would make with other data?
 
 \subsubsection*{Admissibility}
 
@@ -400,7 +399,16 @@ with $x$.  In classification, our goal is to predict the label $y'$
 associated with a new input $x'$. The Bayesian approach is to derive a
 model giving probabilities $\Pr(y' = 1 \given x', \data)$.  Suppose
 this model is provided for you.  Notice that this model is not
-conditioned on any additional parameters $\theta$.
+conditioned on any additional parameters $\theta$; we have
+integrated them out via
+\begin{equation*}
+  \Pr(y' = 1 \given x', \data)
+  =
+  \int
+  \Pr(y' = 1 \given x', \data, \theta)
+  p(\theta \given \data)
+  \intd{\theta}.
+\end{equation*}
 
 Given a new datapoint $x'$, which label $a$ should we predict?  Notice
 that the prediction of a label is actually a \emph{decision.}  Here
@@ -450,7 +458,8 @@ directly:
   \intd{\theta}.
 \end{equation*}
 Now, equipped with a loss function, the posterior expected loss
-framework above can be applied directly.
+framework above can be applied directly to select between different
+hypotheses.
 
 See last week's notes for a brief discussion of frequentist
 hypothesis testing.
