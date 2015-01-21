@@ -1,0 +1,458 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsubsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\R}{\mathbb{R}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{Point estimation}
+
+Suppose we are interested in the value of a parameter $\theta$, for
+example the unknown bias of a coin.  We have already seen how one may
+use the Bayesian method to reason about $\theta$; namely, we select a
+likelihood function $p(x \given \data)$, explaining how observed data
+$\data$ are expected to be generated given the value of $\theta$.
+Then we select prior distribution $p(\theta)$ reflecting our initial
+beliefs about $\theta$.  Finally, we conduct an experiment to gather
+data and use Bayes' theorem to derive the posterior $p(\theta \given
+\data)$.
+
+In a sense, the posterior contains all information about $\theta$ that
+we care about.  However, the process of inference will often require
+us to use this posterior to answer various questions.  For example, we
+might be compelled to choose a single value $\hat{\theta}$ to serve as
+a \emph{point estimate} of $\theta$.  To a Bayesian, the selection of
+$\hat{\theta}$ is a \emph{decision,} and in different contexts we
+might want to select different values to report.
+
+In general, we should not expect to be able to select the true value
+of $\theta$, unless we have somehow observed data that unambiguously
+determine it.  Instead, we can only hope to select an estimate that is
+``close'' to the true value.  Different definitions of ``closeness''
+can naturally lead to different estimates. The Bayesian approach to
+point estimation will be to analyze the impact of our choice in terms
+of a \emph{loss function,} which describes how ``bad'' different types
+of mistakes can be.  We then select the estimate which appears to be
+the least ``bad'' according to our current beliefs about $\theta$.
+
+\section*{Decision theory}
+
+As mentioned above, the selection of an estimate $\hat{\theta}$ can be
+seen as a decision.  It turns out that the Bayesian approach to
+decision theory is rather simple and consistent, so we will introduce
+it in an abstract form here.
+
+A decision problem will typically have three components.  First, we
+have a \emph{parameter space} (also called a \emph{state space})
+$\Theta$, with an unknown value $\theta \in \Theta$.  We will also
+have a \emph{sample space} $\mc{X}$ representing the potential
+observations we could theoretically make.  Finally, we have an
+\emph{action space} $\mc{A}$ representing the potential actions we may
+select from.  In the point estimation problem, the potential actions
+$\hat{\theta}$ are exactly those in the parameter space, so $\mc{A} =
+\Theta$.  This might not always be the case, however.  Finally, we
+will have a likelihood function $p(\data \given \theta)$ linking
+potential observations to the parameter space.
+
+After conducting an experiment and observing data $\data$, we are
+compelled to select an action $a \in \mc{A}$.  We define a
+(deterministic) \emph{decision rule} as a function $\delta\colon
+\mc{X} \to \mc{A}$ that selects an action $a$ given the observations
+$\data$.\footnote{We may also consider \emph{randomized} decision rules,
+  where $\delta$ maps observed data $\data$ to a probability
+  distribution over $\mc{A}$, which we select a sample from.  This can
+  be useful, for example, when facing an intelligent adversary.  Most
+  of the expressions we will derive can be derived analogously for
+  this case; however, we will not do so here.}  In general, this
+decision rule can be any arbitrary function.  How do we select which
+decision rule to use?
+
+To guide our selection, we will define a \emph{loss function,} which
+is a function $L\colon \Theta \times \mc{A} \to \R$.  The value
+$L(\theta, a)$ summarizes ``how bad'' an action $a$ was if the true
+value of the parameter was revealed to be $\theta$; larger losses
+represent worse outcomes.  Ideally, we would select the action that
+minimizes this loss, but unfortunately we will never know the exact
+value of $\theta$; complicating our decision.
+
+As usual, there are two main approaches to designing decision rules.
+We begin with the Bayesian approach.
+
+\subsection*{Bayesian decision theory}
+
+The Bayesian approach to decision theory is straightforward.  Given
+our observed data $\data$, we find the posterior $p(\theta \given
+\data)$, which represents our current belief about the unknown
+parameter $\theta$.  Given a potential action $a$, we may define the
+\emph{posterior expected loss} of $a$ by averaging the loss function
+over the unknown parameter:
+\begin{equation*}
+  \rho\bigl(p(\theta \given \data), a\bigr)
+  =
+  \mathbb{E}\bigl[L(\theta, a) \given \data\bigr]
+  =
+  \int_{\Theta}
+  L(\theta, a) p(\theta \given \data) \intd{\theta}.
+\end{equation*}
+Because the posterior expected loss of each action $a$ is a scalar
+value, it defines a total order on the action space $\mc{A}$.  When
+there is an action minimizing the posterior expected loss, it is the
+natural choice to make:
+\begin{equation*}
+  \delta^\ast(\data) =
+  \argmin_{a \in \mc{A}}
+  \rho\bigl(p(\theta \given \data), a \bigr),
+\end{equation*}
+representing the action with the lowest expected loss, given our
+current beliefs about $\theta$.  Note that $\delta^\ast(\data)$ may
+not be unique, in which case we can select any action attaining the
+minimal value.  Any minimizer of the posterior expected loss is called
+a \emph{Bayes action.}  The value $\delta^\ast(\data)$ may also be
+found by solving the equivalent minimization problem
+\begin{equation*}
+  \delta^\ast(\data) =
+  \argmin_{a \in \mc{A}}
+  \int_{\Theta}
+  L(\theta, a)
+  p(\data \given \theta) p(\theta) \intd{\theta};
+\end{equation*}
+the advantage of this formulation is that it avoids computing the
+normalization constant $p(\data) = \int p(\data \given \theta)
+p(\theta) \intd{\theta}$ in the posterior.
+
+Notice that a Bayes action is tied to a particular set of observed
+data $\data$.  This does not limit its utility terribly; after all, we
+will always have a particular set of observed data at hand when making
+a decision.  However we may extend the notion of Bayes actions in a
+natural way to define an entire decision rule.  We define the
+\emph{Bayes rule,} a decision rule, by simply always selecting a (not
+necessarily unique) Bayes action given the observed data.  Note that
+the second formulation above can often be minimized even when
+$p(\theta)$ is not necessarily a probability distribution (such priors
+are called \emph{improper} but are often encountered in practice).  A
+decision rule derived in this way from an improper prior is called a
+\emph{generalized Bayes rule.}
+
+In the case of point estimation, the decision rule $\delta$ may be
+more naturally written $\hat{\theta}(\data)$.  Then, as above, the
+point estimation problem reduces to selecting a loss function and
+deriving the decision rule $\hat{\theta}$ that minimizes the expected
+loss at every point.  A decision rule that minimizes posterior
+expected loss for every possible set of observations $\data$ is called
+a \emph{Bayes estimator.}
+
+We may derive Bayes estimators for some common loss functions.  As an
+example, consider the common loss function
+\begin{equation*}
+  L(\theta, \hat{\theta})
+  =
+  (\theta - \hat{\theta})^2,
+\end{equation*}
+which represents the squared distance between our estimate and the
+true value.  For the squared loss, we may compute:
+\begin{align*}
+  \mathbb{E}\bigl[L(\theta, \hat{\theta}) \given \data \bigr]
+  &=
+  \int
+  (\theta - \hat{\theta})^2
+  p(\theta \given \data)
+  \intd{\theta}
+  \\
+  &=
+  \int
+  \theta^2
+  p(\theta \given \data)
+  \intd{\theta}
+  -
+  2
+  \hat{\theta}
+  \int
+  \theta
+  p(\theta \given \data)
+  \intd{\theta}
+  +
+  \hat{\theta}^2
+  \int
+  p(\theta \given \data)
+  \intd{\theta}
+  \\
+  &=
+  \int
+  \theta^2
+  p(\theta \given \data)
+  \intd{\theta}
+  -
+  2
+  \hat{\theta}
+  \mathbb{E}[\theta \given \data]
+  +
+  \hat{\theta}^2
+  .
+\end{align*}
+We may minimize this expression by differentiating with respect to
+$\hat{\theta}$ and equating to zero:
+\begin{equation*}
+  \frac{\partial \mathbb{E}\bigl[L(\theta, \hat{\theta}) \given \data \bigr]}
+       {\partial \hat{\theta}}
+  =
+  -2\mathbb{E}[\theta \given \data]
+  +
+  2\hat{\theta}
+  =
+  0,
+\end{equation*}
+from which we may derive $\hat{\theta} = \mathbb{E}[\theta \given
+  \data]$.  Examining the second derivative, we see $\partial^2
+\mathbb{E}\bigl[L(\theta, \hat{\theta}) \given \data \bigr] / \partial
+\hat{\theta}^2 = 2 > 0$, so this is indeed a minimum.  Therefore we
+have shown that the Bayes estimator in the case of squared loss is the
+posterior mean $\hat{\theta}(\data) = \mathbb{E}[\theta \given
+  \data].$
+
+A similar analysis shows that the Bayes estimator for the absolute
+deviation loss $L(\theta, \hat{\theta}) = \lvert \theta - \hat{\theta}
+\rvert$ is the posterior median, and the Bayes estimator for the a
+relaxed 0--1 loss
+\begin{equation*}
+  L(\theta, \hat{\theta}; \varepsilon)
+  =
+  \begin{cases}
+    0 & \lvert \theta - \hat{\theta} \rvert   < \varepsilon \\
+    1 & \lvert \theta - \hat{\theta} \rvert \geq \varepsilon
+  \end{cases}
+\end{equation*}
+converges to the posterior mode for small $\varepsilon$.
+
+The posterior mode, also called the \emph{maximum a posteriori}
+(\acro{MAP}) estimate of $\theta$ and written
+$\hat{\theta}_{\text{\acro{MAP}}}$, is a rather common estimator used
+in practice.  The reason is that optimization is almost always easier
+than integration.  In particular, we may find the \acro{MAP} estimate
+by maximizing the \emph{unnormalized} posterior
+\begin{equation*}
+  \hat{\theta}_{\text{\acro{MAP}}}
+  =
+  \argmax_\theta
+  p(\data \given \theta)p(\theta),
+\end{equation*}
+where we have avoided computing the normalization constant $p(\data) =
+\int p(\data \given \theta) p(\theta) \intd{\theta}.$ An important
+caveat about the \acro{MAP} estimator is that it is not invariant to
+nonlinear transformations of $\theta$!
+
+\subsection*{Frequentist decision theory}
+
+The frequentist approach to decision theory is somewhat different.  As
+usual, in classical statistics it is not allowed to place a prior
+distribution on a parameter such as $\theta$; rather, it is much more
+common to use the likelihood $p(\data \given \theta)$ to hypothesize
+what data might look like for different values of $\theta$, and use
+this analysis to drive your action.
+
+The frequentist approach to decision theory involves the notion of
+\emph{risk functions.}  The \emph{frequentist risk} of a decision
+function $\delta$ is defined by
+\begin{equation*}
+  R(\theta, \delta)
+  =
+  \int_{\mc{X}}
+  L\bigl(\theta, \delta(\data)\bigr)
+  p(\data \given \theta)
+  \intd{\data},
+\end{equation*}
+that is, it represents the expected loss incurred when repeatedly
+using the decision rule $\delta$ on different datasets $\data$ as a
+function of the unknown parameter $\theta$.
+
+To a Bayesian, the frequentist risk is a very strange notion: we know
+the exact value of our data $\data$ when we make our decision, so why
+should we average over other datasets that we haven't seen?  The
+frequentist counterargument to this is typically that we might know
+$\data$ but can't know $p(\theta)$!
+
+Notice that whereas the posterior expected loss was a scalar defining
+a total order on the action space $\mc{A}$, which could be extended to
+naturally define an entire decision rule, the frequentist risk is a
+function of $\theta$ and the entire decision rule $\delta$.  It is
+very unusual for there to be a single decision rule $\delta$ that
+works the best for every potential value of $\theta$.  For this
+reason, we must decide on some mechanism to use the frequentist risk
+to select a ``good'' decision rule.  There are many proposed
+mechanisms for doing so, but we will simply quickly describe two
+below.
+
+\subsubsection*{Bayes risk}
+
+One solution to the problem of comparing decision rules is to place a
+prior distribution on the unknown $\theta$ and compute the average
+risk:
+\begin{equation*}
+  r\bigl(p(\theta), \delta\bigr)
+  =
+  \mathbb{E}\bigl[R(\theta, \delta)\bigr]
+  =
+  \int_{\Theta}
+  R(\theta, \delta)
+  p(\theta)
+  \intd{\theta}
+  =
+  \int_{\Theta}
+  \int_{\mc{X}}
+  L\bigl(\theta, \delta(\data)\bigr)
+  p(\data \given \theta)
+  p(\theta)
+  \intd{\theta}
+  \intd{\data}.
+\end{equation*}
+The function $r\bigl(p(\theta), \delta\bigr)$ is called the
+\emph{Bayes risk} of $\delta$ under the prior $p(\theta)$.  Again, the
+Bayes risk is scalar-valued, so we induce a total order on all
+decision rules, making identifying a unique decision rule easier.  Any
+$\delta$ minimizing Bayes risk is called a \emph{Bayes rule.}  We have
+seen this term before!  It turns out that given a prior $p(\theta)$,
+the Bayesian procedure described above for defining a decision
+function by selecting an action with minimum posterior loss is
+guaranteed to minimize Bayes risk and therefore produce a Bayes rule
+with respect to $p(\theta)$.  Note, however, that it is unusual in the
+Bayesian perspective to first find an entire decision rule $\delta$
+and then apply it to a particular dataset $\data$.  Instead, it is
+almost always easier to minimize the expected posterior loss only at
+the actual observed data.  After all, why would we want to make
+decisions with other data?
+
+With this definition, we may compute the Bayes risk of estimating
+$\theta$ under squared loss: it is the posterior variance $\var[\theta
+  \given \data]$.
+
+\subsubsection*{Admissibility}
+
+Another criterion for selecting between decision rules in the
+frequentist framework is called \emph{admissibility.}  In short, it is
+often difficult to identify a single best decision rule, but it can
+sometimes be easy to discard some bad ones, for example if they can be
+shown to always be no better than (and sometimes worse than) another
+rule.
+
+Let $\delta_1$ and $\delta_2$ be two decision rules.  We say that
+$\delta_1$ \emph{dominates} $\delta_2$ if:
+\begin{itemize}
+\item
+  $R(\theta, \delta_1) \leq R(\theta, \delta_2)$ for all $\theta \in
+  \Theta$, and
+\item
+  there exists at least one $\theta$ for which $R(\theta, \delta_1) <
+  R(\theta, \delta_2)$.
+\end{itemize}
+If there is a decision rule $\delta$ that is not dominated by any
+other rule, it is called \emph{admissible.} One interesting result
+tying Bayesian and frequentist decision theory is the following:
+\begin{itemize}
+\item
+  Every Bayes rule is admissible.
+\item
+  Every admissible decision rule is a generalized Bayes rule for some
+  (possibly improper) prior $p(\theta)$.
+\end{itemize}
+So, in a sense, all admissible frequentist decision rules can be
+equivalently derived from a Bayesian perspective.
+
+\section*{Examples}
+
+Here we give two quick examples of applying Bayesian decision theory.
+
+\subsection*{Classification with 0--1 loss}
+
+Suppose our observations are of the form $(x, y)$, where $x$ is an
+arbitrary input, and $y \in \{0, 1\}$ is a binary label associated
+with $x$.  In classification, our goal is to predict the label $y'$
+associated with a new input $x'$. The Bayesian approach is to derive a
+model giving probabilities $\Pr(y' = 1 \given x', \data)$.  Suppose
+this model is provided for you.  Notice that this model is not
+conditioned on any additional parameters $\theta$.
+
+Given a new datapoint $x'$, which label $a$ should we predict?  Notice
+that the prediction of a label is actually a \emph{decision.}  Here
+our action space is $\mc{A} = \{0, 1\}$, enumerating the two labels we
+can predict.  Our parameter space is the same: the only uncertainty we
+have is the unknown label $y'$.
+
+Let us suppose a simple loss function for this problem:
+\begin{equation*}
+  L(y', a) =
+  \begin{cases}
+    0 & a = y'; \\
+    1 & a \neq y'.
+  \end{cases}
+\end{equation*}
+This loss function, called the \emph{0--1 loss,} is common in
+classification problems.  We pay a constant loss for every mistake we
+make.  In this case, the expected loss of each possible action is
+simple to compute:
+\begin{align*}
+  \mathbb{E}\bigl[L(y', a = 1) \given x', \data\bigr]
+  &=
+  \Pr(y' = 0 \given x', \data);
+  \\
+  \mathbb{E}\bigl[L(y', a = 0) \given x', \data\bigr]
+  &=
+  \Pr(y' = 1 \given x', \data).
+\end{align*}
+The Bayes action is then to predict the class with the highest
+probability.  This is not so surprising.  Notice that if we change the
+loss to have different costs of mistakes (so that $L(0, 1) \neq L(1,
+0)$), then the Bayes action might compel us to select the less-likely
+class to avoid a potentially high loss for misclassification!
+
+\subsection*{Hypothesis testing}
+
+The Bayesian approach to hypothesis testing is also rather
+straightforward.  A \emph{hypothesis} is simply a subset of the
+parameter space $\mc{H} \subseteq \Theta$.  The Bayesian approach
+allows one to compute the posterior probability of a hypothesis
+directly:
+\begin{equation*}
+  \Pr(\theta \in \mc{H} \given \data)
+  =
+  \int_{\mc{H}}
+  p(\theta \given \data)
+  \intd{\theta}.
+\end{equation*}
+Now, equipped with a loss function, the posterior expected loss
+framework above can be applied directly.
+
+See last week's notes for a brief discussion of frequentist
+hypothesis testing.
+
+\end{document}
