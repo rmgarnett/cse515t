@@ -1,0 +1,478 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{8cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+
+\begin{document}
+
+\section*{The Gaussian distribution}
+Probably the most-important distribution in all of statistics is the
+\emph{Gaussian distribution,} also called the \emph{normal
+  distribution.}  The Gaussian distribution arises in many contexts
+and is widely used for modeling continuous random variables.
+
+The probability density function of the univariate (one-dimensional)
+Gaussian distribution is
+\begin{equation*}
+  p(x \given \mu, \sigma^2)
+  =
+  \mc{N}(x; \mu, \sigma^2)
+  =
+  \frac{1}{Z}
+  \exp\biggl(
+  -\frac{(x - \mu)^2}{2 \sigma^2}
+  \biggr).
+\end{equation*}
+The normalization constant $Z$ is
+\begin{equation*}
+  Z = \sqrt{2 \pi \sigma^2}.
+\end{equation*}
+The parameters $\mu$ and $\sigma^2$ specify the mean and variance
+of the distribution, respectively:
+\begin{equation*}
+  \mu = \mathbb{E}[x] \qquad
+  \sigma^2 = \var[x].
+\end{equation*}
+Figure \ref{1d_examples} plots the probability density function for
+several sets of parameters $(\mu, \sigma^2)$.  The distribution is
+symmetric around the mean and most of the density ($\approx 99.7\%$)
+is contained within $\pm 3 \sigma$ of the mean.
+
+\begin{figure}
+  \centering
+  \input{figures/1d_gaussian_pdfs.tex}
+  \caption{Examples of univariate Gaussian \acro{PDF}s $\mc{N}(x; \mu,
+    \sigma^2)$.}
+  \label{1d_examples}
+\end{figure}
+
+We may extend the univariate Gaussian distribution to a distribution
+over $d$-dimensional vectors, producing a multivariate analog.  The
+probablity density function of the $d$-dimensional multivariate
+Gaussian distribution is
+\begin{equation*}
+  p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{x}; \vec{\mu}, \mat{\Sigma})
+  =
+  \frac{1}{Z}
+  \exp\biggl(
+  -\frac{1}{2}
+  (\vec{x} - \vec{\mu})\trans
+  \mat{\Sigma}\inv
+  (\vec{x} - \vec{\mu})
+  \biggr).
+\end{equation*}
+The normalization constant $Z$ is
+\begin{equation*}
+  Z = \sqrt{\det (2 \pi \mat{\Sigma})}
+    = (2 \pi)^{\nicefrac{d}{2}} (\det \mat{\Sigma})^{\nicefrac{1}{2}}.
+\end{equation*}
+Examining these equations, we can see that the multivariate density
+coincides with the uniivariate density in the special case
+$\mat{\Sigma}$ is the scalar $\sigma^2$.
+
+Again, the vector $\vec{\mu}$ specifies the mean of the multivariate
+Gaussian distribution.  The matrix $\mat{\Sigma}$ specifies the
+\emph{covariance} between each pair of variables in $\vec{x}$:
+\begin{equation*}
+  \mat{\Sigma}
+  =
+  \cov(\vec{x}, \vec{x})
+  =
+  \mathbb{E}\bigl[(\vec{x} - \vec{\mu})(\vec{x} - \vec{\mu})\trans\bigr].
+\end{equation*}
+Covariance matrices are necessarily symmetric and \emph{positive
+  semidefinite,} which means their eigenvalues are nonnegative.  Note
+that the density function above requires that $\mat{\Sigma}$ be
+\emph{positive definite,} or have strictly positive eigenvalues.  A
+zero eigenvalue would result in a determinant of zero, making the
+normalization impossible.
+
+The dependence of the multivariate Gaussian density on $\vec{x}$ is
+entirely through the value of the quadratic form
+\begin{equation*}
+  \Delta^2
+  =
+  (\vec{x} - \vec{\mu})\trans
+  \mat{\Sigma}\inv
+  (\vec{x} - \vec{\mu}).
+\end{equation*}
+The value $\Delta$ (obtained via a square root) is called the
+\emph{Mahalanobis distance,} and can be seen as a generalization of
+the $Z$ score $\frac{(x - \mu)}{\sigma}$, often encountered in
+statistics.
+
+To understand the behavior of the density geometrically, we can set
+the Mahalanobis distance to a constant. The set of points in $\R^d$
+satisfying $\Delta = c$ for any given value $c > 0$ is an ellipsoid
+with the eigenvectors of $\mat{\Sigma}$ defining the directions of the
+principal axes.
+
+\begin{figure}
+  \begin{subfigure}{0.33\textwidth}
+    \input{figures/2d_gaussian_pdf_1}
+    \caption{$\mat{\Sigma} = \begin{bmatrix} 1 & 0 \\ 0 & 1 \end{bmatrix}$}
+    \label{2d_example_1}
+  \end{subfigure}
+  \begin{subfigure}{0.33\textwidth}
+    \input{figures/2d_gaussian_pdf_2}
+    \caption{$\mat{\Sigma} = \begin{bmatrix} 1 & \nicefrac{1}{2} \\ \nicefrac{1}{2} & 1 \end{bmatrix}$}
+  \end{subfigure}
+  \begin{subfigure}{0.33\textwidth}
+    \input{figures/2d_gaussian_pdf_3}
+    \caption{$\mat{\Sigma} = \begin{bmatrix} 1 & -1 \\ -1 & 3 \end{bmatrix}$}
+    \label{2d_example_3}
+  \end{subfigure}
+  \caption{Contour plots for example bivariate Gaussian distributions.
+    Here $\vec{\mu} = \vec{0}$ for all examples.}
+  \label{2d_examples}
+\end{figure}
+
+Figure \ref{2d_examples} shows contour plots of the density of three
+bivariate (two-dimensional) Gaussian distributions.  The elliptical
+shape of the contours is clear.
+
+The Gaussian distribution has a number of convenient analytic
+properties, some of which we describe below.
+
+\subsection*{Marginalization}
+
+Often we will have a set of variables $\vec{x}$ with a joint
+multivariate Gaussian distribution, but only be interested in
+reasoning about a subset of these variables.  Suppose $\vec{x}$
+has a multivariate Gaussian distribution:
+\begin{equation*}
+  p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{x}, \vec{\mu}, \mat{\Sigma}).
+\end{equation*}
+
+Let us partition the vector into two components:
+\begin{equation*}
+  \vec{x}
+  =
+  \begin{bmatrix}
+    \vec{x}_1 \\
+    \vec{x}_2
+  \end{bmatrix}.
+\end{equation*}
+We partition the mean vector and covariance matrix in the same
+way:
+\begin{equation*}
+  \vec{\mu}
+  =
+  \begin{bmatrix}
+    \vec{\mu}_1 \\
+    \vec{\mu}_2
+  \end{bmatrix}
+  \qquad
+  \mat{\Sigma}
+  =
+  \begin{bmatrix}
+    \mat{\Sigma}_{11} & \mat{\Sigma}_{12} \\
+    \mat{\Sigma}_{21} & \mat{\Sigma}_{22}
+  \end{bmatrix}.
+\end{equation*}
+Now the marginal distribution of the subvector $\vec{x}_1$
+has a simple form:
+\begin{equation*}
+  p(\vec{x}_1 \given \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{x}_1, \vec{\mu}_1, \mat{\Sigma}_{11}),
+\end{equation*}
+so we simply pick out the entries of $\vec{\mu}$ and $\mat{\Sigma}$
+corresponding to $\vec{x}_1$.
+
+Figure \ref{marginal_example} illustrates the marginal distribution of
+$x_1$ for the joint distribution shown in Figure
+\ref{2d_examples}(\subref{2d_example_3}).
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \input{figures/2d_gaussian_pdf_3_large}
+    \caption{$p(\vec{x} \given \vec{\mu}, \mat{\Sigma})$}
+    \label{marginal_2d_pdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \input{figures/2d_marginal_pdf}
+    \caption{$p(x_1 \given \mu_1, \Sigma_{11}) = \mc{N}(x_1; 0, 1)$}
+    \label{marginal_pdf}
+  \end{subfigure}
+  \caption{Marginalization example.  (\subref{marginal_2d_pdf}) shows
+    the joint density over $\vec{x} = [x_1, x_2]\trans$; this is the same
+    density as in Figure \ref{2d_examples}(\subref{2d_example_3}).
+    (\subref{marginal_pdf}) shows the marginal density of $x_1$.}
+  \label{marginal_example}
+\end{figure}
+
+\subsection*{Conditioning}
+
+Another common scenario will be when we have a set of variables
+$\vec{x}$ with a joint multivariate Gaussian prior distribution, and
+are then told the value of a subset of these variables.  We may then
+condition our prior distribution on this observation, giving a
+posterior distribution over the remaining set.
+
+Suppose again that $\vec{x}$ has a multivariate Gaussian distribution:
+\begin{equation*}
+  p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{x}, \vec{\mu}, \mat{\Sigma}),
+\end{equation*}
+and that we have partitioned as before: $\vec{x} = [\vec{x}_1,
+  \vec{x}_2]\trans$.  Suppose now that we learn the exact value of the
+subvector $\vec{x}_2$.  Remarkably, the posterior distribution
+\begin{equation*}
+  p(\vec{x}_1 \given \vec{x}_2, \vec{\mu}, \mat{\Sigma})
+\end{equation*}
+is a Gaussian distribution!  The formula is
+\begin{equation*}
+  p(\vec{x}_1 \given \vec{x}_2, \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{x}_1; \vec{\mu}_{1 \given 2}, \mat{\Sigma}_{11 \given 2}),
+\end{equation*}
+with
+\begin{align*}
+  \vec{\mu}_{1 \given 2}
+  &=
+  \vec{\mu}_1 + \mat{\Sigma}_{12}\mat{\Sigma}_{22}\inv (\vec{x}_2 - \vec{\mu}_2);
+  \\
+  \mat{\Sigma}_{11 \given 2}
+  &=
+  \mat{\Sigma}_{11} - \mat{\Sigma}_{12}\mat{\Sigma}_{22}\inv \mat{\Sigma}_{21}.
+\end{align*}
+So we adjust the mean by an amount dependent on: (1) the covariance
+between $\vec{x}_1$ and $\vec{x}_2$, $\mat{\Sigma}_{12}$, (2) the
+prior uncertainty in $\vec{x}_2$, $\mat{\Sigma}_{22}$, and (3) the
+deviation of the observation from the prior mean, $(\vec{x}_2 -
+\vec{\mu}_2)$.  Similarly, we reduce the uncertainty in $\vec{x}_1$,
+$\mat{\Sigma}_{11}$, by an amount dependent on (1) and (2).  Notably,
+the reduction of the covariance matrix does \emph{not} depend on the
+values we observe.
+
+Figure \ref{conditional_example} illustrates the conditional
+distribution of $x_1$ for the joint distribution shown in Figure
+\ref{2d_examples}(\subref{2d_example_3}), after observing $x_2 = 2$.
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \input{figures/2d_gaussian_pdf_conditional}
+    \caption{$p(\vec{x} \given \vec{\mu}, \mat{\Sigma})$}
+    \label{conditional_2d_pdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \input{figures/2d_conditional_pdf}
+    \caption{$p(x_1 \given x_2, \vec{\mu}, \mat{\Sigma}) =
+      \mc{N}\bigl(x_1; -\nicefrac{2}{3}, (\nicefrac{2}{3})^2\bigr)$}
+    \label{conditional_pdf}
+  \end{subfigure}
+  \caption{Conditioning example.  (\subref{conditional_2d_pdf}) shows
+    the joint density over $\vec{x} = [x_1, x_2]\trans$, along with
+    the observation value $x_2 = 2$; this is the same density as in
+    Figure \ref{2d_examples}(\subref{2d_example_3}).
+    (\subref{conditional_pdf}) shows the conditional density of
+    $x_1$ given $x_2 = 2$.}
+  \label{conditional_example}
+\end{figure}
+
+\subsection*{Convolutions}
+
+Gaussian probability density functions are closed under convolutions.
+Let $\vec{x}$ and $\vec{y}$ be $d$-dimensional vectors, with
+distributions
+\begin{equation*}
+  p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(x; \vec{\mu}, \mat{\Sigma});
+  \qquad
+  p(\vec{y} \given \vec{\nu}, \mat{P})
+  =
+  \mc{N}(x; \vec{\nu}, \mat{P}).
+\end{equation*}
+Then the convolution of their density functions is another Gaussian
+\acro{PDF}:
+\begin{equation*}
+  f(\vec{y}) =
+  \int
+  \mc{N}(\vec{y} - \vec{x}; \vec{\nu}, \mat{P})
+  \,
+  \mc{N}(\vec{x}; \vec{\mu}, \mat{\Sigma})
+  \intd{\vec{x}}
+  =
+  \mc{N}(\vec{y}; \vec{\mu} + \vec{\nu}, \mat{\Sigma} + \mat{P}),
+\end{equation*}
+where the mean and covariances add in the result.  (This can be proven
+by considering the Fourier transform of a Gaussian, which is another
+Gaussian.)
+
+This result will often come in handy.
+
+\subsection*{Affine transformations}
+
+Consider a $d$-dimensional vector $\vec{x}$ with a multivariate
+Gaussian distribution
+\begin{equation*}
+  p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{x}, \vec{\mu}, \mat{\Sigma}).
+\end{equation*}
+Suppose we wish to reason about an affine transformation of $\vec{x}$
+into $\R^D$, $\vec{y} = \mat{A}\vec{x} + \vec{b}$, where $\mat{A} \in
+\R^{D \times d}$ and $\vec{b} \in \R^D$.  Then $\vec{y}$ has a
+$D$-dimensional Gaussian distribution:
+\begin{equation*}
+  p(\vec{y} \given \vec{\mu}, \mat{\Sigma}, \mat{A}, \vec{b})
+  =
+  \mc{N}(\vec{y}, \mat{A}\vec{\mu} + \vec{b}, \mat{A}\mat{\Sigma}\mat{A}\trans).
+\end{equation*}
+
+\begin{figure}
+  \centering
+  \begin{subfigure}[t]{0.49\textwidth}
+    \input{figures/2d_gaussian_pdf_3_large}
+    \caption{$p(\vec{x} \given \vec{\mu}, \mat{\Sigma})$}
+    \label{transformed_2d_pdf}
+  \end{subfigure}
+  \begin{subfigure}[t]{0.49\textwidth}
+    \input{figures/2d_transformed_pdf}
+    \caption{$p(\vec{y} \given \vec{\mu}, \mat{\Sigma}, \mat{A}, \vec{b})$}
+    \label{transformed_pdf}
+  \end{subfigure}
+  \caption{Affine transformation example.
+    (\subref{transformed_2d_pdf}) shows the joint density over
+    $\vec{x} = [x_1, x_2]\trans$; this is the same density as in
+    Figure \ref{2d_examples}(\subref{2d_example_3}).
+    (\subref{transformed_pdf}) shows the density of $\vec{y} =
+    \mat{A}\vec{x} + \vec{b}$. The values of $\mat{A}$ and $\vec{b}$
+    are given in the text.  The density of the transformed vector is
+    another Gaussian.}
+  \label{transformed_example}
+\end{figure}
+
+Figure \ref{transformed_example} illustrates an affine transformation
+of the vector $\vec{x}$ with the joint distribution shown in Figure
+\ref{2d_examples}(\subref{2d_example_3}), for the values
+\begin{equation*}
+  \mat{A}
+  =
+  \begin{bmatrix}
+    \nicefrac{1}{5} & -\nicefrac{3}{5} \\
+    \nicefrac{1}{2} & \nicefrac{3}{10}
+  \end{bmatrix};
+  \qquad
+  \vec{b}
+  =
+  \begin{bmatrix}
+    1 \\
+    -1
+  \end{bmatrix}.
+\end{equation*}
+The density has been rotated and translated, but remains a Gaussian.
+
+\section*{Selecting parameters}
+
+The $d$-dimensional multivariate Gaussian distribution is specified by
+the parameters $\vec{\mu}$ and $\mat{\Sigma}$.  Without any further
+restrictions, specifying $\vec{\mu}$ requires $d$ parameters and
+specifying $\mat{\Sigma}$ requires a further $\binom{d}{2} = \frac{d(d
+  -1)}{2}$.  The number of parameters therefore grows quadratically in
+the dimension, which can sometimes cause difficulty.  For this reason,
+we sometimes restrict the covariance matrix $\vec{\Sigma}$ in some way
+to reduce the number of parameters.
+
+Common choices are to set $\mat{\Sigma} = \diag \vec{\tau}$, where
+$\vec{\tau}$ is a vector of marginal variances, and $\mat{\Sigma} =
+\sigma^2 \mat{I}$, a constant diagonal matrix.  Both of these options
+assume independence between the variables in $\vec{x}$.  The former
+case is more flexible, allowing a different scale parameter for each
+entry, whereas the latter assumes an equal marginal variance of
+$\sigma^2$ for each variable.  Geometrically, the densities are
+axis-aligned, as in Figure \ref{2d_examples}(\subref{2d_example_1}),
+and in the latter case, the isoprobability contours are spherical
+(also as in Figure \ref{2d_examples}(\subref{2d_example_1})).
+
+\end{document}
