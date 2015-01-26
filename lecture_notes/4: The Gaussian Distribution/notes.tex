@@ -363,6 +363,36 @@ distribution of $x_1$ for the joint distribution shown in Figure
   \label{conditional_example}
 \end{figure}
 
+\subsection*{Pointwise multiplication}
+
+Another remarkable fact about multivariate Gaussian density functions
+is that pointwise multiplication gives another (unnormalized) Gaussian
+\acro{PDF}:
+\begin{equation*}
+  \mc{N}(\vec{x}; \vec{\mu}, \mat{\Sigma})
+  \,
+  \mc{N}(\vec{y}; \vec{\nu}, \mat{P})
+  =
+  \frac{1}{Z}
+  \mc{N}(\vec{z}; \vec{\omega}, \mat{T}),
+\end{equation*}
+where
+\begin{align*}
+  \mat{T}
+  &=
+  (\mat{\Sigma}\inv + \mat{P}\inv)\inv \\
+  \vec{\omega}
+  &=
+  \mat{T}
+  (\mat{\Sigma}\inv \vec{\mu} +
+  \mat{P}\inv \vec{\nu}) \\
+  Z^{-1}
+  &=
+  \mc{N}(\vec{\mu}; \vec{\nu}, \mat{\Sigma} + \mat{P})
+  =
+  \mc{N}(\vec{\nu}; \vec{\mu}, \mat{\Sigma} + \mat{P}).
+\end{align*}
+
 \subsection*{Convolutions}
 
 Gaussian probability density functions are closed under convolutions.
@@ -389,11 +419,19 @@ Then the convolution of their density functions is another Gaussian
   =
   \mc{N}(\vec{y}; \vec{\mu} + \vec{\nu}, \mat{\Sigma} + \mat{P}),
 \end{equation*}
-where the mean and covariances add in the result.  (This can be proven
-by considering the Fourier transform of a Gaussian, which is another
-Gaussian.)
+where the mean and covariances add in the result.
 
-This result will often come in handy.
+If we assume that $\vec{x}$ and $\vec{y}$ are independent, then the
+distribution of their sum $\vec{z} = \vec{x} + \vec{y}$ will also have
+a multivariate Gaussian distribution, whose density will precisely the
+convolution of the individual densities:
+\begin{equation*}
+  p(\vec{z} \given \vec{\mu}, \vec{\nu}, \mat{\Sigma}, \mat{P})
+  =
+  \mc{N}(\vec{z}; \vec{\mu} + \vec{\nu}, \mat{\Sigma} + \mat{P}).
+\end{equation*}
+
+These results will often come in handy.
 
 \subsection*{Affine transformations}
 
