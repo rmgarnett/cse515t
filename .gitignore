@@ -2,3 +2,5 @@
 *.pdf
 *.log
 *.aux*
+*.md5
+*.dpth
