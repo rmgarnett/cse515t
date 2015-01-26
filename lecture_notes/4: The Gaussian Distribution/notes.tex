@@ -111,7 +111,7 @@ The normalization constant $Z$ is
 The parameters $\mu$ and $\sigma^2$ specify the mean and variance
 of the distribution, respectively:
 \begin{equation*}
-  \mu = \mathbb{E}[x] \qquad
+  \mu = \mathbb{E}[x]; \qquad
   \sigma^2 = \var[x].
 \end{equation*}
 Figure \ref{1d_examples} plots the probability density function for
@@ -129,8 +129,8 @@ is contained within $\pm 3 \sigma$ of the mean.
 
 We may extend the univariate Gaussian distribution to a distribution
 over $d$-dimensional vectors, producing a multivariate analog.  The
-probablity density function of the $d$-dimensional multivariate
-Gaussian distribution is
+probablity density function of the multivariate Gaussian distribution
+is
 \begin{equation*}
   p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
   =
@@ -150,8 +150,8 @@ The normalization constant $Z$ is
     = (2 \pi)^{\nicefrac{d}{2}} (\det \mat{\Sigma})^{\nicefrac{1}{2}}.
 \end{equation*}
 Examining these equations, we can see that the multivariate density
-coincides with the uniivariate density in the special case
-$\mat{\Sigma}$ is the scalar $\sigma^2$.
+coincides with the univariate density in the special case
+when $\mat{\Sigma}$ is the scalar $\sigma^2$.
 
 Again, the vector $\vec{\mu}$ specifies the mean of the multivariate
 Gaussian distribution.  The matrix $\mat{\Sigma}$ specifies the
@@ -294,7 +294,7 @@ Another common scenario will be when we have a set of variables
 $\vec{x}$ with a joint multivariate Gaussian prior distribution, and
 are then told the value of a subset of these variables.  We may then
 condition our prior distribution on this observation, giving a
-posterior distribution over the remaining set.
+posterior distribution over the remaining variables.
 
 Suppose again that $\vec{x}$ has a multivariate Gaussian distribution:
 \begin{equation*}
@@ -333,6 +333,10 @@ $\mat{\Sigma}_{11}$, by an amount dependent on (1) and (2).  Notably,
 the reduction of the covariance matrix does \emph{not} depend on the
 values we observe.
 
+Notice that if $\vec{x}_1$ and $\vec{x}_2$ are independent, then
+$\mat{\Sigma}_{12} = \mat{0}$, and the conditioning operation does not
+change the distribution of $\vec{x}_1$, as expected.
+
 Figure \ref{conditional_example} illustrates the conditional
 distribution of $x_1$ for the joint distribution shown in Figure
 \ref{2d_examples}(\subref{2d_example_3}), after observing $x_2 = 2$.
@@ -367,11 +371,11 @@ distributions
 \begin{equation*}
   p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
   =
-  \mc{N}(x; \vec{\mu}, \mat{\Sigma});
+  \mc{N}(\vec{x}; \vec{\mu}, \mat{\Sigma});
   \qquad
   p(\vec{y} \given \vec{\nu}, \mat{P})
   =
-  \mc{N}(x; \vec{\nu}, \mat{P}).
+  \mc{N}(\vec{y}; \vec{\nu}, \mat{P}).
 \end{equation*}
 Then the convolution of their density functions is another Gaussian
 \acro{PDF}:
@@ -394,7 +398,7 @@ This result will often come in handy.
 \subsection*{Affine transformations}
 
 Consider a $d$-dimensional vector $\vec{x}$ with a multivariate
-Gaussian distribution
+Gaussian distribution:
 \begin{equation*}
   p(\vec{x} \given \vec{\mu}, \mat{\Sigma})
   =
