@@ -423,6 +423,35 @@ loss function for our predictions and use Bayesian decision theory.
 For example, to minimize expected squared loss, we predict the
 posterior mean.
 
+An equivalent way to derive this result is to use the sum rule as
+follows:
+\begin{align*}
+  p(\vec{y}_\ast \given \data, \vec{\mu}, \mat{\Sigma}, \sigma^2)
+  &=
+  \int
+  p(\vec{y}_\ast \given \vec{w}, \sigma^2)
+  p(\vec{w} \given \data, \vec{\mu}, \mat{\Sigma}, \sigma^2)
+  \intd{\vec{w}}
+  \\
+  &=
+  \int
+  \mc{N}(\vec{y}_\ast; \mat{X}_\ast \vec{w}, \sigma^2 \mat{I})
+  \,
+  \mc{N}(\vec{w}; \vec{\mu}_{\vec{w}\given\data}, \mat{\Sigma}_{\vec{w}\given\data})
+  \intd{\vec{w}}
+  \\
+  &=
+  \mc{N}(
+  \vec{y}_\ast;
+  \mat{X}_\ast \vec{\mu}_{\vec{w}\given\data},
+  \mat{X}_\ast \mat{\Sigma}_{\vec{w}\given\data} \mat{X}_\ast\trans + \sigma^2 \mat{I}),
+\end{align*}
+where we have used a slightly more general form of the convolution
+formula for multivariate Gaussians.  In this case, we view the
+prediciton process as considering the predictions we would make with
+every possible value of the parameters $\vec{w}$ and averaging them
+according to their plausibility.
+
 \subsection*{Connection to ridge regression}
 
 For the simple prior \eqref{simple_prior}, the posterior mean
@@ -453,7 +482,7 @@ $\vec{w}$ using the simple prior \eqref{simple_prior}.
 Bayes' theorem tells us that the posterior distribution $p(\vec{w}
 \given \data)$ is proportional to the likelihood times the prior:
 \begin{equation*}
-  p(\vec{w} \given \mat{X}, \vec{y}, \sigma^2, \tau^2)
+  p(\vec{w} \given \mat{X}, \vec{y}, \sigma^2, s^2)
   \propto
   p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2)
   p(\vec{w} \given s^2).
