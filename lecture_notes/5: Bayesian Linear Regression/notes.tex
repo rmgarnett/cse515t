@@ -85,6 +85,7 @@
 \DeclareMathOperator{\cov}{cov}
 \DeclareMathOperator{\diag}{diag}
 \DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
 
 \begin{document}
 
@@ -95,7 +96,7 @@ We are ready to consider our first machine-learning problem:
 values of a function $y(\vec{x})\colon \R^d \to \R$, where $\vec{x}$ is
 a $d$-dimensional vector-valued input.  We assume that we have made
 some observations of this mapping, $\data = \bigl\{ (\vec{x}_i, y_i)
-\bigr\}_{i = 1}^N$ to serve as training data.  Given these examples,
+\bigr\}_{i = 1}^N$, to serve as training data.  Given these examples,
 the goal of regression is to be able to predict the value of $y$ at a
 new input location $\vec{x}_\ast$.  In other words, we want to learn
 from $\data$ a (hopefully accurate!) prediction function (also called
@@ -115,11 +116,11 @@ to restrict this space and make learning more tractable, \emph{linear
   y(\vec{x}) = \vec{x}\trans \vec{w} + \epsilon(\vec{x}),
 \end{equation}
 where $\vec{w} \in \R^d$ is a vector of parameters, and
-$\epsilon{\vec{x}}$ represents a departure from the underlying linear
+$\epsilon(\vec{x})$ represents a departure from the underlying linear
 function $\vec{x}\trans \vec{w}$ at $\vec{x}$.  The value of
 $\epsilon(\vec{x})$ is also called the \emph{residual.}  If the
-underlying linear trend closely matches the data, we can expect
-small residuals.
+underlying linear trend closely matches the data, we can expect small
+residuals.
 
 Note that this model does not explicitly contain an intercept term.
 Instead, we normally add a constant feature to the input vector
@@ -128,6 +129,16 @@ $w_1$ may be seen as an intercept term, allowing the hyperplane to
 avoid passing through the origin at $\vec{x} = 0$.  To avoid messy
 notation, we will not explicitly write the prime on the inputs and
 rather assume this expansion has already been done.
+
+In general, we can imagine applying any function to $\vec{x}$ to serve
+as the inputs to our linear regression model.  For example, to
+accomplish polynomial regression of a given degree $k$, we might take
+$\vec{x}' = [1, \vec{x}, \vec{x}^2, \dots, \vec{x}^k]\trans$, where
+exponentiation is pointwise.  A transformation of this type may be
+summarized by a map $\vec{x} \mapsto \phi(\vec{x})$; this is known as
+a \emph{basis expansion.}  With a nonlinear basis expansion, we can
+learn nonlinear regression functions.  We assume in the following that
+such an expansion, if desired, has already been applied to the inputs.
 
 Let us collect the $N$ training examples into a matrix of training
 inputs $\vec{X} \in \R^{N \times d}$ and a vector of associated outputs
@@ -140,8 +151,8 @@ written
 where we have also collected the residuals into the vector
 $\vec{\epsilon}$.
 
-There are many approaches for estimating the parameter vector
-$\vec{w}$; below, we describe two.
+There are many classical approaches for estimating the parameter
+vector $\vec{w}$; below, we describe two.
 
 \subsection*{Ordinary least squares}
 
@@ -152,7 +163,7 @@ $\vec{x}_\ast$.  Of course, this is impossible, so we settle for the
 next best thing: we minimize the magnitude of the residuals on our
 training data.
 
-The classical approach is to estimate $\vec{w}$ by minimize the sum of
+The classical approach is to estimate $\vec{w}$ by minimizing the sum of
 the squared residuals on the training data:
 \begin{equation}
   \label{ols}
@@ -200,10 +211,10 @@ can become ill-behaved and extremely large.  This is an example of
 
 \emph{A priori,} we might reasonably expect or desire the values of
 $\vec{w}$ to be relatively small.  For this reason, so-called
-\emph{penalization methods} or \emph{regularization methods} modify
-the objective in \eqref{ols} to avoid such pathologies.  The most
-common approach is to add a term to the objective encouraging small
-entries of $\vec{w}$, for example
+\emph{penalization} or \emph{regularization methods} modify the
+objective in \eqref{ols} to avoid such pathologies.  The most common
+approach is to add a term to the objective encouraging small entries
+of $\vec{w}$, for example
 \begin{equation}
   \label{ridge}
   \hat{\vec{w}}
@@ -215,7 +226,7 @@ entries of $\vec{w}$, for example
   \lambda
   \lVert \vec{w} \rVert_{2}^2,
 \end{equation}
-where we have added the squared norm of $\vec{w}$ to the function to
+where we have added the squared 2-norm of $\vec{w}$ to the function to
 be minimized, thereby penalizing large-magnitude entries of $\vec{w}$.
 The scalar $\lambda \geq 0$ serves to trade off the contributions of
 the residual term and the penalty term, and is a parameter of the
@@ -225,7 +236,9 @@ ordinary least squares objective.
 The minimization problem in \eqref{ridge} may also be solved exactly,
 giving the slightly modified estimator
 \begin{equation*}
-  \hat{\vec{w}} = (\mat{X}\trans\mat{X} + \lambda \mat{I})\inv \mat{X}\trans \vec{y}.
+  \hat{\vec{w}}
+  =
+  (\mat{X}\trans\mat{X} + \lambda \mat{I})\inv \mat{X}\trans \vec{y}.
 \end{equation*}
 Again, as $\lambda \to 0$ (corresponding to very small penalties on
 the magnitude of $\vec{w}$ entries), we see that the resulting
@@ -252,25 +265,27 @@ on $\vec{w}$:
 \begin{equation*}
   p(\vec{w} \given \vec{\mu}, \mat{\Sigma})
   =
-  \mc{N}(\vec{w}; \vec{mu}, \mat{\Sigma}).
+  \mc{N}(\vec{w}; \vec{\mu}, \mat{\Sigma}).
 \end{equation*}
 As before, we might expect \emph{a priori} that the entries of
 $\vec{w}$ are small.  Furthermore, in the absence of any evidence
 otherwise, we might reason that all potential directions of $\vec{w}$
 are equally likely.  These two assumptions can be codified by choosing
 a multivariate Gaussian distribution for $\vec{w}$ with zero mean and
-isotropic diagonal covariance $\tau^2 \mat{I}$:
-\begin{equation*}
-  p(\vec{w} \given \tau^2)
+isotropic diagonal covariance $s^2 \mat{I}$:
+\begin{equation}
+  \label{simple_prior}
+  p(\vec{w} \given s^2)
   =
-  \mc{N}(\vec{w}; \vec{0}, \tau^2\mat{I}).
-\end{equation*}
+  \mc{N}(\vec{w}; \vec{0}, s^2\mat{I}).
+\end{equation}
 
 Given our observed data $\data = (\mat{X}, \vec{y})$, we wish to form
 the posterior distribution $p(\vec{w} \given \data)$.  We will do so
-by deriving the likelihood of our observed vector of values $\vec{y}$
-given the parameter vector $\vec{w}$ and the inputs $\mat{X}$.  We
-write again the assumed linear relationship in our training data:
+by deriving the joint distribution between the weight vector $\vec{w}$
+and the observed vector of values $\vec{y}$, given the inputs
+$\mat{X}$.  We write again the assumed linear relationship in our
+training data:
 \begin{equation*}
   \vec{y} = \mat{X}\vec{w} + \vec{\epsilon}.
 \end{equation*}
@@ -285,39 +300,212 @@ with variance $\sigma^2$:
   =
   \mc{N}(\vec{\epsilon}; \vec{0}, \sigma^2 \mat{I}).
 \end{equation*}
-This assumption implies the following likelihood for the observations
-$\vec{y}$:
-\begin{equation*}
-  p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2)
-  =
-  \mc{N}(\vec{y}; \mat{X}\vec{w}, \sigma^2\mat{I}).
-\end{equation*}
 
+Define $\vec{f} = \mat{X}\vec{w},$ and note that $\vec{f}$ is a linear
+transformation of the multivariate-Gaussian distributed $\vec{w}$;
+therefore, we may easily derive its distribution:
+\begin{equation*}
+  p(\vec{f} \given \mat{X}, \vec{\mu}, \mat{\Sigma})
+  =
+  \mc{N}(\vec{f}; \mat{X}\vec{\mu}, \mat{X}\mat{\Sigma}\mat{X}\trans).
+\end{equation*}
+Now the observation vector $\vec{y}$ is a sum of two independent
+multivariate Gaussian distributed vectors $\vec{f}$ and
+$\vec{\epsilon}$.  Therefore, we may derive its prior distribution as
+well:
+\begin{equation*}
+  p(\vec{y} \given \vec{X}, \vec{\mu}, \mat{\Sigma}, \sigma^2)
+  =
+  \mc{N}(
+  \vec{y};
+  \mat{X}\vec{\mu},
+  \mat{X}\mat{\Sigma}\mat{X}\trans + \sigma^2\mat{I}
+  ).
+\end{equation*}
+Finally, we compute the covariance between $\vec{y}$ and $\vec{w}$:
+\begin{equation*}
+  \cov[\vec{y}, \vec{w}]
+  =
+  \cov[\mat{X}\vec{w} + \vec{\epsilon}, \vec{w}]
+  =
+  \cov[\mat{X}\vec{w}, \vec{w}]
+  =
+  \mat{X}\cov[\vec{w}, \vec{w}]
+  =
+  \mat{X}\mat{\Sigma},
+\end{equation*}
+where we have used the linearity of covariance and the fact that
+the noise vector $\vec{\epsilon}$ is independent of $\vec{w}$.
+
+Now the joint distribution of $\vec{w}$ and $\vec{y}$ is multivariate
+Gaussian:
+\begin{equation*}
+  p\Biggl(
+  \begin{bmatrix}
+    \vec{w}
+    \\
+    \vec{y}
+  \end{bmatrix}
+  \given
+  \vec{X}, \vec{\mu}, \mat{\Sigma}, \sigma^2
+  \Biggr)
+  =
+  \mc{N}
+  \Biggl(
+  \begin{bmatrix}
+    \vec{w}
+    \\
+    \vec{y}
+  \end{bmatrix}
+  ;
+  \begin{bmatrix}
+    \vec{\mu}
+    \\
+    \mat{X}\vec{\mu}
+  \end{bmatrix}
+  ,
+  \begin{bmatrix}
+    \mat{\Sigma} & \mat{\Sigma}\mat{X}\trans
+    \\
+    \mat{X}\mat{\Sigma} & \mat{X}\mat{\Sigma}\mat{X}\trans + \sigma^2\mat{I}
+  \end{bmatrix}
+  \Biggr).
+\end{equation*}
+We apply the formula for conditioning multivariate Gaussians on
+subvectors to derive the posterior distribution of $\vec{w}$ given
+the data $\data$:
+\begin{equation*}
+  p(\vec{w} \given \data, \vec{\mu}, \mat{\Sigma}, \sigma^2)
+  =
+  \mc{N}(\vec{w};
+  \vec{\mu}_{\vec{w}\given\data},
+  \mat{\Sigma}_{\vec{w}\given\data}
+  ),
+\end{equation*}
+where
+\begin{align*}
+  \vec{\mu}_{\vec{w}\given\data}
+  &=
+  \vec{\mu}
+  +
+  \mat{\Sigma}
+  \mat{X}\trans
+  (\mat{X}\mat{\Sigma}\mat{X}\trans + \sigma^2 \mat{I})\inv
+  (\vec{y} - \mat{X}\vec{w});
+  \\
+  \mat{\Sigma}_{\vec{w}\given\data}
+  &=
+  \mat{\Sigma}
+  -
+  \mat{\Sigma}
+  \mat{X}\trans
+  (\mat{X}\mat{\Sigma}\mat{X}\trans + \sigma^2 \mat{I})\inv
+  \mat{X}
+  \mat{\Sigma}.
+\end{align*}
+
+\subsection*{Making predictions}
+
+Suppose we wish to use our model to predict the outputs $\vec{y}_\ast$
+associated with a set of inputs $\mat{X}_\ast$.  Writing again
+$\vec{y}^\ast = \mat{X}_\ast\vec{w} + \vec{\epsilon}$, we derive:
+\begin{equation*}
+  p(\vec{y}_\ast \given \data, \vec{\mu}, \mat{\Sigma}, \sigma^2)
+  =
+  \mc{N}(
+  \vec{y}_\ast;
+  \mat{X}_\ast \vec{\mu}_{\vec{w}\given\data},
+  \mat{X}_\ast \mat{\Sigma}_{\vec{w}\given\data} \mat{X}_\ast\trans + \sigma^2 \mat{I}).
+\end{equation*}
+Therefore, we have a full, joint probability distribution over the
+outputs $\vec{y}_\ast$.  If we must make point estimates, we choose a
+loss function for our predictions and use Bayesian decision theory.
+For example, to minimize expected squared loss, we predict the
+posterior mean.
+
+\subsection*{Connection to ridge regression}
+
+For the simple prior \eqref{simple_prior}, the posterior mean
+can be rewritten as:
+\begin{equation*}
+  \vec{\mu}_{\vec{w}\given\data}
+  =
+  s^2
+  \mat{X}\trans
+  (s^2\mat{X}\mat{X}\trans + \sigma^2 \mat{I})\inv
+  \vec{y}
+  =
+  \biggl(\mat{X}\trans\mat{X} + \frac{\sigma^2}{s^2} \mat{I}\biggr)\inv
+  \mat{X}\trans
+  \vec{y},
+\end{equation*}
+where we have factored out the $s^2$ in the inverse and have applied
+the matrix identity
+\begin{equation*}
+  (\mat{A}\mat{B} + c\mat{I})\inv \mat{A} =
+  \mat{A}(\mat{B}\mat{A} + c \mat{I})\inv.
+\end{equation*}
+This is exactly equal to the ridge regression solution \eqref{ridge}
+with $\lambda = \frac{\sigma^2}{s^2}$!  Why is this?
+
+Consider finding the \emph{maximum a posteriori} estimator of
+$\vec{w}$ using the simple prior \eqref{simple_prior}.
 Bayes' theorem tells us that the posterior distribution $p(\vec{w}
 \given \data)$ is proportional to the likelihood times the prior:
 \begin{equation*}
   p(\vec{w} \given \mat{X}, \vec{y}, \sigma^2, \tau^2)
   \propto
   p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2)
-  p(\vec{w} \given \tau^2).
+  p(\vec{w} \given s^2).
+\end{equation*}
+The distribution of $\vec{y}$ given $\vec{w}$ is simple:
+\begin{equation*}
+  p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2)
+  =
+  \mc{N}(\vec{y}; \mat{X}\vec{w}, \sigma^2\mat{I})
+  =
+  \prod_{i = 1}^N
+  \mc{N}(y_i; \vec{x}_i\trans\vec{w}, \sigma^2).
 \end{equation*}
 
-%% which we may rewrite as
-%% \begin{equation*}
-%%   \vec{\epsilon} = \vec{y} - \mat{X}\vec{w}.
-%% \end{equation*}
-%% Notice that $\vec{y} - \mat{X}\vec{w}$ is an affine transformation of
-%% the Gaussian-distributed vector $\vec{w}$.  From our discussion of the
-%% Gaussian distribution, this implies that the residuals have a
-%% multivariate Gaussian distribution:
-%% \begin{equation*}
-%%   p(\vec{\epsilon} \given \vec{y}, \mat{X})
-%%   =
-%%   \mc{N}(\vec{\epsilon};
-%%   \vec{y},
-%%   \tau^2 \mat{X}\mat{X}\trans
-%%   \vec{y} - \mat{X}\vec{w}.
-%% \end{equation*}
+Rather than maximizing the posterior directly, we may instead maximize
+its logarithm:
+\begin{align*}
+  \hat{\vec{w}}_{\text{\acro{MAP}}}
+  &=
+  \argmax_{\vec{w}}
+  -\frac{1}{2\sigma^2}
+  \sum_{i = 1}^N
+  (\vec{x}_i\trans \vec{w} - y_i)^2
+  -
+  \frac{1}{2s^2}
+  \sum_{i = 1}^d
+  w_i^2
+  \\
+  &=
+  \argmin_{\vec{w}}
+  \sum_{i = 1}^N
+  (\vec{x}_i\trans \vec{w} - y_i)^2
+  +
+  \frac{\sigma^2}{s^2}
+  \lVert \vec{w} \rVert_{2}^{2},
+\end{align*}
+where we multiplied by $-2\sigma^2$ to derive the second line.  This
+is exactly the ridge regression objective.  Therefore ridge regression
+with $\ell^2$ regularization can be seen from the Bayesian perspective
+as placing a Gaussian prior on $\vec{w}$ and finding the \acro{MAP}
+estimator.  In general, many regularization methods can be interpreted
+as implicitly choosing a particular likelihood for the data and prior
+for the parameters of a model and maximizing the posterior density.
+For example, $\ell^1$ regularization (as seen in \acro{LASSO}) is
+equivalent to placing a Laplace distribution prior on the weight
+parameters, encouraging a sparse solution.
 
+Continuing with this argument, we can interpret the squared loss
+function $\sum_{i=1}^N (\vec{x}\trans \vec{w} - y_i)^2$ as coming from
+an iid Gaussian noise assumption.  In general, loss functions in
+minimization problems such as \eqref{ridge} can often be interpreted
+as negative log likelihoods arising from an implicit independent noise
+assumption.
 
 \end{document}
