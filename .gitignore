@@ -4,3 +4,4 @@
 *.aux*
 *.md5
 *.dpth
+.DS_Store
