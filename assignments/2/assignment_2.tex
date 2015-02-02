@@ -134,14 +134,14 @@ Due Monday, 16 February 2015 \\
     \vec{x}_\ast = [-4, -3.5, -3, \dotsc, 3.5, 4]\trans.
   \end{equation*}
   We select the squared loss for a set of predictions
-  $\hat{\vec{y}}_\ast$:
+  $\hat{\vec{y}}_\ast$ at these points:
   \begin{equation*}
     \ell(\vec{y}_\ast, \hat{\vec{y}}_\ast)
     =
     \sum_i \bigl((y_\ast)_i - (\hat{y}_\ast)_i\bigr)^2;
   \end{equation*}
-  therefore, we will predict the posterior mean $\hat{\vec{y}}_\ast =
-  \mat{X}_\ast \vec{\mu}_{\vec{w}\given\data'}$.
+  therefore, we will predict using the new posterior mean
+  $\hat{\vec{y}}_\ast = \mat{X}_\ast \vec{\mu}_{\vec{w}\given\data'}$.
   \begin{itemize}
   \item
     Given a potential observation location $x'$, derive a closed-form
@@ -153,6 +153,13 @@ Due Monday, 16 February 2015 \\
     Plot the expected loss over the interval $x' \in [-4, 4]$.  Where
     is the optimal location to sample the function?
   \end{itemize}
+
+  Note: this approach of actively selecting where to sample a function
+  to maximize some utility function is known as \emph{active learning}
+  in machine learning and \emph{optimal experimental design} in
+  statistics.  Bayesian decision theory provides a convenient and
+  consistent framework for performing active learning with a variety
+  of objectives.
 
 \item
   (Woodbury matrix identity.)
@@ -194,6 +201,9 @@ Due Monday, 16 February 2015 \\
     \theta^{\alpha - 1}
     \exp(-\beta\theta).
   \end{equation*}
+  Plot the approximation against the true density for $(\alpha, \beta)
+  = (2, \nicefrac{1}{2})$.
+
   The true value of the normalizing constant is
   \begin{equation*}
     Z = \frac{\Gamma(\alpha)}{\beta^\alpha}.
