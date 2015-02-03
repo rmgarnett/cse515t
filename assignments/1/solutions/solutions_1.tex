@@ -1,0 +1,634 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{8cm}
+\setlength{\figureheight}{6cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2015) Assignment 1 Solutions}} \\
+
+\begin{enumerate}
+\item
+  (Barber.)
+  Suppose that a study shows that 90\% of people who have contracted
+  Creutzfeldt--Jakob disease (``mad cow disease'') ate hamburgers
+  prior to contracting the disease.  Creutzfeldt--Jakob disease is
+  incredibly rare; suppose only one in a million people have the
+  disease.
+
+  If you eat hamburgers, should you be worried?  Does this depend on
+  how many other people eat hamburgers?
+\end{enumerate}
+
+\subsection*{Solution}
+Let CJ be the random variaable ``has Creutzfeldt--Jakob disease,'' and
+let H be the random variable ``eats hamburgers.''  From the problem,
+we know $\Pr(\mathrm{H} \given \mathrm{CJ}) = 0.9$ and
+$\Pr(\mathrm{CJ}) = 10^{-6}$.  From Bayes' theorem, we may compute the
+posterior probability of having Creutzfeldt--Jakob disease given that
+you eat hamburgers:
+\begin{equation*}
+  \Pr(\mathrm{CJ} \given \mathrm{H})
+  =
+  \frac
+      {\Pr(\mathrm{H} \given \mathrm{CJ}) \Pr(\mathrm{CJ})}
+      {\Pr(\mathrm{H})}.
+\end{equation*}
+The denominator, $\Pr(\mathrm{H})$, is the probability that a random
+person eats hamburgers, so whether you should be worried does depend
+on this value.  I estimate $\Pr(\mathrm{H})$ might be around
+\nicefrac{1}{2}; plugging in this value, the posterior probability
+of having Creutzfeldt--Jakob disease is
+\begin{equation*}
+  \frac{0.9 \times 10^{-6}}{\nicefrac{1}{2}}
+  =
+  1.8 \times 10^{-6},
+\end{equation*}
+so your probability of having the disease has only increased from
+$10^{-6}$ to $1.8 \times 10^{-6} = 0.0000018$ as a result of eating
+hamburgers.  You can sleep safe.
+
+If hamburger eating were rare, say $\Pr(\mathrm{H}) = 10^{-5}$, then
+we would instead have $\Pr(\mathrm{CJ} \given \mathrm{H}) = 9\%$, and
+maybe you should be worried!
+
+\clearpage
+
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item
+  (O'Hagan and Forster.)
+  Suppose $x$ has a Poisson distribution with unknown mean
+  $\theta$:
+  \begin{equation*}
+    p(x \given \theta) = \frac{\theta^x}{x!} \exp(-\theta),
+    \qquad
+    x = 0, 1, \dotsc
+  \end{equation*}
+  Let the prior for $\theta$ be a gamma distribution:
+  \begin{equation*}
+    p(\theta \given \alpha, \beta)
+    =
+    \frac{\beta^\alpha \theta^{\alpha - 1}}{\Gamma(\alpha)} \exp(-\beta\theta),
+    \qquad \theta > 0
+  \end{equation*}
+  where $\Gamma$ is the gamma function.  Show that, given an
+  observation $x$, the posterior $p(\theta \given x, \alpha, \beta)$
+  is a gamma distribution with updated parameters $(\alpha', \beta') =
+  (\alpha + x, \beta + 1)$.
+\end{enumerate}
+
+\subsection*{Solution}
+From Bayes' theorem, we have:
+\begin{align*}
+  p(\theta \given x)
+  &\propto
+  p(x \given \theta)
+  p(\theta)
+  \\
+  &\propto
+  \bigl(\theta^{x} \exp(-\theta)\bigr)
+  \bigl(\theta^{\alpha - 1} \exp(-\beta\theta)\bigr)
+  \\
+  &=
+  \theta^{x + \alpha - 1}
+  \exp\bigl(-(\beta + 1)\theta\bigr)
+  \\
+  &\propto
+  \mc{G}(\alpha + x, \beta + 1).
+\end{align*}
+
+Here we exploit a common trick: we manipulate the numerator, ignoring
+constants independent of $\theta$.  If we can recognize the functional
+form as belonging to a distribution family we know, we can simply
+identify the parameters and trust that the distribution normalizes!
+
+\clearpage
+
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item
+  (Optimal \emph{Price is Right} bidding.)
+  Suppose you have a standard normal belief about an unknown parameter
+  $\theta$, $p(\theta) = \mc{N}(\theta; 0, 1^2)$.  You are asked to
+  give a point estimate $\hat{\theta}$ of $\theta$, but are told that
+  there is a heavy penalty for guessing too high.  The loss function is
+  \begin{equation*}
+    \ell(\hat{\theta}, \theta; c)
+    =
+    \begin{cases}
+      (\theta - \hat{\theta})^2 & \hat{\theta}  <   \theta; \\
+      c                         & \hat{\theta} \geq \theta
+    \end{cases},
+  \end{equation*}
+  where $c > 0$ is a constant cost for overestimating.  What is the
+  Bayesian estimator in this case?  How does it change as a function
+  of $c$?
+\end{enumerate}
+
+\subsection*{Solution}
+Let $\phi(x) = \mc{N}(x; 0, 1^2)$ be the standard normal \acro{PDF}
+evaluated at $x$, and let $\Phi(x) = \int_{-\infty}^x \phi(x)
+\intd{x}$ be the standard normal \acro{CDF} evaluated at $x$.  If we
+fix a point $\hat{\theta}$, the expected loss is:
+\begin{align*}
+  \mathbb{E}\bigl[\ell(\hat{\theta}, \theta; c)\bigr]
+  &=
+  \int
+  \ell(\hat{\theta}, \theta; c)
+  p(\theta)
+  \intd{\theta}
+  \\
+  &=
+  \int_{-\infty}^{\hat{\theta}}
+  c
+  \phi(\theta)
+  \intd{\theta}
+  +
+  \int_{\hat{\theta}}^{\infty}
+  (\theta - \hat{\theta})^2
+  \phi(\theta)
+  \intd{\theta}.
+\end{align*}
+The first term is proportional to the standard normal \acro{CDF}
+$\Phi$ evaluated at $\hat{\theta}$:
+\begin{equation*}
+  \int_{-\infty}^{\hat{\theta}}
+  c
+  \phi(\theta)
+  \intd{\theta}
+  =
+  c\,\Phi(\hat{\theta}).
+\end{equation*}
+
+We may also compute the second integral using the following
+antiderivatives:\footnote{\url{http://en.wikipedia.org/wiki/List_of_integrals_of_Gaussian_functions}
+  is useful here! (Wolfram alpha also works.)}
+\begin{equation*}
+  \int \theta \phi(\theta) \intd{\theta} = -\phi(\theta) + C;
+  \qquad
+  \int \theta^2 \phi(\theta) \intd{\theta} = \Phi(\theta) - \theta \phi(\theta) + C.
+\end{equation*}
+Using the fundamental theorem of calculus, we may use these to calculate
+\begin{equation*}
+  \int_{\hat{\theta}}^{\infty}
+  (\theta - \hat{\theta})^2
+  \phi(\theta)
+  \intd{\theta}
+  =
+  (\hat{\theta}^2 + 1) (1 - \Phi(\hat{\theta}))
+  - \hat{\theta}\phi(\hat{\theta}).
+\end{equation*}
+Finally, the entire expected loss is
+\begin{equation*}
+  \mathbb{E}\bigl[\ell(\hat{\theta}, \theta; c)\bigr]
+  =
+  (c - \hat{\theta}^2 - 1)\Phi(\hat{\theta})
+  - \hat{\theta}\phi(\hat{\theta})
+  + \hat{\theta}^2 + 1.
+\end{equation*}
+The derivative with respect to $\hat{\theta}$ is
+\begin{equation*}
+  \frac{\partial \mathbb{E}\bigl[\ell(\hat{\theta}, \theta; c)\bigr]}
+       {\partial \hat{\theta}}
+  =
+  2 \hat{\theta} \bigl(1 - \Phi(\hat{\theta})\bigr)
+  + (c - 2) \phi(\hat{\theta}).
+\end{equation*}
+Unfortunately, I do not believe we may find a root explicitly, so we
+would have to rely on numerical root finding.  For $c = 1$, the
+minimial expected loss is achieved at $\hat{\theta} = 0.612$; for $c =
+10$, the Bayes action is $\hat{\theta} = -1.0615$; for $c = 100$, the
+Bayes action is $\hat{\theta} = -2.1167$.  In general, the larger $c$,
+the smaller your estimate should be, due to the potentially high cost
+of overestimation.  For $c = 0$, there is no Bayes action, because we
+may continue to decrease the expected loss when taking $\hat{\theta}
+\to \infty$ (there is no reason not to!).
+
+\clearpage
+
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item
+  (Maximum-likelihood estimation.)
+  Suppose you flip a coin with unknown bias $\theta$, $\Pr(x =
+  \text{H}) = \theta$, three times and observe the outcome HHH.  What
+  is the maximum likelihood estimator for $\theta$?  Do you think this
+  is a good estimator?  Would you want to use it to make predictions?
+
+  Consider a Bayesian analysis of $\theta$ with a beta prior $p(\theta
+  \given \alpha, \beta) = \mc{B}(\theta; \alpha, \beta)$.  What is the
+  posterior mean of $\theta$?  What is the posterior mode?  Consider
+  $(\alpha, \beta) = (\nicefrac{1}{5}, \nicefrac{1}{5})$.  Plot the
+  posterior density in this case.  Is the posterior mean a good
+  summary of the distribution?
+\end{enumerate}
+
+\subsection*{Solution}
+The likelihood of HHH is proportional to $\theta^3$, which over the
+domain $\theta \in [0, 1]$ is maximized at $\theta = 1$.  Whether you
+think this is a good estimator is subjective; however, I certainly
+wouldn't use it for prediction, because it completely discounts the
+(in my opinion, still rather likely) possiblity of a tails event.
+
+With a $\mc{B}(\alpha, \beta)$ prior, the posterior is $\mc{B}(\alpha
++ 3, \beta)$.  We may calculate the mean of an arbitrary beta
+distribution:
+\begin{equation*}
+  \mathbb{E}[\theta \given \alpha, \beta]
+  =
+  \int
+  \theta
+  \mc{B}(\theta \given \alpha, \beta)
+  \intd{\theta}
+  =
+  \frac{1}{B(\alpha, \beta)}
+  \int_{0}^{1}
+  \theta
+  \bigl(
+  \theta^{\alpha - 1}
+  (1 - \theta)^{\beta - 1}
+  \bigr)
+  \intd{\theta}
+  =
+  \frac{B(\alpha + 1, \beta)}{B(\alpha, \beta)}
+  =
+  \frac{\alpha}{\alpha + \beta}.
+\end{equation*}
+
+Therefore the posterior mean is $\frac{\alpha + 3}{\alpha + \beta +
+  3}$.  The posterior mode is $\frac{\alpha + 2}{\alpha + \beta +
+  1}$.\footnote{\url{http://goo.gl/zigQER} -- this is how I would
+  answer this type of question!} Note that the posterior mode only
+exists for $\alpha, \beta > 1$.
+
+The prior and posterior distributions are plotted below.  An
+interesting point about the prior is that its mean and median are both
+$\nicefrac{1}{2}$, but this is simultaneously the anti-mode!  It's an
+unusual estimator.
+
+\begin{figure}[h]
+  \centering
+  \input{figures/problem_4.tex}
+  \caption{The prior and posterior distributions over $\theta$ for the
+    coin-flipping problem.}
+\end{figure}
+
+\clearpage
+
+\begin{enumerate}
+\setcounter{enumi}{4}
+\item
+  (Gaussian with unknown mean.)
+  Let $\bm{x} = \{ x_i \}_{i = 1}^N$ be independent, identically
+  distributed real-valued random variables with distribution $p(x_i
+  \given \theta) = \mc{N}(x_i; \theta, \sigma^2)$.  Suppose the
+  variance $\sigma^2$ is known but the mean $\theta$ is unknown with
+  prior distribution $p(\theta) = \mc{N}(\theta; 0, 1^2)$.
+  \begin{itemize}
+  \item
+    What is the likelihood of the full observation vector $p(\bm{x}
+    \given \theta)$?
+  \item
+    After observing $\bm{x}$, what is the posterior distribution of
+    $\theta$, $p(\theta \given \bm{x}, \sigma^2)$?  (Note: you might
+    find it more convenient in this case to work with the
+    \emph{precision} $\tau = \sigma^{-2}$.)
+  \item
+    Interpret how the posterior changes as a function of $N$.  What
+    happens if $N = 0$?  What happens if $N \to \infty$?  Does this
+    agree with your intuition?
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+In the first part, we use the definition of independence:
+\begin{equation*}
+  p(\bm{x} \given \theta)
+  =
+  \prod_{i = 1}^N
+  p(x_i \given \theta)
+  =
+  \prod_{i = 1}^N
+  \mc{N}(x_i; \theta, \sigma^2).
+\end{equation*}
+
+We will consider the slightly more general case with an arbitrary
+Gaussian prior on $\theta$: $p(\theta \given m, s^2) = \mc{N}(\theta;
+m, s^2)$.  For convenience, we will parameterize the Gaussians on the
+$\{x_i\}$ and $\theta$ with the \emph{precision} parameters $\tau =
+\sigma^{-2}; t = s^{-2}$.
+
+By Bayes' theorem, we have
+\begin{align*}
+  p(\theta \given \bm{x})
+  &\propto
+  p(\bm{x} \given \theta)
+  p(\theta)
+  \\
+  &=
+  \prod \mc{N}(x_i; \theta, \tau)
+  \,
+  \mc{N}(\theta; m, t)
+  \\
+  &\propto
+  \exp\Biggl(
+  -\frac{1}{2}
+  \biggl(
+  \tau
+  \sum_{i = 1}^N (x_i - \theta)^2
+  +
+  t
+  (\theta - m)^2
+  \biggr)
+  \Biggr).
+\end{align*}
+This is an exponentiated, negative quadratic function of $\theta$ and
+is therefore proportional to a Gaussian distribution over $\theta$.
+Our goal is to identify the mean and precision of this distribution.
+
+We expand:
+\begin{equation*}
+  \tau
+  \sum_{i = 1}^N (x_i - \theta)^2
+  +
+  t
+  (\theta - m)^2
+  =
+  (\tau N + t)\theta^2
+  - 2(\tau \textstyle\sum x_i + tm) \theta
+  + (\tau \sum x_i^2 + t m^2).
+\end{equation*}
+Notice that $\sum x_i = N \bar{x}$, where $\bar{x}$ is the sample mean
+of the measurements.  Notice also that the last term is a constant
+independent of $\theta$, which will be absorbed into the normalizing
+constant.  To arrive at a more-familiar form, we ``complete the
+square:''
+\begin{equation*}
+  (\tau N + t)\theta^2
+  - 2(\tau N \bar{x} + tm) \theta
+  =
+  (\tau N + t) \biggl(
+  \theta -
+  \frac{\tau N \bar{x} + tm}{\tau N + t}
+  \biggr)^2
+  +
+  c,
+\end{equation*}
+where $c$ is another constant independent of $\theta$.  Therefore:
+\begin{align*}
+  p(\theta \given \bm{x})
+  &\propto
+  \exp\bigl(
+  \textstyle -\frac{t'}{2}
+  (\theta - m')^2
+  \bigr),
+\end{align*}
+which is a Gaussian distribution with mean and precision
+\begin{equation*}
+  m' = \frac{\tau N \bar{x} + t m}{\tau N + t};
+  \qquad
+  t' = \tau N + t,
+\end{equation*}
+respectively.  We recognize that the new precision is the sum of the
+precisions of each measurement (the $N$ independent measurements
+$\{x_i\}$ with precision $\tau$ aplus one additional prior
+``measurement.'' with precision $t$).  The posterior mean can be
+recognized as a precision-weighted average of the measurements,
+including the ``measurement'' at the prior mean $m$.
+
+As $N \to \infty$, the sample mean $\bar{x}$ dominates, and the
+influence of the prior diminishes to zero.  If $N = 0$, we rely only
+on our prior knowledge.
+
+\clearpage
+
+\begin{enumerate}
+\setcounter{enumi}{5}
+\item
+  (Spike and slab priors.)
+  Suppose $\theta$ is a real-valued random variable that is expected
+  to either be near zero (with probability $\pi$) or to have a wide
+  range of potential values (with probability $(1 - \pi)$).  Such
+  scenarios happen a lot in practice: for example, $\theta$ could be
+  the coefficient of a feature in a regression model.  We either
+  expect the feature to be useless for predicting the output (and have
+  a value close to zero) or to be useful, in which case we expect a
+  value with larger magnitude but can't say much else.
+
+  A common approach in this case is to use a so-called \emph{spike and
+    slab prior.} Let $f \in \{0, 1\}$ be a discrete random variable
+  serving as a flag.  We define the following conditional prior:
+  \begin{equation*}
+    p(\theta \given f, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2)
+    =
+    \begin{cases}
+      \mc{N}(\theta; 0, \sigma_{\text{spike}}^2) & f = 0 \\
+      \mc{N}(\theta; 0, \sigma_{\text{slab}}^2)  & f = 1,
+    \end{cases}
+  \end{equation*}
+  where $\sigma_{\text{spike}}$ is the width of a narrow ``spike'' at
+  zero, and $\sigma_{\text{slab}} > \sigma_{\text{spike}}$ is the
+  width of a ``slab'' supporting values with larger magnitude.
+
+  In practice, we will never observe the flag variable $f$; instead,
+  we must infer it or marginalize it, as required.
+  \begin{itemize}
+  \item
+    Suppose we choose a prior $\Pr(f = 1) = \pi = \nicefrac{1}{2}$,
+    expressing no \emph{a priori} preference for the spike or the
+    slab.  What is the marginal prior $p(\theta \given
+    \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2$)?  Plot the
+    marginal prior distribution for $(\sigma_{\text{spike}}^2,
+    \sigma_{\text{slab}}^2) = (1^2, 10^2)$.
+  \item
+    Suppose that we can make a noisy observation $x$ of $\theta$, with
+    distribution $p(x \given \theta, \omega^2) = \mc{N}(x; \theta,
+    \omega^2)$, with known variance $\omega^2$.  Given $x$, what is
+    the posterior distribution of the flag parameter, $\Pr(f = 1
+    \given x, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2,
+    \omega^2)$?  Plot this distribution as a function of $x$.  What
+    observation would teach us the most about $f$?  What teaches us
+    the least?
+  \item
+    Given an observation $x$ as in the last part, what is the
+    posterior distribution of $\theta$, $p(\theta \given x,
+    \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)$?
+    (Hint: use the sum rule to eliminate $f$ and use the result
+    above.)
+  \item
+    Suppose the noise variance is $\omega^2 = 0.1^2$ and we make an
+    observation $x = 3$.  Plot the posterior distribution of $\theta$,
+    using the parameters from the first part.
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+For the first part, we use the sum rule:
+\begin{equation*}
+  p(\theta \given \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2)
+  =
+  \sum_f
+  \Pr(f)p(\theta \given f, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2)
+  =
+  \frac{1}{2}\mc{N}(\theta; 0, \sigma_{\text{spike}}^2) +
+  \frac{1}{2}\mc{N}(\theta; 0, \sigma_{\text{slab}}^2).
+\end{equation*}
+The prior density is plotted below.
+
+\begin{figure}[h]
+  \centering
+  \input{figures/problem_6_prior.tex}
+  \caption{The prior distribution over $\theta$ for the spike-and-slab
+    prior problem.}
+\end{figure}
+
+For the second part, we have from Bayes' theorem that:
+\begin{equation*}
+  \Pr(f = 1 \given x, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)
+  =
+  \frac{p(x \given f = 1, \sigma_{\text{slab}}^2, \omega^2)\Pr(f = 1)}
+       {\sum_f p(x \given f, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)\Pr(f)}.
+\end{equation*}
+
+We must derive the likelihood $p(x \given f, \sigma_{\text{spike}}^2,
+\sigma_{\text{slab}}^2)$.  We apply the sum rule:
+\begin{equation*}
+  p(x \given f, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)
+  =
+  \int
+  p(x \given \theta, \omega^2)
+  p(\theta \given f, \sigma_{\text{slab}}^2, \omega^2)
+  \intd{\theta}.
+\end{equation*}
+For $f = 1$, this becomes:
+\begin{align*}
+  p(x \given f = 1, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)
+  &=
+  \int
+  p(x \given \theta, \omega^2)
+  p(\theta \given f = 1, \sigma_{\text{slab}}^2, \omega^2)
+  \intd{\theta}
+  \\
+  &=
+  \int
+  \mc{N}(x; \theta, \omega^2)
+  \mc{N}(\theta; 0, \sigma_{\text{slab}}^2)
+  \intd{\theta}
+  \\
+  &=
+  \mc{N}(x; 0, \sigma_{\text{slab}}^2 + \omega^2).
+\end{align*}
+A similar expression holds for $f = 0$.  The final result is
+\begin{equation*}
+  \Pr(f = 1 \given x, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)
+  =
+  \frac{\mc{N}(x; 0, \sigma_{\text{slab}}^2 + \omega^2)}
+       {\mc{N}(x; 0, \sigma_{\text{spike}}^2 + \omega^2) + \mc{N}(x; 0, \sigma_{\text{slab}}^2 + \omega^2)}.
+\end{equation*}
+This value is plotted as a function of $x$ on the range $x \in [-10,
+  10]$ below for $\omega^2 = 0.1^2$.  Extreme values of $x$ teach us
+the most, because we can conclude with near certainty that the
+observation came from the slab.  The observations that would teach us
+the least are $x \approx \pm 2.165$, either of which result in a
+posterior slab probability of $\nicefrac{1}{2}$ -- the same as our
+prior!
+
+\begin{figure}[h]
+  \centering
+  \input{figures/problem_6_f_posterior.tex}
+  \caption{The posterior probability for the slab flag $(f = 1)$ for
+    the spike-and-slab prior problem as a function of the observation
+    $x$.}
+\end{figure}
+
+For the third part, we use the sum rule:
+\begin{equation*}
+  p(\theta \given x, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)
+  =
+  \sum_f
+  p(\theta \given f, x, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2)
+  \Pr(f \given x, \sigma_{\text{spike}}^2, \sigma_{\text{slab}}^2, \omega^2).
+\end{equation*}
+We need to compute the posterior on $\theta$ given $f$ and $x$.  Here
+we may use the result from the last problem:
+\begin{align*}
+  p(\theta \given f = 0, x, \sigma_{\text{spike}}^2, \omega^2)
+  &=
+  \mc{N}(\theta;
+  \tau_{\text{spike}}^{-1} \omega^{-2} x,
+  \tau_{\text{spike}}^{-1}) \\
+  p(\theta \given f = 1, x, \sigma_{\text{slab}}^2, \omega^2)
+  &=
+  \mc{N}(\theta;
+  \tau_{\text{slab}}^{-1} \omega^{-2} x,
+  \tau_{\text{slab}}^{-1}),
+\end{align*}
+where $\tau_{\text{spike}} = (\omega^{-2} +
+\sigma_{\text{spike}}^{-2})$, and $\tau_{\text{slab}}$ is defined
+similarly.
+
+Finally, the posterior for $\theta$ for the observation $x = 3$ with
+$\omega^2 = 0.1^2$ is plotted below.
+
+\begin{figure}[h]
+  \centering
+  \input{figures/problem_6_theta_posterior.tex}
+  \caption{The posterior density for the parameter $\theta$ given
+    the example observation $x = 3$, $\omega^2 = 0.1^2$.}
+\end{figure}
+
+\end{document}
