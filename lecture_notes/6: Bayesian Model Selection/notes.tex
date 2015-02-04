@@ -1,0 +1,304 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{8cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\model}{\mc{M}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{Bayesian model selection}
+
+Consider the regression problem, where we want to predict the values
+of an unknown function $y\colon \R^d \to \R$ given examples $\data =
+\bigl\{ (\vec{x}_i, y_i) \bigr\}_{i = 1}^N$ to serve as training data.
+In Bayesian linear regression, we made the following assumption about
+$y(\vec{x})$:
+\begin{equation}
+  y(\vec{x}) = \phi(\vec{x})\trans \vec{w} + \epsilon(\vec{x}),
+\end{equation}
+where $\phi(\vec{x})$ is a now explicitly-written feature expansion of
+$\vec{x}$.  We proceed in the normal Bayesian way: we place Gaussian
+priors on our unknowns, the parameters $\vec{w}$ and the residuals
+$\vec{\epsilon}$, then derive the posterior distribution over
+$\vec{w}$ given $\data$, which we use to make predictions.
+
+One question left unanswered is how to choose a good feature expansion
+function $\phi(\vec{x})$.  For example, a purely linear model could
+use $\phi(\vec{x}) = [1, \vec{x}]\trans$, whereas a quadratic model
+could use $\phi(\vec{x}) = [1, \vec{x}, \vec{x}^2]\trans$, etc.  In
+general, arbitrary feature expansions $\phi$ are allowed.  How can I
+select between them?  Even more generally, how do I select whether I
+should use linear regression or a completely different probabilistic
+model to explain my data?  These are questions of \emph{model
+  selection,} and naturally there is a Bayesian approach to it.
+
+Before we continue our discussion of model selection, we will first
+define the word \emph{model,} which is often used loosely without
+explicit definition.  A model is a parametric family of probability
+distributions, each of which can explain the observed data.  Another
+way to explain the concept of a model is that if we have chosen a
+likelihood $p(\data \given \theta)$ for our data, which depends on a
+parameter $\theta$, then the model is the set of all likelihoods (each
+one of which is a distribution over $\data$) for every possible value
+of the parameter $\theta$.
+
+In the case of linear regression, the weight vector $\vec{w}$ defines
+the parametric family, and the model is the set of distributions
+\begin{equation*}
+  \bigl\{ p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2) \bigr\}
+  =
+  \bigl\{ \mc{N}(\vec{y}; \mat{X}\vec{w}, \sigma^2 \mat{I}) \bigr\},
+\end{equation*}
+indexed by all possible $\vec{w}$.  Each one of these is a potential
+explanation of the observed values $\vec{y}$ given $\vec{X}$.  In the
+case of flipping a coin $n$ times with an unknown bias $\theta$ and
+observing the number of heads $x$, the model is
+\begin{equation*}
+  \bigl\{ p(x \given n, \theta) \bigr\}
+  =
+  \bigl\{ \mathrm{Binomial}(x, n, \theta) \bigr\},
+\end{equation*}
+where there is one binomial distribution for every possible $\theta
+\in (0, 1)$.  In the Bayesian method, we maintain a belief over which
+elements in the model we consider plausible by reasoning about
+$p(\theta \given \data)$ via Bayes' theorem.
+
+Suppose now that I have at my disposal a finite set of models
+$\{\model_i\}_i$ that I may use to explain my observed data $\data$,
+and let us write $\theta_i$ for the parameters of model $\model_i$.
+How do we know which model to prefer?  We work out the posterior
+probability over the models via Bayes' theorem!  We have:
+\begin{equation*}
+  \Pr(\model_i \given \data)
+  =
+  \frac{p(\data \given \model_i)\Pr(\model_i)}
+       {\sum_j p(\data \given \model_j)\Pr(\model_j)}.
+\end{equation*}
+Here $\Pr(\model_i)$ is a prior distribution over models that we have
+selected; a common practice is to set this to a uniform distribution
+over the models.  The value $p(\data \given \model_i)$ may also be
+written in a more-familiar familiar form:
+\begin{equation*}
+  p(\data \given \model_i)
+  =
+  \int
+  p(\data \given \theta_i, \model_i)
+  p(\theta_i \given \model_i)
+  \intd{\theta_i}.
+\end{equation*}
+This is exactly the denominator when applying Bayes' theorem to find
+the posterior $p(\theta_i \given \data, \model_i)$!
+\begin{equation*}
+  p(\theta_i \given \data, \model_i)
+  =
+  \frac{p(\data \given \theta_i, \model_i) p(\theta_i \given \model_i)}
+       {\int
+         p(\data \given \theta_i, \model_i)
+         p(\theta_i \given \model_i)
+         \intd{\theta_i}.
+       }
+  =
+  \frac{p(\data \given \theta_i, \model_i) p(\theta_i \given \model_i)}
+       {p(\data \given \model_i)},
+\end{equation*}
+where we have simply conditioned on $\model_i$ to be explicit.  In the
+context of model selection, the term $p(\data \given \model_i)$ is
+known as the \emph{model evidence} or simply \emph{evidence.}  One
+interpretation of the model evidence is the probability that your
+model could have generated the observed data, under the chosen prior
+belief over its parameters $\theta_i$.
+
+Suppose now that we have exactly two models for the observed data that
+we wish to compare: $\model_1$ and $\model_2$, with corresponding
+parameter vectors $\theta_1$ and $\theta_2$ and prior probabilities
+$\Pr(\model_1)$ and $\Pr(\model_2)$. In this case it is easiest to
+compute the \emph{posterior odds}, the ratio of the models'
+probabilities given the data:
+\begin{equation*}
+  \frac{\Pr(\model_1 \given \data)}
+       {\Pr(\model_2 \given \data)}
+  = \frac{\Pr(\model_1) p(\data \given \model_1)}
+         {\Pr(\model_2) p(\data \given \model_2)}
+  = \frac{\Pr(\model_1) \int p(\data \given \theta_1, \model_1)
+          p(\theta_1 \given \model_1) \intd{\theta_1}}
+         {\Pr(\model_2) \int p(\data \given \theta_2, \model_2)
+          p(\theta_2 \given \model_2) \intd{\theta_2}},
+\end{equation*}
+which is simply the prior odds multiplied by the ratio of the evidence
+for each model.  The latter quantity is also called the \emph{Bayes
+  factor} in favor of $\model_1$.  Publishing Bayes factors allows
+another practitioner to easily substitute their own model priors and
+derive their own conclusions about the models being considered.
+
+\subsection*{Example}
+
+Wikipedia gives a truly excellent example of Bayesian model selection
+in
+practice.\footnote{\url{http://en.wikipedia.org/wiki/Bayes_factor#Example}}
+Suppose I am presented with a coin and want to compare two models for
+explaining its behavior.  The first model, $\model_1$, assumes that
+the heads probability is fixed to $\nicefrac{1}{2}$.  Notice that this
+model does not have any parameters.  The second model, $\model_2$,
+assumes that the heads probability is fixed to an unknown value
+$\theta \in (0, 1)$, with a uniform prior on $\theta$: $p(\theta
+\given \model_2) = 1$ (this is equivalent to a beta prior on $\theta$
+with $\alpha = \beta = 1$).  For simplicity, we choose a uniform model
+prior: $\Pr(\model_1) = \Pr(\model_2) = \nicefrac{1}{2}$.
+
+Suppose we flip the coin $n = 200$ times and observe $x = 115$ heads.
+Which model should we prefer in light of this data?  We compute the
+model evidence for each model.  The model evidence for $\model_1$ is
+quite straightforward, as it has no parameters:
+\begin{equation*}
+  \Pr(x \given n, \model_1)
+  =
+  \mathrm{Binomial}(n, x, \nicefrac{1}{2})
+  =
+  \binom{200}{115}
+  \frac{1}{2^{200}}
+  \approx
+  0.005956.
+\end{equation*}
+The model evidence for $\model_2$ requires integrating over the
+parameter $\theta$:
+\begin{align*}
+  \Pr(x \given n, \model_2)
+  &=
+  \int
+  \Pr(x \given n, \theta, \model_2)
+  p(\theta \given \model2)
+  \intd{\theta}
+  \\
+  &=
+  \int_{0}^{1}
+  \binom{200}{115}
+  \theta^{115}
+  (1 - \theta)^{200 - 115}
+  \intd{\theta}
+  \\
+  &=
+  \frac{1}{201}
+  \approx
+  0.004975.
+\end{align*}
+The Bayes factor in favor of $\model_1$ is approximately $1.2$, so the
+data give very weak evidence in favor of the simpler model $\model_1$.
+
+An interesting aside here is that a frequentist hypothesis test would
+reject the null hypothesis $\theta = \frac{1}{2}$ at the $\alpha =
+0.05$ level. The probability of generating at least 115 heads under
+model $\model_1$ is approximately $0.02$ (similarly, the probability
+of generating at least 115 tails is also $0.02$), so a two-sided test
+would give a $p$-value of approximately $4\%$.
+
+\subsection*{Occam's razor}
+
+One spin on Bayesian decision theory is that it automatically gives a
+preference towards simpler models, in line with Occam's razor.  One
+way to see this is to consider the model evidence $p(\data \given
+\model)$ as a probability distribution over datasets $\data$.  More
+complex models can explain more datasets, so the support of this
+distribution is wider in the sample space.  But note that the
+distribution must normalize over the sample space as well, so we pay a
+price for generality.  When moving from a simpler model to a more
+complex model, the probability of some datasets that are well
+explained by the simpler model must inevitably decrease to ``give up''
+probability mass for the newly explained datasets in the widened
+support of the more-complex model.  The model selection process then
+drives us to select the model that is ``just complex enough'' to
+explain the data at hand, an in-build Occam's razor.
+
+In the coin flipping example above, model $\model_1$ can only explain
+datasets with empirical heads probability reasonably near
+$\frac{1}{2}$.  An observation of 200 heads, for example, would have
+astronomically small probability under this model.  The second model
+$\model_2$ can explain \emph{any} set of observations by selecting an
+appropriate $\theta$.  The price for this generality, though, is that
+datasets with a roughly equal number of heads and tails have a smaller
+prior probability under the model than before.
+
+\end{document}
