@@ -301,4 +301,35 @@ appropriate $\theta$.  The price for this generality, though, is that
 datasets with a roughly equal number of heads and tails have a smaller
 prior probability under the model than before.
 
+\subsection*{Model selection for Bayesian linear regression}
+
+A common application for model selection is for selecting between
+feature expansion functions $\phi(\vec{x})$ in Bayesian linear
+regression.  Here the model $\model_i$ could for example correspond
+to order-$i$ polynomial regression with
+\begin{equation*}
+  \phi_i(\vec{x})
+  =
+  [1, \vec{x}, \vec{x}^2, \dotsc \vec{x}^i]\trans.
+\end{equation*}
+After selecting a set of these models to compare, as well as a prior
+probability for each, the only remaining task is to compute the
+evidence for each model in observed data $(\mat{X}, \vec{y})$.  In our
+discussion of Bayesian linear regression, we have actually already
+computed the desired quantity:
+\begin{equation*}
+  p(\vec{y} \given \mat{X}, \sigma^2, \model_i)
+  =
+  \mc{N}\bigl(\vec{y};
+  \phi_i(\mat{X})\vec{\mu},
+  \phi_i(\mat{X})\mat{\Sigma}\phi_i(\mat{X})\trans + \sigma^2\mat{I}\bigr),
+\end{equation*}
+where I have explicitly written the basis expansion in $\phi_i$.
+
+Note that the model $\phi_i$ can also easily explain all datasets
+well-explained by the models $\phi_j$ for $j < i$, by simply setting
+the weights on higher-order terms to zero.  Again, however, the
+simpler model will be preferred due the Occam's razor effect described
+above.
+
 \end{document}
