@@ -1,0 +1,464 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{8cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+Until now we have always worked with likelihoods and prior
+distributions that were conjugate to each other, allowing the
+computation of the posterior distribution to be done in closed form.
+Unfortunately, there are numerous situations where this will not be
+the case, forcing us to approximate the posterior and related
+quantities (such as the model evidence or expectations under the
+posterior distribution).  Logistic regression is a common linear
+method for binary classification, and attempting to use the Bayesian
+approach directly will be intractable.
+
+\section*{Logistic Regression}
+
+In linear regression, we supposed that were interested in the values
+of a real-valued function $y(\vec{x})\colon \R^d \to \R$, where
+$\vec{x}$ is a $d$-dimensional vector-valued input.  Here, we will
+consider a similar setup, but with a twist: we restrict the output of
+the function $y$ to the discrete space $y \in \{0, 1\}$.  In machine
+learning, problems of this form fall under the category of
+\emph{binary classification:} given a input $\vec{x}$, we wish to
+\emph{classify} it into one of two categories, in this case denoted
+arbitrarily by $0$ and $1$.
+
+We again assume that we have made some observations of this mapping,
+$\data = \bigl\{ (\vec{x}_i, y_i) \bigr\}_{i = 1}^N$, to serve as
+training data.  Given these examples, the goal of binary
+classification is to be able to predict the label at a new input
+location $\vec{x}_\ast$.
+
+As in linear regression, the problem is not yet well-posed without
+some restrictions on $y$.  In linear regression, we assumed that the
+relationship between $\vec{x}$ and $y$ was ``mostly'' linear:
+\begin{equation*}
+  y(\vec{x}) = \vec{x}\trans \vec{w} + \epsilon(\vec{x}),
+\end{equation*}
+where $\vec{w} \in \R^d$ is a vector of parameters, and
+$\epsilon(\vec{x})$ is the residual.  This assumption is not very
+desirable in the classification case, where the outputs are restricted
+to $\{0, 1\}$ (note, for example, that $\vec{x}\trans \vec{w}$ is
+unbounded as the norm of $\vec{x}$ increases, forcing the residuals to
+grow ever larger).
+
+In linear classification methods, we instead assume that the
+class-conditional probability of belonging to the ``$1$'' class is
+given by a nonlinear transformation of an underlying linear function
+of $\vec{x}$:
+\begin{equation*}
+  \Pr(y = 1 \given \vec{x}, \vec{w})
+  =
+  \sigma(\vec{x}\trans \vec{w}),
+\end{equation*}
+where $\sigma$ is a so-called ``sigmoid'' (``s-shaped'') increasing
+function mapping the real line to valid probabilities in $(0, 1)$.
+The most-commonly used functions $\sigma$ are the \emph{logistic function}
+\begin{equation*}
+  \sigma(a) = \frac{\exp(a)}{1 + \exp(a)},
+\end{equation*}
+or the standard normal cumulative distribution function:
+\begin{equation*}
+  \sigma(a) = \Phi(a) = \int_{-\infty}^a \mc{N}(x; 0, 1) \intd x.
+\end{equation*}
+These two choices are compared in Figure \ref{sigmoids}.  The main
+difference is that the logistic function has slightly heavier tails
+than the normal \acro{CDF}.  Linear classification using the logistic
+function is called \emph{logistic regression}; linear classification
+using the normal \acro{CDF} is called \emph{probit regression.}
+Logistic regression is more commonly encountered in practice.  Notice
+that the linear assumption above combined with the logistic function
+sigmoid implies that the \emph{log odds} are a linear function of the
+input $\vec{x}$ (verify this!):
+\begin{equation*}
+  \log
+  \frac{\Pr(y = 1 \given x, \vec{w})}
+       {\Pr(y = 0 \given x, \vec{w})}
+  =
+  \vec{x}\trans \vec{w}.
+\end{equation*}
+
+\begin{figure}
+  \centering
+  \input{figures/sigmoids.tex}
+  \caption{A comparison of the two sigmoid functions described in the
+    text.  The normal \acro{CDF} curve in this example uses the
+    transformation $\Phi(\sqrt{\frac{\pi}{8}} a)$, which ensures the
+    slopes of the two curves are equal at the origin.}
+  \label{sigmoids}
+\end{figure}
+
+With the choice of the sigmoid function, and an assumption that our
+training labels $\vec{y}$ are generated independently given $\vec{w}$,
+we have defined our likelihood $\Pr(\vec{y} \given \mat{X}, \vec{w})$:
+\begin{equation}
+  \label{likelihood}
+  \Pr(\vec{y} \given \mat{X}, \vec{w})
+  =
+  \prod_{i = 1}^N
+  \sigma(\vec{x}_i\trans \vec{w})^{y_i}
+  \bigl(1 - \sigma(\vec{x}_i\trans \vec{w})\bigr)^{1 - y_i}.
+\end{equation}
+To verify this equation, notice that each $y_i$ will either be $0$ or
+$1$, so exactly one of $y_i$ or $1 - y_i$ will be nonzero, which
+picks out the correct contribution to the likelihood.
+
+The traditional approach to logistic regression is to maximize the
+likelihood of the training data as a function of the parameters
+$\vec{w}$:
+\begin{equation*}
+  \hat{\vec{w}}
+  =
+  \argmax_{\vec{w}}
+  \Pr(\vec{y} \given \mat{X}, \vec{w});
+\end{equation*}
+$\hat{\vec{w}}$ is therefore a maximum-likelihood estimator
+(\acro{MLE}).  Unlike in linear regression, where there was a
+closed-form expression for the maximum-likelihood estimator, there is
+no such solution for logistic regression.  Things aren't too bad,
+though, because it turns out that for logistic regression the negative
+log-likelihood is convex and positive definite, which means there is a
+unique global minimum (and therefore a unique \acro{MLE}).  There are
+numerous off-the-shelf methods available for finding $\hat{\vec{w}}$:
+steepest descent, Newton's method, etc.
+
+\subsection*{Bayesian logistic regression}
+
+A Bayesian approach to logistic regression requires us to select a
+prior distribution for the parameters $\vec{w}$ and derive the
+posterior distribution $p(\vec{w} \given \data)$.  For the former, we
+will consider a multivariate Gaussian prior, identical to the one we used
+for linear regression:
+\begin{equation*}
+  p(\vec{w})
+  =
+  \mc{N}(\vec{w}; \vec{\mu}, \mat{\Sigma}).
+\end{equation*}
+
+Now we apply Bayes' theorem to write down the desired posterior:
+\begin{equation*}
+  p(\vec{w} \given \data)
+  =
+  \frac{p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w})}
+       {\int p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w}) \intd{\vec{w}}}.
+  =
+  \frac{p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w})}
+       {p(\vec{y} \given \mat{X})}.
+\end{equation*}
+Unfortunately, the product of the Gaussian prior on $\vec{w}$ and the
+likelihood \eqref{likelihood} (for either choice of sigmoid) does not
+result in a posterior distribution in a nice parameteric family that
+we know.  Likewise, the integral in the normalization constant (the
+evidence) $p(\vec{y} \given \mat{X})$ is intractable as well.
+
+How can we proceed?  There are two main approaches to continuing
+Bayesian inference in such a situation.  The first is to use a
+deterministic method to find an approximation to the posterior (that
+will typically live inside a chosen parametric family).  The second is
+to forgo a closed-form expression for the posterior and instead derive
+an algorithm to draw \emph{samples} from the posterior distribution,
+which we may use to, for example, make Monte Carlo estimates to
+expectations.  Here we will consider the \emph{Laplace approximation,}
+which is an example of the first type of approach.
+
+\section*{Laplace Approximation to the Posterior}
+
+Suppose we have an arbitrary parameter prior $p(\vec{\theta})$ and an
+arbitrary likelihood $p(\data \given \vec{\theta})$, and wish to
+approximate the posterior
+\begin{equation*}
+  p(\vec{\theta} \given \data)
+  =
+  \frac{1}{Z}
+  p(\data \given \vec{\theta})
+  p(\vec{\theta}),
+\end{equation*}
+where the normalization constant $Z$ is the unknown evidence.  We
+define the following function:
+\begin{equation*}
+  \Psi(\vec{\theta})
+  =
+  \log p(\data \given \vec{\theta})
+  +
+  \log p(\vec{\theta}),
+\end{equation*}
+$\Psi$ is therefore the logarithm of the \emph{unnormalized} posterior
+distribution.  The Laplace approximation is based on a Taylor
+expansion to $\Psi$ around its maximum.  First, we find the maximum of
+$\Psi$:
+\begin{equation*}
+  \hat{\vec{\theta}}
+  =
+  \argmax_{\vec{\theta}}
+  \Psi(\vec{\theta}).
+\end{equation*}
+Notice that the point $\hat{\vec{\theta}}$ is a \emph{maximum a
+  posteriori} (\acro{MAP}) approximation to the parameters.  Finding
+$\hat{\vec{\theta}}$ can be done in a variety of ways, but in practice
+it is usually fairly easy to find the gradient and Hessian of $\Psi$
+with respect to $\vec{\theta}$ and use off-the-shelf optimization
+routines.  This is another example of the mantra \emph{optimization is
+  easier than integration.}
+
+Once we have found $\hat{\vec{\theta}}$, we make a second-order Taylor
+expansion to $\Psi$ around this point:
+\begin{equation*}
+  \Psi(\vec{\theta})
+  \approx
+  \Psi(\hat{\vec{\theta}})
+  -
+  \frac{1}{2}
+  (\vec{\theta} - \hat{\vec{\theta}})\trans
+  \mat{H}
+  (\vec{\theta} - \hat{\vec{\theta}}),
+\end{equation*}
+where $\mat{H}$ is the Hessian of the negative log posterior evaluated
+at $\hat{\vec{\theta}}$:
+\begin{equation*}
+  \mat{H}
+  =
+  -\nabla\nabla \Psi(\vec{\theta}) \bigr\rvert_{\vec{\theta} = \hat{\vec{\theta}}}.
+\end{equation*}
+Notice that the first-order term in the Taylor expansion vanishes
+because we expand around a maximum, where the gradient is zero.
+Exponentiating, we may derive an approximation to the (unnormalized)
+posterior distribution:
+\begin{equation}
+  \label{almost_there}
+  p(\vec{\theta} \given \data)
+  \overset{\propto}{\sim}
+  \exp\bigl(\Psi(\hat{\vec{\theta}})\bigr)
+  \exp\biggl(-\frac{1}{2}
+  (\vec{\theta} - \hat{\vec{\theta}})\trans
+  \mat{H}
+  (\vec{\theta} - \hat{\vec{\theta}})
+  \biggr),
+\end{equation}
+which we recognize as being proportional to a Gaussian distribution!
+The Laplace approximation therefore results in a normal approximation
+to the posterior distribution:
+\begin{equation*}
+  p(\vec{\theta} \given \data)
+  \approx
+  \mc{N}(\vec{\theta}; \hat{\vec{\theta}}, \mat{H}\inv).
+\end{equation*}
+The approximation is a Gaussian centered on the mode of the posterior,
+$\hat{\vec{\theta}}$, with covariance compelling the log of the
+approximation to posterior to match the curvature of the true log
+posterior at that point.
+
+We note that the Laplace approximation also gives an approximation to
+the normalizing constant $Z$.  In this case, it's simply a question of
+which normalizing constant we had to use to get \eqref{almost_there}
+to normalize.  A fairly straightforward calculation gives
+\begin{equation*}
+  Z
+  =
+  \int \Psi(\vec{\theta}) \intd{\vec{\theta}}
+  \approx
+  \int
+  \exp\bigl(\Psi(\hat{\vec{\theta}})\bigr)
+  \exp\biggl(-\frac{1}{2}
+  (\vec{\theta} - \hat{\vec{\theta}})\trans
+  \mat{H}
+  (\vec{\theta} - \hat{\vec{\theta}})
+  \biggr)
+  =
+  \exp\bigl(\Psi(\hat{\vec{\theta}})\bigr)
+  \sqrt{
+    \frac{(2\pi)^d}
+         {\det \mat{H}}
+   },
+\end{equation*}
+where $d$ is the dimension of $\vec{\theta}$.
+
+\section*{Making Predictions}
+
+Suppose we have obtained a Gaussian approximation to the posterior
+distribution $p(\vec{w} \given \data)$; for example, applying the
+Laplace approximation above gives $p(\vec{w} \given \data) \approx
+\mc{N}(\vec{w}; \hat{\vec{w}}, \mat{H}\inv)$, where $\hat{\vec{w}}$ is
+the \acro{MAP} approximation to the parameters and $\mat{H}$ is the
+Hessian of the negative log posterior evaluated at $\hat{\vec{w}}$.
+
+Suppose now that we are given a test input $\vec{x}_\ast$ and wish to
+predict the binary label $y_\ast$.  In the Bayesian approach, we
+marginalize the unknown parameters $\vec{w}$ to find the
+\emph{predictive distribution}:
+\begin{equation*}
+  \Pr(y_\ast = 1 \given \vec{x}_\ast, \data)
+  =
+  \int
+  \Pr(y_\ast = 1 \given \vec{x}_\ast, \vec{w})
+  p(\vec{w} \given \data)
+  \intd{\vec{w}}
+  =
+  \int
+  \sigma(\vec{x}_\ast\trans \vec{w})
+  p(\vec{w} \given \data)
+  \intd{\vec{w}}.
+\end{equation*}
+Unfortunately, even with our Gaussian approximation to $p(\vec{w}
+\given \data)$, this integral cannot be evaluated if we use the
+logistic function in the role of the sigmoid $\sigma$.  We can,
+however, compute the integral when using the normal \acro{CDF} for
+$\sigma$:
+\begin{equation*}
+  \Pr(y_\ast = 1 \given \vec{x}_\ast, \data)
+  =
+  \int
+  \Phi(\vec{x}_\ast\trans \vec{w})
+  \mc{N}(\vec{w}; \hat{\vec{w}}, \mat{H})
+  \intd{\vec{w}}.
+\end{equation*}
+To proceed, we define the scalar value $a = \vec{x}_\ast\trans
+\vec{w}$ and rewrite this as
+\begin{equation*}
+  \Pr(y_\ast = 1 \given \vec{x}_\ast, \data)
+  =
+  \int_{-\infty}^\infty
+  \Phi(a)
+  p(a \given \data)
+  \intd{\data}.
+\end{equation*}
+Notice that $a$ is a linear transformation of the Gaussian-distributed
+$\vec{w}$; therefore, $a$ has a Gaussian distribution:
+\begin{equation*}
+  p(a \given \data)
+  =
+  \mc{N}(a; \mu_{a \given \data}, \sigma^2_{a \given \data}),
+\end{equation*}
+where
+\begin{equation*}
+  \mu_{a \given \data} = \vec{x}_\ast\trans \hat{\vec{w}};
+  \qquad
+  \sigma^2_{a \given \data} = \vec{x}_\ast\trans \mat{H} \vec{x}_\ast.
+\end{equation*}
+Now we may finally compute the integral:
+\begin{equation*}
+  \Pr(y_\ast = 1 \given \vec{x}_\ast, \data)
+  =
+  \int_{-\infty}^\infty
+  \Phi(a)
+  \,
+  \mc{N}(a; \mu_{a \given \data}, \sigma^2_{a \given \data})
+  \intd{\data}
+  =
+  \Phi
+  \Biggl(
+  \frac{\mu_{a \given \data}}{\sqrt{1 + \sigma^2_{a \given \data}}}
+  \Biggr).
+\end{equation*}
+Notice that $\Phi(\mu_{a \given \data})$ would be the estimate we
+would make using the \acro{MAP} $\hat{\vec{w}}$ as a plug-in
+estimator.  The $\sqrt{1 + \sigma^2_{a \given \data}}$ term has the
+effect of making our prediction less confident (that is, closer to
+\nicefrac{1}{2}) according to our uncertainty in the value of $a =
+\vec{x}_\ast\trans \vec{w}$.  This procedure is sometimes called
+\emph{moderation,} because we force our predictions to be more
+moderate than we would have using a plug-in point estimate of
+$\vec{w}$.
+
+We also note that if we only want to make point predictions of
+$y_\ast$ using the 0--1 loss function, we only need to know which
+class is more probable (this was a general result from our discussion
+of Bayesian decision theory).  In this case, the moderation has no
+effect on our ultimate predictions (you can check that we never change
+which side of \nicefrac{1}{2} the final probability is), and we may
+instead simply find $\hat{\vec{w}}$.  This is similar to the result we
+had in linear regression, where we could simply find the \acro{MAP}
+estimator for $\vec{w}$ if we only ultimately cared about point
+predictions under a squared loss.
+
+With loss functions different from the 0--1 loss, however, the
+uncertainty in $\vec{w}$ can indeed be important.
+
+\end{document}
