@@ -48,24 +48,6 @@
 \setlength{\figurewidth}{8cm}
 \setlength{\figureheight}{6cm}
 
-\newlength\squarefigurewidth
-\newlength\squarefigureheight
-
-\setlength{\squarefigurewidth}{4cm}
-\setlength{\squarefigureheight}{4cm}
-
-\newlength\smallsquarefigurewidth
-\newlength\smallsquarefigureheight
-
-\setlength{\smallsquarefigurewidth}{3.25cm}
-\setlength{\smallsquarefigureheight}{3.25cm}
-
-\newlength\smallfigurewidth
-\newlength\smallfigureheight
-
-\setlength{\smallfigurewidth}{6.25cm}
-\setlength{\smallfigureheight}{4cm}
-
 \setlength{\parindent}{0pt}
 \setlength{\parskip}{1ex}
 
@@ -73,6 +55,7 @@
 \newcommand{\given}{\mid}
 \newcommand{\mc}[1]{\mathcal{#1}}
 \newcommand{\data}{\mc{D}}
+\newcommand{\model}{\mc{M}}
 \newcommand{\intd}[1]{\,\mathrm{d}{#1}}
 \newcommand{\inv}{^{-1}}
 \newcommand{\trans}{^\top}
@@ -141,27 +124,27 @@ of $\vec{x}$:
 \end{equation*}
 where $\sigma$ is a so-called ``sigmoid'' (``s-shaped'') increasing
 function mapping the real line to valid probabilities in $(0, 1)$.
-The most-commonly used functions $\sigma$ are the \emph{logistic function}
+The most-commonly used functions $\sigma$ are the \emph{logistic function:}
 \begin{equation*}
   \sigma(a) = \frac{\exp(a)}{1 + \exp(a)},
 \end{equation*}
 or the standard normal cumulative distribution function:
 \begin{equation*}
-  \sigma(a) = \Phi(a) = \int_{-\infty}^a \mc{N}(x; 0, 1) \intd x.
+  \sigma(a) = \Phi(a) = \int_{-\infty}^a \mc{N}(x; 0, 1^2) \intd x.
 \end{equation*}
 These two choices are compared in Figure \ref{sigmoids}.  The main
-difference is that the logistic function has slightly heavier tails
-than the normal \acro{CDF}.  Linear classification using the logistic
-function is called \emph{logistic regression}; linear classification
-using the normal \acro{CDF} is called \emph{probit regression.}
-Logistic regression is more commonly encountered in practice.  Notice
-that the linear assumption above combined with the logistic function
-sigmoid implies that the \emph{log odds} are a linear function of the
-input $\vec{x}$ (verify this!):
+qualitative difference is that the logistic function has slightly
+heavier tails than the normal \acro{CDF}.  Linear classification using
+the logistic function is called \emph{logistic regression}; linear
+classification using the normal \acro{CDF} is called \emph{probit
+  regression.}  Logistic regression is more commonly encountered in
+practice.  Notice that the linear assumption above combined with the
+logistic function sigmoid implies that the \emph{log odds} are a
+linear function of the input $\vec{x}$ (verify this!):
 \begin{equation*}
   \log
-  \frac{\Pr(y = 1 \given x, \vec{w})}
-       {\Pr(y = 0 \given x, \vec{w})}
+  \frac{\Pr(y = 1 \given \vec{x}, \vec{w})}
+       {\Pr(y = 0 \given \vec{x}, \vec{w})}
   =
   \vec{x}\trans \vec{w}.
 \end{equation*}
@@ -228,7 +211,7 @@ Now we apply Bayes' theorem to write down the desired posterior:
   p(\vec{w} \given \data)
   =
   \frac{p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w})}
-       {\int p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w}) \intd{\vec{w}}}.
+       {\int p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w}) \intd{\vec{w}}}
   =
   \frac{p(\vec{y} \given \mat{X}, \vec{w}) p(\vec{w})}
        {p(\vec{y} \given \mat{X})}.
@@ -396,11 +379,13 @@ $\sigma$:
   =
   \int
   \Phi(\vec{x}_\ast\trans \vec{w})
-  \mc{N}(\vec{w}; \hat{\vec{w}}, \mat{H})
+  \mc{N}(\vec{w}; \hat{\vec{w}}, \mat{H}\inv)
   \intd{\vec{w}}.
 \end{equation*}
-To proceed, we define the scalar value $a = \vec{x}_\ast\trans
-\vec{w}$ and rewrite this as
+This looks like an annoying $d$-dimensional integral, but notice that
+the vector $\vec{w}$ only appears in the expectation via the scalar
+product $\vec{x}_\ast\trans \vec{w}$.  To proceed, we define the
+scalar value $a = \vec{x}_\ast\trans \vec{w}$ and rewrite this as
 \begin{equation*}
   \Pr(y_\ast = 1 \given \vec{x}_\ast, \data)
   =
@@ -420,7 +405,7 @@ where
 \begin{equation*}
   \mu_{a \given \data} = \vec{x}_\ast\trans \hat{\vec{w}};
   \qquad
-  \sigma^2_{a \given \data} = \vec{x}_\ast\trans \mat{H} \vec{x}_\ast.
+  \sigma^2_{a \given \data} = \vec{x}_\ast\trans \mat{H}\inv \vec{x}_\ast.
 \end{equation*}
 Now we may finally compute the integral:
 \begin{equation*}
@@ -460,5 +445,54 @@ predictions under a squared loss.
 
 With loss functions different from the 0--1 loss, however, the
 uncertainty in $\vec{w}$ can indeed be important.
+
+\section*{Bonus: The Bayesian Information Criterion}
+
+When performing model selection, a common surrogate to the model
+posterior (which can be difficult to compute when faced with
+intractable integrals) is the so-called \emph{Bayesian information
+  criterion} (\acro{BIC}).  Given a set of models $\{ \model_i \}$,
+and observed data $\data$, we compute the following statistic for each:
+\begin{equation*}
+  \textstyle
+  \text{\acro{BIC}}_i
+  =
+  \log p(\data \given \hat{\vec{\theta}}_i)
+  -
+  (\frac{d}{2}) \log N,
+\end{equation*}
+where $N$ is the number of data points, $d$ is the dimension of
+$\vec{\theta}_i$, and $\hat{\vec{\theta}}_i$ is the \acro{MAP}
+parameters for $\model_i$.  The model with the highest \acro{BIC} is
+preferred.
+
+We can derive this via the Laplace approximation to the posterior
+distribution.  Taking the logarithm of the estimate to $Z$ above, we
+have
+\begin{equation*}
+  \textstyle
+  \log p(\data \given \model_i)
+  =
+  \log Z
+  \approx
+  \log p(\data \given \hat{\vec{\theta}}_i)
+  +
+  \log p(\hat{\vec{\theta}}_i)
+  +
+  (\frac{d}{2}) \log 2\pi
+  -
+  (\frac{1}{2}) \log \det \mat{H}.
+\end{equation*}
+If we assume the prior is very broad, we can ignore the $\log
+p(\hat{\vec{\theta}}_i)$ term, and if we assume the data points are
+independent given the parameters (such as in linear and logistic
+regression), and that $\mat{H}$ is of full-rank, then we can
+approximate this asymptotically (very roughly!) with the \acro{BIC}
+score, once we discard constants.
+
+The nature of the \acro{BIC} score is that it rewards models that
+explain the data well but penalizes them for being too complex,
+exactly the tradeoff considered in ``full-blown'' Bayesian model
+selection.
 
 \end{document}
