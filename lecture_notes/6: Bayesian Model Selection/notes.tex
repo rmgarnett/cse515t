@@ -332,4 +332,24 @@ the weights on higher-order terms to zero.  Again, however, the
 simpler model will be preferred due the Occam's razor effect described
 above.
 
+\section*{Bayesian Model Averaging}
+
+Note that a ``full Bayesian'' treatment of a problem would eschew
+model selection entirely.  Instead, when making predictions, we should
+theoretically use the sum rule to marginalize the unknown model, e.g.:
+\begin{equation*}
+  p(y_\ast \given \vec{x}_\ast, \data)
+  =
+  \sum_i
+  p(y_\ast \given \vec{x}_\ast, \data, \model_i)
+  \Pr(\model_i \given \data).
+\end{equation*}
+Such an approach is called \emph{Bayesian model averaging.}  Although
+this is sometimes seen, model selection is still used widely in
+practice.  The reason is that the computational overhead of using a
+single model is much lower than having to continually retrain multiple
+models, and that Bayesian model averaging uses a mixture distribution
+for predictions, which can have annoying analytic properties (for
+example, the predictive distribution could be multimodal).
+
 \end{document}
