@@ -459,7 +459,7 @@ and observed data $\data$, we compute the following statistic for each:
   =
   \log p(\data \given \hat{\vec{\theta}}_i)
   -
-  (\frac{d}{2}) \log N,
+  \frac{d}{2} \log N,
 \end{equation*}
 where $N$ is the number of data points, $d$ is the dimension of
 $\vec{\theta}_i$, and $\hat{\vec{\theta}}_i$ is the \acro{MAP}
@@ -479,9 +479,9 @@ have
   +
   \log p(\hat{\vec{\theta}}_i)
   +
-  (\frac{d}{2}) \log 2\pi
+  \frac{d}{2} \log 2\pi
   -
-  (\frac{1}{2}) \log \det \mat{H}.
+  \frac{1}{2} \log \det \mat{H}.
 \end{equation*}
 If we assume the prior is very broad, we can ignore the $\log
 p(\hat{\vec{\theta}}_i)$ term, and if we assume the data points are
