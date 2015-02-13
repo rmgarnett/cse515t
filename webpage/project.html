@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSE 515T: Project</title>
+    <meta name="description" content="Project notes for CSE 515T: Bayesian Methods in Machine Learning, Spring Semester 2015" />
+    <meta name="author" content="Roman Garnett" />
+    <link href="http://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="style.css" />
+    <!--[if lt IE 9]>
+	<script>
+	  document.createElement("header" );
+	  document.createElement("footer" );
+	  document.createElement("section");
+	  document.createElement("aside"  );
+	  document.createElement("nav"    );
+	  document.createElement("article");
+	  document.createElement("hgroup" );
+	  document.createElement("time"   );
+	</script>
+	<noscript>
+	  <strong>Warning!</strong>
+	  Because your browser does not support HTML5, some elements are simulated using JScript.
+	  Unfortunately your browser has disabled scripting. Please enable it in order to display this page.
+	</noscript>
+	<![endif]-->
+  </head>
+  <body>
+    <h1>CSE 515T Project notes</h1>
+    <p>The main goal of the project is to give you hands-on experience applying Bayesian methods to a real-world dataset.  The use of real-world data can have many interesting (and potentially frustrating!) aspects that are difficult to convey without getting your hands dirty.  The scope of the project is intended to be more than a homework problem, but less than a full-fledged research paper.  We will read your proposals and suggest tweaks to bring them into the intended scope, if necessary.
+    <section>
+      <h2>Project ideas</h2>
+      <p>Below are some potential project ideas, but please absolutely feel free to come up with your own!</p>
+      <ul>
+	<li><a href="https://archive.ics.uci.edu/ml/datasets/Relative+location+of+CT+slices+on+axial+axis">This dataset</a> from the UCI repository is quite interesting.  The task is to predict the depth in the body (effectively, the depth along the spine) given the properties of a two-dimensional "slice" of the body.  The hard part about this problem is that it's actually the output causing the input rather than the other way around.  I have not had luck designing a good regression method for this data.  Can you?</li>
+	<li>In <a href="http://auai.org/uai2014/proceedings/individuals/152.pdf">this paper</a>, we introduced a means to approximately marginalize over Gaussian process hyperparameters (the "MGP").  Our hope was that this would be useful in Bayesian optimization.  Is it?  Note that <a href="https://github.com/rmgarnett/mgp">an implementation of the MGP</a> is available.</li>
+	<li>Find a Bayesian interpretation of <a href="http://en.wikipedia.org/wiki/Elastic_net_regularization">elastic net regularization</a>, and compare this method for regression against "standard" Bayesian regression (with a Gaussian prior) on a dataset of your choosing.</li>
+	<li><a href="http://research.microsoft.com/pubs/67218/bishop-ppca-jrss.pdf">Probabilistic PCA</a> is a Bayesian interpretation of the classical PCA algorithm for dimensionality reduction.  Implement PPCA and compare its performance with other methods (such as "standard" PCA) on a dataset of your choosing.</li>
+	<li><a href="http://en.wikipedia.org/wiki/Bayesian_optimization">Bayesian optimization</a> is quite popular here, and could be the basis of many projects!</li>
+	<li>The squared exponential covariance is widely used for Gaussian process regression.  It is probably used in 90+% of all GP publications.  That said, it is widely believed to be "too smooth" for many real-world regression tasks.  Compare the squared exponential covariance versus the Mat&eacute;ern covariance on several datasets via Bayesian model selection.  How often is the squared exponential the right choice?</li>
+	<li><a href="http://en.wikipedia.org/wiki/Latent_Dirichlet_allocation">Latent Dirichlet allocation</a> (LDA) is a Bayesian method for creating "topic models" of text documents.  There are plenty of interesting text datasets available (some are listed below; DBpedia could be a good resource!).  One idea would be to compare the behavior of LDA with other techniques, such as <a href="http://en.wikipedia.org/wiki/Latent_semantic_analysis">latent semantic analysis</a>.</li>
+	<li><a href="http://www.kaggle.com/c/march-machine-learning-mania-2015">This compentition</a> could be won by a Bayesian!</li>
+    </section>
+    <section>
+      <h2 class="resource">Datasets</h3>
+      <ul>
+	<li><a href="http://rs.io/100-interesting-data-sets-for-statistics/">This website</a> has a fantastic compilation of 100 interesting, relevant datasets from all sorts of application areas.</li>
+	<li>The creators of <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvm/">libSVM</a> have also compiled a <a href="http://www.csie.ntu.edu.tw/~cjlin/libsvmtools/datasets/">great list of datasets</a>, all in a standardized format.  The libSVM codebase also includes <tt>libsvmread</tt> for reading these in MATLAB.</li>
+	<li>The <a href="https://archive.ics.uci.edu/ml/datasets.html">UCI Machine Learning Repository</a> is a mainstay in machine-learning research.  There are a wide range of datasets there from many different application areas and with many different properties (large, small, high-dimensional, low-dimensional, classification, regression, etc.).  Note that many of these datasets are also included in the libSVM collection above, which may be more convenient due to the common format used.</li>
+	<li><a href="http://dbpedia.org/">DBpedia</a> is an amazing resource that automatically extracts structured data from Wikipedia.  They have <a href="http://wiki.dbpedia.org/Downloads">all sorts of data available for download</a> in convenient formats. I have written <a href="https://github.com/rmgarnett/dbpedia_graph_extractor">a little tool</a> to extract labeled graphs from DBpedia, but there is so much more you could do.</li>
+    </section>
+  </body>
+</html>
