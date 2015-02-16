@@ -1,0 +1,281 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{12cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{The Kernel Trick}
+
+Consider the assumption of linear regression with an explicit feature
+expansion $\phi\colon \vec{x} \mapsto \phi(\vec{x})$:
+\begin{equation}
+  \label{linear_assumption}
+  y(\vec{x}) = \phi(\vec{x})\trans \vec{w} + \epsilon(\vec{x}).
+\end{equation}
+Given training data $\data = \bigl\{ (\vec{x}, y) \bigr\} = (\mat{X},
+\vec{y})$, recall we modeled the residuals $\epsilon(\vec{x})$ as
+zero-mean independent, identically distributed Gaussians with variance
+$\sigma^2$:
+\begin{equation*}
+  p(\vec{\epsilon})
+  =
+  \mc{N}(\vec{\epsilon}; \vec{0}, \sigma^2 \mat{I}),
+\end{equation*}
+giving rise to the following likelihood:
+\begin{equation*}
+  p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2)
+  =
+  \mc{N}(\vec{y}; \mat{X}\vec{w}, \sigma^2 \mat{I}).
+\end{equation*}
+
+In Bayesian linear regression, we further chose a multivariate
+Gaussian prior for $\vec{w}$:
+\begin{equation*}
+  p(\vec{w}) = \mc{N}(\vec{w}; \vec{\mu}, \mat{\Sigma}).
+\end{equation*}
+For simplicity, in the below we assume the prior mean for $\vec{w}$ is
+$\vec{\mu} = \vec{0}$.
+
+Given these assumptions, we were able to derive the posterior
+distribution of $\vec{w}$ given the data $\data$:
+\begin{equation*}
+  p(\vec{w} \given \data, \sigma^2)
+  =
+  \mc{N}(\vec{w};
+  \vec{\mu}_{\vec{w}\given\data},
+  \mat{\Sigma}_{\vec{w}\given\data}
+  ),
+\end{equation*}
+where
+\begin{align*}
+  \vec{\mu}_{\vec{w}\given\data}
+  &=
+  \mat{\Sigma}
+  \mat{\Phi}\trans
+  (\mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans + \sigma^2 \mat{I})\inv
+  \vec{y};
+  \\
+  \mat{\Sigma}_{\vec{w}\given\data}
+  &=
+  \mat{\Sigma}
+  -
+  \mat{\Sigma}
+  \mat{\Phi}\trans
+  (\mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans + \sigma^2 \mat{I})\inv
+  \mat{\Phi}
+  \mat{\Sigma},
+\end{align*}
+where we have defined $\mat{\Phi} = \phi(\mat{X})$.
+
+If we wish to use our model to predict the outputs $\vec{y}_\ast$
+associated with a set of inputs $\mat{X}_\ast$, we previously derived:
+\begin{equation*}
+  p(\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2)
+  =
+  \mc{N}(
+  \vec{y}_\ast;
+  \mat{\Phi}_\ast \vec{\mu}_{\vec{w}\given\data},
+  \mat{\Phi}_\ast \mat{\Sigma}_{\vec{w}\given\data} \mat{\Phi}_\ast\trans + \sigma^2 \mat{I}).
+\end{equation*}
+Examining the forms of these expressions, we see that the feature
+expansion $\phi$ always appears in one of the following expressions:
+\begin{equation*}
+  \mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans
+  \qquad
+  \mat{\Phi}_\ast\mat{\Sigma}\mat{\Phi}\trans
+  \qquad
+  \mat{\Phi}\mat{\Sigma}\mat{\Phi}_\ast\trans
+  \qquad
+  \mat{\Phi}_\ast\mat{\Sigma}\mat{\Phi}_\ast\trans.
+\end{equation*}
+The entries of these matrices are always of the form $\phi(\vec{x})
+\mat{\Sigma} \phi(\vec{x}')$, where $\vec{x}$ and $\vec{x}'$ are two
+arbitrary inputs.  To simply our expressions, we define a function
+\begin{equation*}
+  K(\vec{x}, \vec{x}')
+  =
+  \phi(\vec{x})\mat{\Sigma}\phi(\vec{x}').
+\end{equation*}
+Because $\mat{\Sigma}$ is positive definite, it has a ``matrix square
+root,'' $\mat{\Sigma}^{\nicefrac{1}{2}}$ with the property
+$(\mat{\Sigma}^{\nicefrac{1}{2}})^2 = \mat{\Sigma}$.\footnote{You can
+  prove this via the singular value decomposition (\acro{SVD}): write
+  $\mat{\Sigma} = \mat{U}\mat{D}\mat{U}\trans$, where $\mat{U}$ is
+  unitary and $\mat{D}$ is diagonal with positive entries (because
+  $\mat{\Sigma}$ is positive definite), then define
+  $\mat{\Sigma}^{\nicefrac{1}{2}} =
+  \mat{U}\mat{D}^{\nicefrac{1}{2}}\mat{U}\trans$.} If we define the
+function $\psi(\vec{x}) =
+\mat{\Sigma}^{\nicefrac{1}{2}}\phi(\vec{x})$, we can see that
+$K$ is simply an inner product:
+\begin{equation*}
+  K(\vec{x}, \vec{x}')
+  =
+  \psi(\vec{x})\trans \psi(\vec{x}').
+\end{equation*}
+Such a function $K$ is guaranteed to always produce positive-definite
+Gram matrices (a \emph{Gram matrix} is a square matrix of inner
+products between pairs of elements), and is called a \emph{kernel} or
+\emph{covariance function.}
+
+Sometimes it is possible to specify a covariance function $K$ directly
+without ever computing the feature map explicitly.  With such a
+function, we could perform efficient Bayesian linear regression even
+with a high-dimensional (or even infinite dimensional!) feature
+expansion $\phi$ \emph{implicitly.} This idea of computing inner
+products in a feature space directly is called the \emph{kernel trick}
+and has been the basis of a large amount of work in the
+machine-learning community.  Effectively, any algorithm that operates
+purely in terms of inner products between input vectors can be made
+nonlinear by replacing normal inner products with the evaluation of a
+kernel.
+
+With this definition, we may rewrite the predictive distribution
+for $\vec{y}_\ast$:
+\begin{equation*}
+  p(\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2)
+  =
+  \mc{N}(
+  \vec{y}_\ast;
+  \mu_{\vec{y}_\ast \given \data},
+  K_{\vec{y}_\ast \given \data}),
+\end{equation*}
+where
+\begin{align*}
+  \vec{\mu}_{\vec{y}_\ast\given\data}
+  &=
+  K(\mat{X}_\ast, \mat{X})
+  \bigl(K(\mat{X}, \mat{X}) + \sigma^2 \mat{I}\bigr)\inv
+  \vec{y};
+  \\
+  K_{\vec{y}_\ast\given\data}
+  &=
+  K(\vec{X}_\ast, \vec{X}_\ast)
+  -
+  K(\mat{X}_\ast, \mat{X})
+  \bigl(K(\mat{X}, \mat{X}) + \sigma^2 \mat{I}\bigr)\inv
+  K(\mat{X}, \mat{X}_\ast).
+\end{align*}
+
+\subsection*{Example}
+
+Perhaps the most-commonly used kernel is the \emph{squared exponential
+  covariance function:}
+\begin{equation*}
+  K(\vec{x}, \vec{x}'; \lambda, \ell)
+  =
+  \lambda^2
+  \exp\biggl(-\frac{\lVert \vec{x} - \vec{x}' \rVert^2}{2\ell^2}\biggr),
+\end{equation*}
+where $\lambda$ and $\ell$ are parameters.  The former is simply a
+multiplicative scaling constant (you can think of this as an implicit
+scalar multiplication in the implicit feature map $\phi$).  The latter
+takes the role of a \emph{length scale;} vectors separated by more
+than a couple length scales will have a kernel value near zero.
+
+An example of Bayesian linear regression using this kernel function is
+shown in Figure \ref{kernel_example}.  We see that the use of this
+kernel function allowed us to achieve nice nonlinear regression
+without computing explicit basis expansions.  In fact, you can show
+that the squared exponential kernel corresponds to a
+\emph{infinite-dimensional} basis expansion, where we use a Gaussian
+basis function \emph{centered on every point.}  Such a feature
+expansion would be impossible to use if we attempted to use explicit
+feature computation.
+
+\begin{figure}
+  \centering
+  \input{figures/kernel_example.tex}
+  \caption{Example of Bayesian linear regression using the squared
+    exponential covariance function.  The true function is $f =
+    \sin(x)$.  The kernel parameters are $\lambda = \ell = 1$, and the
+    noise variance was set to $\sigma^2 = 0.1^2$.}
+  \label{kernel_example}
+\end{figure}
+
+\end{document}
