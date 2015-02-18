@@ -5,7 +5,6 @@
 \usepackage[scaled=0.8]{beramono}
 \usepackage[margin=1.5in]{geometry}
 \usepackage{url}
-\usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{nicefrac}
@@ -242,7 +241,7 @@ where
   K(\mat{X}, \mat{X}_\ast).
 \end{align*}
 
-\subsection*{Example}
+\subsection*{Examples}
 
 Perhaps the most-commonly used kernel is the \emph{squared exponential
   covariance function:}
@@ -277,5 +276,22 @@ feature computation.
     noise variance was set to $\sigma^2 = 0.1^2$.}
   \label{kernel_example}
 \end{figure}
+
+Sometimes thinking in terms of the kernel can help even when you have
+an explicit feature expansion on hand.  As an example, imagine our
+inputs are binary vectors of length $n$ (so each input $\vec{x}$ is a
+subset, a member of the power set $\mc{P}(n)$).  One rather expensive
+feature expansion we could try would be to enumerate every member of
+$\mc{P}(n)$ and define $\phi(\vec{x})_i = \vec{s}_i \subset \vec{x}$,
+where $\vec{s}_i$ is the $i$th element of the power set.  So we
+represent our set $\vec{x}$ by a feature vector of length $2^n$
+indicating every subset of $\vec{x}$.  This is a very expensive
+feature expansion, requiring exponential space to store for each
+input.  However, if we take $\mat{\Sigma} = \mat{I}$, we can compute
+the dot product as:
+\begin{equation}
+  K(\vec{x}, \vec{x}') = 2^{\lvert x \cap x' \rvert},
+\end{equation}
+which only requires time and space linear in $n$!
 
 \end{document}
