@@ -5,3 +5,7 @@
 *.md5
 *.dpth
 .DS_Store
+*.nav
+*.out
+*.snm
+*.toc
