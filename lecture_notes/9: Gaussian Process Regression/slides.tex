@@ -1,0 +1,660 @@
+\documentclass[xcolor={dvipsnames},hyperref={breaklinks=true},12pt]{beamer}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+\usepackage{graphicx}
+\usepackage{multicol}
+\usepackage{nicefrac}
+\usepackage{relsize}
+\usepackage[english]{babel}
+\usepackage{mathtools}
+\usepackage{bm}
+\usepackage{etex}
+
+\usepackage[T1]{fontenc}
+%% \usepackage{fontspec}
+%% \defaultfontfeatures{Mapping=tex-text}
+%% \setmainfont{Helvetica Neue}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small, /tikz/every even column/.append style={column sep=0.2em}},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\newtheorem{defn}{Definition}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz_slides/]
+
+\newlength\figurewidth\setlength{\figurewidth}{11cm}
+\newlength\figureheight\setlength{\figureheight}{5cm}
+
+\definecolor{cbb}{RGB}{31, 120, 180}
+\definecolor{cbg}{RGB}{51, 160, 44}
+
+\mode<presentation>
+\usetheme{rg}
+
+\author{CSE 515T}
+\title{Gaussian Process Regression}
+\date{Spring 2015}
+
+\newcommand{\sslide}[2]{
+  \begingroup
+  \setbeamertemplate{headline}[greytop]
+  \setbeamertemplate{footline}[default]
+  \setbeamercolor{background canvas}{bg=or}
+  \begin{frame}
+    \vspace{2.6 cm}
+    \Huge \textcolor{white}{\thesection. \MakeUppercase{#1}}\vspace*{-0.3cm}
+    \hspace*{-0.2cm}\textcolor{white}{\rule{\textwidth}{0.025cm}}
+    \Large \textcolor{white}{#2}
+  \end{frame}
+  \endgroup
+}
+
+\newcommand{\acro}[1]{{\smaller \MakeUppercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\Exp}{\mathbb{E}}
+
+\newcommand{\emphr}[1]{{\textcolor{or}{\itshape #1}}}
+\newcommand{\maker}[1]{{\color{or}{#1}}}
+\newcommand{\makeb}[1]{{\color{cbb}{#1}}}
+\newcommand{\makeo}[1]{{\color{cbg}{#1}}}
+
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+{
+\setbeamertemplate{headline}[greytop]
+\setbeamertemplate{footline}[default]
+\begin{frame}
+  \titlepage
+\end{frame}
+}
+
+\section{Introduction}
+\subsection{The Kernel Trick}
+\sslide{Background}{The kernel trick again\dots}
+
+\begin{frame}{The Kernel Trick}
+  Consider again the linear regression model:
+  \begin{equation*}
+    y(\vec{x}) = \phi(\vec{x})\trans\vec{w} + \epsilon,
+  \end{equation*}
+  with prior
+  \begin{equation*}
+    p(\vec{w}) = \mc{N}(\vec{w}; \vec{0}, \mat{\Sigma}).
+  \end{equation*}
+  The \emphr{kernel trick} is to define the function
+  \begin{equation*}
+    K(\vec{x}, \vec{x}')
+    =
+    \phi(\vec{x})\trans \mat{\Sigma} \phi(\vec{x}'),
+  \end{equation*}
+  which allows us to\dots
+\end{frame}
+
+\begin{frame}{The Kernel Trick}
+  \dots given training data $\data$ and test inputs $\mat{X}_\ast$,
+  write the predictive distribution in this nice form:
+  \begin{equation*}
+    p(\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2)
+    =
+    \mc{N}(
+    \vec{y}_\ast;
+    \vec{\mu}_{\vec{y}_\ast \given \data},
+    \mat{K}_{\vec{y}_\ast \given \data}
+    ),
+  \end{equation*}
+  where
+  \begin{align*}
+    \vec{\mu}_{\vec{y}_\ast \given \data}
+    &=
+    \mat{K}_\ast\trans
+    (\mat{K} + \sigma^2\mat{I})\inv
+    \vec{y}
+    \\
+    \mat{K}_{\vec{y}_\ast \given \data}
+    &=
+    \mat{K}_{\ast\ast}
+    -
+    \mat{K}_\ast\trans
+    (\mat{K} + \sigma^2\mat{I})\inv
+    \mat{K}_\ast,
+  \end{align*}
+  and we have defined
+  \begin{equation*}
+    \mat{K} = K(\mat{X}, \mat{X})
+    \qquad
+    \mat{K}_\ast = K(\mat{X}, \mat{X}_\ast)
+    \qquad
+    \mat{K}_{\ast\ast} = K(\mat{X}_\ast, \mat{X}_\ast).
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{The Kernel Trick}
+  This does more than just make the expressions pretty.  In
+  particular, it is often \emphr{easier/cheaper} to calculate $K$
+  directly rather than explicitly compute $\phi(\vec{x})$ and take the
+  dot product.\\[1ex]
+
+  Example: ``all subsets'' kernel.
+\end{frame}
+
+\begin{frame}{The Kernel Trick}
+  Idea: completely \emphr{abandon} the idea of deriving explicit
+  feature expansions and simply derive (positive-definite) kernel
+  functions $K$ directly!
+\end{frame}
+
+\begin{frame}{The Kernel Trick}
+  Maybe we could \emphr{skip} the entire procedure of thinking about
+  $\vec{w}$, which we never explicitly use here\dots
+  \begin{equation*}
+    p(\vec{y}_\ast \given \mat{X}_\ast, \data \sigma^2)
+    =
+    \mc{N}(
+    \vec{y}_\ast;
+    \mu_{\vec{y}_\ast \given \data},
+    K_{\vec{y}_\ast \given \data}
+    ),
+  \end{equation*}
+  where
+  \begin{align*}
+    \mu_{\vec{y}_\ast \given \data}
+    &=
+    \mat{K}_\ast\trans
+    (\mat{K} + \sigma^2\mat{I})\inv
+    \vec{y}
+    \\
+    K_{\vec{y}_\ast \given \data}
+    &=
+    \mat{K}_{\ast\ast}
+    -
+    \mat{K}_\ast\trans
+    (\mat{K} + \sigma^2\mat{I})\inv
+    \mat{K}_\ast.
+  \end{align*}
+\end{frame}
+
+\section{Gaussian Processes}
+\subsection{Introduction}
+\sslide{Gaussian Processes}{A reimagining of regression}
+
+\begin{frame}{For more information}
+  \begin{center}
+    \includegraphics[scale=0.4]{figures/rwcover.pdf} \\
+    \url{http://www.gaussianprocess.org/}
+  \end{center}
+\end{frame}
+
+\begin{frame}{Regression}
+  Consider the general \emphr{regression} problem.  Here we have:
+
+  \begin{itemize}
+    \item an input domain $\mc{X}$ (for example, $\R^n$, but in
+      general anything),
+    \item an unknown function $f\colon \mc{X} \to \R$, and
+    \item and (perhaps noisy) observations of the function: $\data =
+      \bigl\{ (\vec{x}_i, y_i) \bigr\}$, where $y_i = f(\vec{x}_i) +
+      \epsilon_i$.
+  \end{itemize}
+
+  Our goal is to \emphr{predict} the value of the function
+  $f(\vec{x}_\ast)$ at some location $\vec{x}_\ast$.
+\end{frame}
+
+\begin{frame}{Gaussian processes}
+  \begin{itemize}
+  \item Gaussian processes similarly take a \emphr{nonparameteric}
+    approach to regression.  We select a \emphr{prior distribution}
+    over the function $f$ and condition this distribution on our
+    observations, using the posterior distribution to make
+    predictions.
+  \item Previously we took a prior over the weight vector $\vec{w}$; here
+    we
+  \item Gaussian processes are very \emphr{powerful} and leverage
+    the many \emphr{convenient properties} of the Gaussian
+    distribution to enable tractable inference.
+  \end{itemize}
+\end{frame}
+
+\subsection{GPs: Prior}
+
+\begin{frame}{From the Gaussian distribution to GPs}
+  \begin{itemize}
+    \item How can we leverage these useful properties of the Gaussian
+      distribution to approach the regression problem?  We have a
+      problem: the latent function $f$ is usually \emphr{infinite
+        dimensional}; however, the multivariate Gaussian distribution
+      is only useful in \emphr{finite dimensions.}
+    \item The Gaussian process is a \emphr{natural generalization} of
+      the multivariate Gaussian distribution to \emphr{potentially
+        infinite settings.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{GPs: Definition}
+  \begin{defn}[GPs]
+    A \emphr{Gaussian process} is a (potentially infinite) collection
+    of random variables such that the joint distribution of any finite
+    number of them is multivariate Gaussian.
+  \end{defn}
+\end{frame}
+
+\begin{frame}{GPs: Notation}
+  A Gaussian process distribution on $f$ is written
+  \begin{equation*}
+    p(f) = \mc{GP}(f; \mu, K),
+  \end{equation*}
+  and just like the multivariate Gaussian distribution, is
+  parameterized by its first two moments (now functions):
+  \begin{itemize}
+  \item $\Exp[f] = \mu\colon \mc{X} \to \R$, the \emphr{mean function,} and
+  \item $\Exp\Bigl[\bigl(f(x) - \mu(x)\bigr)\bigl(f(x') - \mu(x')\bigr)\bigr]
+    = K\colon \mc{X} \times \mc{X} \to \R$,
+    a positive semidefinite \emphr{covariance function} or \emphr{kernel.}
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{GPs: Mean and covariance functions}
+  \begin{itemize}
+    \item The mean function encodes the \emphr{central tendency} of
+      the function, and is often assumed to be a constant (usually 0).
+    \item The covariance function encodes information about the
+      \emphr{shape} and \emphr{structure} we expect the function to
+      have.  A simple and very common example is the \emphr{squared
+        exponential} covariance:
+      \begin{equation*}
+        K(x, x') = \exp\bigl(-\nicefrac{1}{2}\lVert x - x' \rVert^2\bigr),
+      \end{equation*}
+      which encodes the notation that ``nearby points should have
+      similar function values.''p
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{GPs: Prior on finite sets}
+  Suppose we have selected a GP prior $\mc{GP}(f; \mu, K)$ for the
+  function $f$.  Consider a finite set of points $\mat{X} \subseteq
+  \mc{X}$.  The GP prior on $f$, by definition, \emphr{implies} the
+  following joint distribution on the associated function values
+  $\vec{f} = f(\mat{X})$:
+  \begin{equation*}
+    p(\vec{f} \given \mat{X})
+    =
+    \mc{N}(\vec{f}; \mu(\mat{X}), K(\mat{X}, \mat{X})\bigr).
+  \end{equation*}
+  That is, we simply evaluate the mean and covariance functions at $\mat{X}$
+  and take the associated multivariate Gaussian distribution.  Very simple!
+\end{frame}
+
+\begin{frame}{Prior: Sampling examples}
+  \hspace*{-1.5em}\input{figures/samples_example_1.tex}
+  \begin{equation*}
+    K = \exp\bigl(-\nicefrac{1}{2}\lVert x - x' \rVert^2\bigr)
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Prior: Sampling examples}
+  \hspace*{-1.5em}\input{figures/samples_example_2.tex}
+  \begin{equation*}
+    K = \maker{\lambda^2}\exp\biggl(-\frac{\lVert x - x' \rVert^2}{2\makeb{\ell^2}}\biggr)
+    \qquad
+    \maker{\lambda} = \nicefrac{1}{2}, \makeb{\ell} = 2
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Prior: Sampling examples}
+  \hspace*{-1.5em}\input{figures/samples_example_3.tex}
+  \begin{equation*}
+    K = \exp\bigl(-\lVert x - x' \rVert\bigr)
+  \end{equation*}
+\end{frame}
+
+\subsection{GPs: Posterior}
+
+\begin{frame}{From the prior to the posterior}
+  So far, I've only told you how to construct \emphr{prior}
+  distributions over the function $f$.  How do we \emphr{condition}
+  our prior on some observations $\data = (\mat{X}, \vec{f})$ to
+  \emphr{make predictions} about the value of $f$ at some points
+  $\mat{X}_\ast$?
+\end{frame}
+
+\begin{frame}{From the prior to the posterior}
+  We begin by writing the \emphr{joint distribution} between the
+  training function values $f(\mat{X}) = \vec{f}$ and the test function
+  values $f(\mat{X}_\ast) = \vec{f}_\ast$:
+  \begin{equation*}
+    p(\vec{f}, \vec{f}_\ast) =
+    \mc{N}\Biggl(
+    \begin{bmatrix} \vec{f} \\ \vec{f}_\ast \end{bmatrix};
+    \begin{bmatrix} \mu(\mat{X}) \\ \mu(\mat{X}_\ast) \end{bmatrix},
+    \begin{bmatrix} K(\mat{X}, \mat{X}) & K(\mat{X}, \mat{X}_\ast) \\ K(\mat{X}_\ast, \mat{X}) & K(\mat{X}_\ast, \mat{X}_\ast) \end{bmatrix}
+    \Biggl)\dotsc
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{From the prior to the posterior}
+  \dots we then \emphr{condition} this multivariate Gaussian on the known
+  training values $\vec{f}$.  We already know how to do that!
+  \begin{equation*}
+    p(\vec{f}_\ast \given \mat{X}_\ast, \data) =
+    \mc{N}
+    \bigl(
+    \vec{f}_\ast;
+    \mu_{f \given \data}(\mat{X}_\ast)
+    ,
+    K_{f \given \data}(\mat{X}_\ast, \mat{X}_\ast)
+    \bigr),
+  \end{equation*}
+  where
+  \begin{align*}
+    \mu_{f \given \data}(x)
+    &=
+    \mu(x) +
+    K(x, \mat{X})
+    \mat{K}\inv
+    \bigl(\vec{f} - \mu(\mat{X})\bigr)
+    \\
+    K_{f \given \data}(x, x')
+    &=
+    K(x, x')
+    -
+    K(x, \mat{X})
+    \mat{K}\inv
+    K(\mat{X}, x').
+  \end{align*}
+\end{frame}
+
+\begin{frame}{From the prior to the posterior}
+  Notice that the functions $\mu_{f \given \data}$ and $K_{f \given
+    \data}$ are \emphr{valid mean and covariance} functions,
+  respectively.  That means the previous slide is telling us
+  the posterior distribution over $f$ is a Gaussian process!
+\end{frame}
+
+\begin{frame}{The posterior mean}
+  One way to understand the posterior mean function $\mu_{f \given
+    \data}$ is as a \emphr{correction to the prior mean} consisting of
+  a \emphr{weighted combination} of kernel functions, one for each
+  training data point:
+  \begin{align*}
+    \mu_{f \given D}(x)
+    &=
+    \mu(x) +
+    K(x, \mat{X})
+    \bigl(K(\mat{X}, \mat{X})\bigr)^{-1}
+    \bigl(\vec{f} - \mu(\mat{X})\bigr)
+    \\
+    &=
+    \mu(x) +
+    \sum_{i = 1}^N \alpha_i K(x_i, x),
+  \end{align*}
+  where $\alpha_i = K(\mat{X}, \mat{X})^{-1} \bigl(f(x_i) - \mu(x_i) \bigr)$.
+\end{frame}
+
+\begin{frame}{Prior}
+  \hspace*{-1.5em}\input{figures/samples_example_1.tex}
+  \begin{equation*}
+    K = \exp\bigl(-\nicefrac{1}{2}\lVert x - x' \rVert^2\bigr)
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Posterior example}
+  \hspace*{-1.5em}\input{figures/example_posterior.tex}
+\end{frame}
+
+\begin{frame}{Posterior: Sampling}
+  \hspace*{-1.5em}\input{figures/example_posterior_samples.tex}
+\end{frame}
+
+\subsection{Gaussian noise}
+
+\begin{frame}{Dealing with noise}
+  So far, we have assumed we can sample the function $f$
+  \emphr{exactly,} which is uncommon in regression settings.  How do
+  we deal with \emphr{observation noise?}
+\end{frame}
+
+\begin{frame}{Dealing with noise}
+  We must create a \emphr{model} for our observations given the latent
+  function.  To begin, we will choose the simple iid, zero-mean
+  additive Gaussian noise model:
+  \begin{align*}
+    y(x) &= f(x) + \varepsilon,
+    \\ p(\varepsilon \given x) &= \mc{N}(\varepsilon; 0, \sigma^2);
+  \end{align*}
+  combined we have
+  \begin{equation*}
+    p(\vec{y} \given \vec{f}) = \mc{N}(\vec{y}; \vec{f}, \sigma^2\mat{I}).
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Noisy posterior}
+  To derive the posterior given \emphr{noisy observations} $\data$, we
+  again write the joint distribution between the training function
+  values $\vec{y}$ and the test function values $\vec{f}^\ast$:
+  \begin{equation}
+    p(\vec{y}, \vec{f}^\ast) =
+    \mc{N}\Biggl(
+    \begin{bmatrix} \vec{y} \\ \vec{f}^\ast \end{bmatrix};
+    \begin{bmatrix} \mu(\vec{x}) \\ \mu(\vec{x}^\ast) \end{bmatrix},
+    \begin{bmatrix} K(\vec{x}, \vec{x}) + \maker{\sigma^2 \vec{I}} & K(\vec{x}, \vec{x}^\ast) \\ K(\vec{x}^\ast, \vec{x}) & K(\vec{x}^\ast, \vec{x}^\ast) \end{bmatrix}
+    \Biggl)\dotsc
+  \end{equation}
+\end{frame}
+
+\begin{frame}{Noisy posterior}
+  \dots and \emphr{condition} as before.
+  \begin{equation*}
+    p(\vec{f}^\ast \given \vec{x}^\ast, \data) =
+    \mc{N}
+    \bigl(
+    \vec{f}^\ast;
+    \mu_{f \given \data}(\vec{x}^\ast)
+    ,
+    K_{f \given \data}(\vec{x}^\ast, \vec{x}^\ast)
+    \bigr),
+  \end{equation*}
+  where
+  \begin{align*}
+    \mu_{f \given \data}(x)
+    &=
+    \mu(x) +
+    K(x, \vec{x})
+    \bigl(K(\vec{x}, \vec{x}) + \maker{\sigma^2 \vec{I}}\bigr)^{-1}
+    \bigl(\vec{y} - \mu(\vec{x})\bigr)
+    \\
+    K_{f \given \data}(x, x')
+    &=
+    K(x, x')
+    -
+    K(x, \vec{x})
+    \bigl(K(\vec{x}, \vec{x}) + \maker{\sigma^2 \vec{I}}\bigr)^{-1}
+    K(\vec{x}, x').
+  \end{align*}
+\end{frame}
+
+\begin{frame}{Noisy Posterior: Sampling}
+  \hspace*{-1.5em}\input{figures/noisy_posterior.tex}
+  \begin{equation*}
+    \sigma = 0.1
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Noisy Posterior: Sampling}
+  \hspace*{-1.5em}\input{figures/really_noisy_posterior.tex}
+  \begin{equation*}
+    \sigma = 0.5
+  \end{equation*}
+\end{frame}
+
+\section{Hyperparameters}
+\subsection{}
+\sslide{Hyperparameters}{We're not done yet\dots}
+
+\begin{frame}{Hyperparameters}
+  \begin{itemize}
+  \item So far, we have assumed that the Gaussian process prior
+    distribution on $f$ has been specified \emphr{a priori.}
+  \item But this prior distribution \emphr{itself} has parameters, for
+    example the length scale $\ell$, the output scale $\lambda$, and
+    the noise variance $\sigma_n^2$.  As parameters of a prior
+    distribution, we call these \emphr{hyperparameters.}
+  \item For convenience, we will write $\theta$ to denote the vector
+    of all hyperparameters of the model (including of $\mu$ and $K$).
+  \item How do we \emphr{learn} $\theta$?
+  \end{itemize}
+\end{frame}
+
+\begin{frame}{Marginal likelihood}
+  Assume we have chosen a parameterized prior
+  \begin{equation*}
+    p(f \given \theta) = \mc{GP}\bigl(f; \mu(x; \theta), K(x, x'; \theta)\bigr).
+  \end{equation*}
+  We will measure the quality of the fit to our training data $\data
+  = (\vec{x}, \vec{y})$ with the \emphr{marginal likelihood,} the
+  probability of \emphr{observing the given data} under our prior:
+  \begin{equation*}
+    p(\vec{y} \given \vec{x}, \theta) = \int p(\vec{y} \given \vec{f}) \, p(\vec{f} \given \vec{x}, \theta) \intd{\vec{f}},
+  \end{equation*}
+  where we have \emphr{marginalized} the unknown function values
+  $\vec{f}$ (hence, marginal likelihood).
+\end{frame}
+
+\begin{frame}{Marginal likelihood: evaluating}
+  Thankfully, this is an integral we can do \emphr{analytically} under
+  the Gaussian noise assumption!
+  \begin{align*}
+    p(\vec{y} \given \vec{x}, \theta)
+    &=
+    \int p(\vec{y} \given \vec{f}) \, p(\vec{f} \given \vec{x}, \theta) \intd{\vec{f}},
+    \\
+    &=
+    \int \overset{\makeb{\text{iid noise}}}{\mc{N}(\vec{y}; \vec{f}, \sigma_n^2 \vec{I})} \,
+    \overset{\maker{\text{GP prior}}}{\mc{N}\bigl(\vec{f}; \mu(\vec{x}; \theta), K(\vec{x}, \vec{x}; \theta) \bigr)} \intd{\vec{f}}
+    \\
+    &=
+    \mc{N}\bigl(\vec{y}; \mu(\vec{x}; \theta), K(\vec{x}, \vec{x}; \theta) + \sigma_n^2 \vec{I}\bigr).
+  \end{align*}
+  (Convolutions of two Gaussians are Gaussian.)
+\end{frame}
+
+\begin{frame}{Marginal likelihood: Evaluating}
+  The log-likelihood of our data under the chosen prior are then
+  (writing $\vec{V} = (K(\vec{x}, \vec{x}; \theta) + \sigma_n^2 \vec{I})$):
+  \begin{equation*}
+    \log p(\vec{y} \given \vec{\vec{x}}, \theta)
+    =
+    \overset{\makeb{\text{data fit}}}
+            {-\frac{\vec{y}\trans\vec{V}^{-1}\vec{y}}{2}}
+            -
+    \overset{\maker{\text{Occam's razor}}}
+            {\frac{\log \det \vec{V}}{2}}
+            - \frac{N \log 2\pi}{2}
+  \end{equation*}
+  The first term is large when the \emphr{data fit the model well},
+  and the second term is large when the \emphr{volume of the prior
+    covariance is small;} that is, when the model is \emphr{simpler}.
+\end{frame}
+
+\begin{frame}{Hyperparameters: Example}
+  \hspace*{-1.5em}\input{figures/hp_demo_good.tex}
+  \begin{equation*}
+    \theta = (\lambda, \ell, \sigma_n) = (1, 1, \nicefrac{1}{5}),
+    \quad
+    \log p(\vec{y} \given \vec{x}, \theta) = -27.6
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Hyperparameters: Example}
+  \hspace*{-1.5em}\input{figures/hp_demo_bad.tex}
+  \begin{equation*}
+    \theta = (\lambda, \ell, \sigma_n) = (2, \nicefrac{1}{3}, \nicefrac{1}{20}),
+    \quad
+    \log p(\vec{y} \given \vec{x}, \theta) = -46.5
+  \end{equation*}
+\end{frame}
+
+\begin{frame}{Hyperparameters are important}
+  Comparing the marginal likelihoods, we see that the observed data
+  are \emphr{over 100 million times more likely} to have been
+  generated by the first model rather than from the second model!
+  Clearly hyperparameters can be \emphr{quite important.}
+\end{frame}
+
+\begin{frame}{Can we marginalize hyperparameters?}
+  To be fully Bayesian, we would choose a \emphr{hyperprior}
+  over $\theta$, $p(\theta)$, and \emphr{marginalize} the unknown
+  hyperparameters when making predictions:
+  \begin{equation*}
+    p(f^\ast \given x^\ast, \data) =
+    \frac
+    {\int
+      p(f^\ast \given x^\ast, \data, \theta)
+      p(\vec{y} \given \vec{x}, \theta)
+      p(\theta)
+      \intd{\theta}
+    }
+    {\int
+      p(\vec{y} \given \vec{x}, \theta)
+      p(\theta)
+      \intd{\theta}
+    }
+  \end{equation*}
+  Unfortunately, this integral \emphr{cannot} be resolved
+  analytically.
+\end{frame}
+
+\begin{frame}{Maximum likelihood-II}
+  \begin{itemize}
+    \item Instead, if we believe the posterior distribution over
+      $\theta$ to be \emphr{well-concentrated} (for example, if we
+      have many training examples), we may approximate $p(\theta
+      \given \data)$ with a \emphr{delta} distribution at the point
+      with the \emphr{maximum marginal likelihood:}
+      \begin{equation*}
+        \theta_{\text{MLE}}
+        =
+        \argmax_\theta p(\vec{y} \given \vec{x}, \theta).
+      \end{equation*}
+      This is called \emphr{maximum likelihood-II} (ML-II) inference.
+    \item
+      This effectively gives the approximation
+      \begin{equation*}
+        p(f^\ast \given x^\ast, \data)
+        \approx
+        p(f^\ast \given x^\ast, \data, \theta_{\text{MLE}}).
+      \end{equation*}
+    \item
+      How can we find $\theta_{\text{MLE}}$?
+  \end{itemize}
+\end{frame}
+
+\end{document}

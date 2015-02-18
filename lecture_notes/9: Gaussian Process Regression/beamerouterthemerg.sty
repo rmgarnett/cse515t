@@ -1,0 +1,40 @@
+\mode<presentation>
+
+\definecolor{dg}{RGB}{147,162,153}
+
+\setbeamercolor{section in footer}{fg=white,bg=dg}
+\setbeamercolor{subsection in footer}{fg=white,bg=dg!90!black}
+\setbeamercolor{pagenumber in footer}{fg=white,bg=dg!80!black}
+
+\defbeamertemplate{headline}{greytop}{
+  \hspace*{-0.5cm}{
+    \begin{tikzpicture}
+      \draw[white,line width=0.12cm] (-1,6) -- (14,6);
+      \draw[dg,line width=0.51cm] (-1,6.31) -- (14,6.31);
+    \end{tikzpicture}
+  }
+}
+
+\defbeamertemplate*{footline}{rgtheme}{%
+  \leavevmode%
+  \hbox{%
+    \begin{beamercolorbox}[wd=.33\paperwidth,ht=2.25ex,dp=1ex,center]{section in footer}%
+      \insertsectionhead%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.25ex,dp=1ex,center]{subsection in footer}%
+      \insertsubsectionhead%
+    \end{beamercolorbox}%
+    \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.25ex,dp=1ex,center]{pagenumber in footer}%
+      \insertframenumber%
+    \end{beamercolorbox}%
+  }%
+  %% \hbox{%
+  %%   \hspace*{0.66\paperwidth}%
+  %%   \begin{beamercolorbox}[wd=.34\paperwidth,ht=2.25ex,dp=1ex]{pagenumber in footer}%
+  %%     \hspace*{3em}\insertsectionhead \hfill \insertframenumber\hspace*{3em}%
+  %%   \end{beamercolorbox}%
+  %% }%
+  \vskip0pt%
+}
+
+\mode<all>

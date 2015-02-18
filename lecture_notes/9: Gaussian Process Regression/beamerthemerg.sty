@@ -1,0 +1,42 @@
+\mode<presentation>
+
+\useoutertheme{rg}
+
+\definecolor{dg}{RGB}{147,162,153}
+\definecolor{or}{RGB}{210,83,60}
+\definecolor{dp}{RGB}{87,87,110}
+
+\setbeamertemplate{navigation symbols}{}
+\setbeamertemplate{itemize items}[circle]
+
+\setbeamercolor{item projected}{bg=dg}
+\setbeamercolor{block title}{fg=dg}
+\setbeamercolor{local structure}{fg=dg}
+
+\setbeamercolor{frametitle}{fg=or}
+\setbeamerfont{frametitle}{size=\LARGE}
+
+\setbeamercolor{title}{fg=or}
+\setbeamerfont{title}{size=\Huge}
+
+\setbeamercolor{author}{fg=dp}
+\setbeamerfont{author}{size=\small}
+
+\setbeamercolor{institute}{fg=dp}
+\setbeamerfont{institute}{size=\small}
+
+\setbeamercovered{transparent}
+
+\usefonttheme{professionalfonts}
+
+\defbeamertemplate*{title page}{rgtheme}{
+  \usebeamerfont{title}\usebeamercolor[fg]{title}%
+  \MakeUppercase{\inserttitle}\\
+  \rule{\textwidth}{0.025cm}
+  \usebeamerfont{author}\usebeamercolor[fg]{author}%
+  \insertauthor\\[2ex]
+  \insertdate\\
+  %\hspace*{8cm}\includegraphics[width=0.25\textwidth]{logo}
+}
+
+\mode<all>
