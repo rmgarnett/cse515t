@@ -1,0 +1,637 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\trans}{^\top}
+\newcommand{\inv}{^{-1}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\tr}{tr}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{8cm}
+\setlength{\figureheight}{6cm}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2015) Assignment 2 solutions}} \\
+
+\begin{enumerate}
+
+\item
+  (Curse of dimensionality.)
+  Consider a $d$-dimensional, zero-mean, spherical multivariate
+  Gaussian distribution:
+  \begin{equation*}
+    p(\vec{x}) = \mc{N}(\vec{x}; \vec{0}, \mat{I}_d).
+  \end{equation*}
+  Equivalently, each entry of $\vec{x}$ is drawn iid from a univariate
+  standard normal distribution.
+
+  In familiar small dimensions ($d \leq 3$), ``most'' of the vectors
+  drawn from a multivariate Gaussian distribution will lie near the
+  mean.  For example, the famous 68--95--99.7 rule for $d = 1$
+  indicates that large deviations from the mean are unusual.  Here we
+  will consider the behavior in larger dimensions.
+  \begin{itemize}
+  \item Draw 10\,000 samples from $p(\vec{x})$ for each dimension in
+    $d \in \{1, 5, 10, 50, 100\},$ and compute the length of each
+    vector drawn: $y_d = \sqrt{\vec{x}\trans \vec{x}} = (\sum_i^d
+    x_i^2)^{\nicefrac{1}{2}}$.  Estimate the distribution of each
+    $y_d$ using either a histogram or a kernel density estimate (in
+    \acro{MATLAB}, \texttt{hist} and \texttt{ksdensity},
+    respectively).  Plot your estimates.  (Please do not hand in your
+    raw samples!)  Summarize the behavior of this distribution as $d$
+    increases.
+  \item
+    The true distribution of $y_d^2$ is a chi-square distribution with
+    $d$ degrees of freedom (the distribution of $y_d$ itself is the
+    less-commonly seen chi distribution).  Use this fact to compute
+    the probability that $y_d < 5$ for each of the dimensions in the
+    last part.
+  \item
+    For $d = 1\,000$, compute the 5th and 95th percentiles of $y_d$.
+    Is the mean $\vec{x} = \vec{0}$ a representative summary of the
+    distribution in high dimensions?  This behavior has been called
+    ``the curse of dimensionality.''
+  \end{itemize}
+
+\end{enumerate}
+
+\subsection*{Solution}
+
+Kernel density estimates of the empirical distributions of $y$ (using
+10\,000 samples each) are shown in Figure \ref{problem_1}. As the
+dimension increases, we see that the bulk of the probability mass
+actually lives in a thin ``shell'' centered around the origin: all
+samples are approximately the same length, with no vectors near the
+mean.  This is somewhat unintuitive.
+
+The compute the probability that $y_d < 5$, we can evaluate the
+corresponding $\chi^2$ \acro{CDF} at $y_d^2 = 25$:\footnote{Computed
+  with \texttt{chi2cdf(25, [1, 5, 10, 50, 100])} in \acro{MATLAB}.}
+\begin{align*}
+  \Pr(y < 5 \given d = \phantom{00}1) &\approx 1.0000 \\
+  \Pr(y < 5 \given d = \phantom{00}5) &\approx 0.9999 \\
+  \Pr(y < 5 \given d = \phantom{0}10) &\approx 0.9947 \\
+  \Pr(y < 5 \given d = \phantom{0}50) &\approx 0.0012 \\
+  \Pr(y < 5 \given d = 100) &\approx 0.0000,
+\end{align*}
+so the probability of being within a distance of five standard
+deviations form he mean decreases from near certainty to near
+impossibility, another surprising result.
+
+For the last part, we invert the $\chi^2$ \acro{CDF} and take the
+square root.\footnote{Computed with \texttt{sqrt(chi2inv([0.05, 0.95],
+    1000))} in \acro{MATLAB}.}  The 5th percentile is 30.46 and the
+95th percentile is 32.78.  Again, we see that most of the mass lies in
+a narrow shell centered around the mean.
+
+Whether the mean is a representative summary is a much more
+complicated question with no definitive answer.  In some sense, it's a
+very odd summary: in dimensions higher than 10 or so, we can't imagine
+seeing a vector anywhere near the mean!  On the other hand, if we want
+to choose another single point to summarize the distribution, there's
+no clear better alternative.  By definition, the mean minimizes the
+average squared distance from the chosen point to the vector
+$\vec{x}$.  It just so happens that the \emph{minimum} squared
+distance to the mean is relatively high in large dimension.  This is
+the ``curse of dimensionality:'' all points are ``far away from the
+mean'' (and also each other!).
+
+\begin{figure}
+  \centering
+  \input{figures/problem_1.tex}
+  \caption{Empirical distributions of lengths $y$ as a function of the
+    dimension $d$.}
+  \label{problem_1}
+\end{figure}
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item
+  (Bayesian linear regression.)
+  Consider the following data:
+  \begin{align*}
+    \vec{x}
+    &=
+    [-2.26, -1.31, -0.43, 0.32, 0.34, 0.54, 0.86, 1.83, 2.77, 3.58]\trans; \\
+    \vec{y}
+    &=
+    [1.03, 0.70, -0.68, -1.36, -1.74, -1.01, 0.24, 1.55, 1.68, 1.53]\trans.
+  \end{align*}
+  Fix the noise variance at $\sigma^2 = 0.5^2$.
+  \begin{itemize}
+  \item
+    Perform Bayesian linear regression for these data using the
+    polynomial basis functions $\phi_k(x) = [1, x, x^2, \dotsc
+      x^k]\trans$ for $k \in \{1, 2, 3\}$, in each case using the
+    parameter prior $p(\vec{w}) = \mc{N}(\vec{w}; \vec{0}, \mat{I})$.
+    Evaluate and plot the posterior means $\mathbb{E}[\vec{y}_\ast
+      \given \mat{X}_\ast, \data, \sigma^2]$ on the interval $x_\ast
+    \in [-4, 4]$ for each model.  Also plot the posterior mean
+    plus-or-minus two times the posterior standard deviation:
+    \begin{equation*}
+      \mathbb{E}[\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2] \pm
+      2 \sqrt{\var[\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2]}.
+    \end{equation*}
+    This is a pointwise 95\% credible interval for the regression
+    function.  Where is the pointwise uncertainty the largest?
+  \item
+    Compute the marginal likelihood of the data for each of the basis
+    expansions above: $p(\vec{y} \given \mat{X}, k, \sigma^2)$.  Which
+    model explains the data the best?
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+
+Given the feature expansions $\mat{\Phi} = \phi(\mat{X})$ and
+$\mat{\Phi}_\ast = \phi(\mat{X}_\ast)$, we may compute the posterior
+distribution of $\vec{y}_\ast$:
+\begin{equation*}
+  p(\vec{y}_\ast \given \vec{X}_\ast, \data)
+  =
+  \mc{N}(\vec{y}_\ast;
+  \mat{\Phi}_\ast \vec{\mu}_{\vec{w}\given\data},
+  \mat{X}_\ast \mat{\Sigma}_{\vec{w}\given\data} \mat{X}_\ast\trans + \sigma^2 \mat{I}),
+\end{equation*}
+where
+\begin{align*}
+  \vec{\mu}_{\vec{w}\given\data}
+  &=
+  \vec{\mu}
+  +
+  \mat{\Sigma}
+  \mat{\Phi}\trans
+  (\mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans + \sigma^2 \mat{I})\inv
+  (\vec{y} - \mat{\Phi}\vec{\mu});
+  \\
+  \mat{\Sigma}_{\vec{w}\given\data}
+  &=
+  \mat{\Sigma}
+  -
+  \mat{\Sigma}
+  \mat{\Phi}\trans
+  (\mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans + \sigma^2 \mat{I})\inv
+  \mat{\Phi}
+  \mat{\Sigma}.
+\end{align*}
+The diagonal of the posterior covariance for $\vec{y}\ast$,
+$\mat{\Phi}_\ast\mat{\Sigma}\mat{\Phi}_\ast + \sigma^2\mat{I}$,
+gives the desired variance for plotting the credible interval.
+
+Plugging in the prior $p(\vec{w}) = \mc{N}(\vec{w}; \vec{0}, \mat{I})$
+gives the result, plotted below.  For all three models, the pointwise
+uncertainty is maximized on the extreme ranges of the domain at $x =
+-4$ and $x = 4$; we have few observations near either of these
+locations.
+
+\begin{figure}
+  \centering
+  \input{figures/order_1_expansion}
+  \caption{Posterior for $k = 1$.}
+  \label{order_1_expansion}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \input{figures/order_2_expansion}
+  \caption{Posterior for $k = 2$.}
+  \label{order_2_expansion}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \input{figures/order_3_expansion}
+  \caption{Posterior for $k = 3$.}
+  \label{order_3_expansion}
+\end{figure}
+
+To compute the marginal likelihood, we must compute
+\begin{equation*}
+  p(\vec{y} \given \mat{X}, \sigma^2)
+  =
+  \mc{N}(\vec{y};
+  \mat{\Phi}\vec{\mu},
+  \mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans + \sigma^2 \mat{I}).
+\end{equation*}
+Computing the marginal likelihood comes down to plugging in our
+observations $\vec{y}$ into this Gaussian \acro{PDF}.  In practice it
+is more convenient to compute the logarithm of the marginal
+likelihood, due to the large dynamic range of this function.  For our
+data, we can compute:
+\begin{align*}
+  \log p(\vec{y} \given \mat{X}, \sigma^2, k = 1)
+  &= -32.9; \\
+  \log p(\vec{y} \given \mat{X}, \sigma^2, k = 2)
+  &= -22.3; \\
+  \log p(\vec{y} \given \mat{X}, \sigma^2, k = 3)
+  &= -22.2.
+\end{align*}
+There is a clear preference for either the quadratic or the cubic
+model over the linear model, but there is no clear-cut winner between
+those two.
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item
+  (Optimal design for Bayesian linear regression.)
+  Consider the data from the last problem, and suppose we have
+  selected the quadratic model corresponding to $k = 2$ (do not assume
+  that this is the answer to the last part of the last question).
+  Imagine we are allowed to evaluate the function at a point $x'$ of
+  our choosing, giving a new dataset $\data' = \data \cup \bigl\{ (x',
+  y') \bigr\}$ and a new posterior for the parameters $p(\vec{w}
+  \given \data', \sigma^2) = \mc{N}(\vec{w};
+  \vec{\mu}_{\vec{w}\given\data'},
+  \mat{\Sigma}_{\vec{w}\given\data'})$.  We hope to select the
+  location $x'$ to best improve our current model, under some quality
+  measure.
+
+  Assume that we ultimately wish to predict the function at a grid of
+  points
+  \begin{equation*}
+    \vec{x}_\ast = [-4, -3.5, -3, \dotsc, 3.5, 4]\trans.
+  \end{equation*}
+  We select the squared loss for a set of predictions
+  $\hat{\vec{y}}_\ast$ at these points:
+  \begin{equation*}
+    \ell(\vec{y}_\ast, \hat{\vec{y}}_\ast)
+    =
+    \sum_i \bigl((y_\ast)_i - (\hat{y}_\ast)_i\bigr)^2;
+  \end{equation*}
+  therefore, we will predict using the new posterior mean
+  $\hat{\vec{y}}_\ast = \mat{X}_\ast \vec{\mu}_{\vec{w}\given\data'}$.
+  \begin{itemize}
+  \item
+    Given a potential observation location $x'$, derive a closed-form
+    expression for the expected loss
+    $\mathbb{E}\bigl[\ell(\vec{y}_\ast, \hat{\vec{y}}_\ast) \given x',
+      \data \bigr]$.  Note: this does not require integration over
+    $y'$!  (What is the expected squared deviation from the mean?)
+  \item
+    Plot the expected loss over the interval $x' \in [-4, 4]$.  Where
+    is the optimal location to sample the function?
+  \end{itemize}
+
+  Note: this approach of actively selecting where to sample a function
+  to maximize some utility function is known as \emph{active learning}
+  in machine learning and \emph{optimal experimental design} in
+  statistics.  Bayesian decision theory provides a convenient and
+  consistent framework for performing active learning with a variety
+  of objectives.
+\end{enumerate}
+
+\subsection*{Solution}
+
+Imagine for the sake of argument that we have been given a new
+observation $(x', y')$ to our dataset $\data$, forming the augmented
+dataset $\data'$.  Imagine further that we have computed the updated
+posterior $p(\vec{w} \given \data', \sigma^2)$ with this new dataset.
+
+We are compelled to predict the value of the function at the given
+test inputs $\vec{x}_\ast$.  Under the given squared loss function
+$\ell(\vec{y}_\ast, \hat{\vec{y}}_\ast)$, we will predict the
+posterior mean $\hat{\vec{y}}_\ast \vec{\mu}_{\vec{w}\given\data'}$.
+(Recall the Bayes estimator under squared loss is the posterior mean).
+
+Let us explicitly compute the expected loss given $\data$':
+\begin{align*}
+  \mathbb{E}\bigl[
+    \ell(\vec{y}_\ast, \hat{\vec{y}}_\ast)
+    \given
+    \vec{x}_\ast,
+    \data'
+  \bigr]
+  &=
+  \mathbb{E}\Bigl[
+    \sum_i
+    \bigl(
+    (y_\ast)_i - (\hat{y}_\ast)_i
+    \bigr)^2
+    \given \vec{x}_\ast, \data'
+  \Bigr]
+  \\
+  &=
+  \sum_i
+  \mathbb{E}\Bigl[
+    \bigl(
+    (y_\ast)_i
+    -
+    \mathbb{E}\bigl[(y_\ast)_i \given (x_\ast)_i, \data'\bigr]
+    \bigr)^2
+    \given (x_\ast)_i, \data'
+    \Bigr]
+  \\
+  &=
+  \sum_i
+  \var\bigl[
+    (y_\ast)_i
+    \given
+    (x_\ast)_i, \data'
+  \bigr]
+  \\
+  &=
+  \tr
+  \bigl(
+  \vec{\Phi}_\ast
+  \Sigma_{\vec{w}\given\data'}
+  \vec{\Phi}_\ast\trans
+  +
+  \sigma^2 \mat{I}
+  \bigr),
+\end{align*}
+where, in successive lines, we have: applied the linearity of
+expectation, substituted the posterior mean predictions for
+$\hat{\vec{y}}_\ast$, applied the definition of variance, and
+rewritten the sum of the variances in terms of the trace of the
+posterior covariance matrix over $\vec{y}_\ast$ given $\data'$.
+
+The key observation here is that the posterior covariance matrix, and
+therefore the expected loss given $\data'$, \emph{does not depend} on
+the value of $y'$, only the location of the new input $x'$.  So we may
+actually compute the future expected loss as a function of the next
+observation location $x'$.  The Bayes action will then be to sample
+the function at the point minimizing the trace of the updated
+posterior covariance over $\vec{y}_\ast$.
+
+In Figure \ref{problem_3}, we plot the expected loss as a function of
+$x'$.  The expected loss is minimized at $x' \approx -0.3163$, which
+is the Bayes action.
+
+Of course, we could have iteratively performed this procedure to
+select every observation location!  The result would fall under the
+general framework of so-called \emph{active learning.}
+
+\begin{figure}
+  \centering
+  \input{figures/problem_3.tex}
+  \caption{Expected loss for predicting $\vec{y}_\ast$ given $\data'$
+    as a function of $x'$.}
+  \label{problem_3}
+\end{figure}
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item
+  (Woodbury matrix identity.)
+  The \emph{Woodbury matrix identity} is a very useful result.  Let
+  $\mat{A}$ be an $(n \times n)$ matrix, let $\mat{U}$ and $\mat{V}$
+  be $(n \times k)$ matrices, and let $\mat{C}$ be a $(k \times k)$
+  matrix.  Then:
+  \begin{equation*}
+    (\mat{A} + \mat{U}\mat{C}\mat{V}\trans)\inv
+    =
+    \mat{A}\inv
+    -
+    \mat{A}\inv
+    \mat{U}
+    (\mat{C}\inv + \mat{V}\trans \mat{A}\inv \mat{U})\inv
+    \mat{V}\trans
+    \mat{A}\inv.
+  \end{equation*}
+  This result is useful when you already have the inverse of a matrix
+  $\mat{A}$ and want to know the inverse after a rank-$k$ adjustment.
+  When $k \ll n$, the Woodbry matrix identity can be considerably
+  faster than direct inversion!
+  \begin{itemize}
+  \item
+    Prove this result.
+  \item
+    Use this result to rewrite the posterior covariance of the weight
+    vector $\vec{w}$ in Bayesian linear regression (as written in the
+    notes to lecture 5) in a simpler form.
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+
+The first part of the problem can be completed by multiplying the
+right hand side by $(\mat{A} + \mat{U}\mat{C}\mat{V}\trans)$ and
+checking you get the identity.
+
+The posterior covariance for $\vec{w}$ was previously given as
+\begin{equation*}
+  \mat{\Sigma}_{\vec{w}\given\data}
+  =
+  \mat{\Sigma}
+  -
+  \mat{\Sigma}
+  \mat{X}\trans
+  (\mat{X}\mat{\Sigma}\mat{X}\trans + \sigma^2 \mat{I})\inv
+  \mat{X}
+  \mat{\Sigma}.
+\end{equation*}
+Taking
+\begin{equation*}
+  \mat{A} = \mat{\Sigma}\inv
+  \qquad
+  \mat{U} = \mat{V} = \mat{X}\trans
+  \qquad
+  \mat{C} = \sigma^2 \mat{I},
+\end{equation*}
+we may rewrite this as
+\begin{equation*}
+  \mat{\Sigma}_{\vec{w}\given\data}
+  =
+  (\mat{\Sigma}\inv
+  +
+  \sigma^{-2}
+  \mat{X}\trans\mat{X})\inv.
+\end{equation*}
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{4}
+\item
+  (Laplace approximation.)
+  Find a Laplace approximation to the Gamma distribution:
+  \begin{equation*}
+    p(\theta \given \alpha, \beta)
+    =
+    \frac{1}{Z}
+    \theta^{\alpha - 1}
+    \exp(-\beta\theta).
+  \end{equation*}
+  Plot the approximation against the true density for $(\alpha, \beta)
+  = (2, \nicefrac{1}{2})$.
+
+  The true value of the normalizing constant is
+  \begin{equation*}
+    Z = \frac{\Gamma(\alpha)}{\beta^\alpha}.
+  \end{equation*}
+  If we fix $\beta = 1$, then $Z = \Gamma(\alpha)$, so we may use the
+  Laplace approximation to estimate the Gamma function.  Analyze the
+  quality of this approximation as a function of $\alpha$.
+\end{enumerate}
+
+\subsection*{Solution}
+
+We first define the unnormalized log density $\Psi(\theta)$:
+\begin{equation*}
+  \Psi(\theta)
+  =
+  \log p(\theta \given \alpha, \beta)
+  =
+  (\alpha - 1) \log \theta - \beta\theta.
+\end{equation*}
+Next we find the maximal value of the distribution, $\hat{\theta}$, by
+computing the derivative and setting to zero:
+\begin{equation*}
+  0
+  =
+  \frac{d}{d\theta}
+  \Psi(\theta)
+  =
+  \frac{\alpha - 1}{\theta}
+  - \beta
+  \quad
+  \Rightarrow
+  \quad
+  \hat{\theta} = \frac{\alpha - 1}{\beta}.
+\end{equation*}
+Next we compute the negative Hessian of $\Psi$ at $\hat{\theta}$.
+Note that here we have a one-dimensional density, so the Hessian is
+simply equal to the second derivative:
+\begin{equation*}
+  H
+  =
+  -\frac{d^2}{d\theta^2}
+  \Psi(\theta)
+  \biggr\rvert_{\theta = \hat{\theta}}
+  =
+  \frac{\alpha - 1}{\theta^2}
+  \biggr\rvert_{\theta = \hat{\theta}}
+  =
+  \frac{\beta^2}{\alpha - 1}.
+\end{equation*}
+Now the Laplace approximation to the gamma distribution is
+\begin{equation*}
+  p(\theta \given \alpha, \beta)
+  \approx
+  \mc{N}(\theta; \hat{\theta}, H\inv)
+  =
+  \mc{N}\biggl(\theta;
+  \frac{\alpha - 1}{\beta},
+  \frac{\alpha - 1}{\beta^2}
+  \biggr).
+\end{equation*}
+The corresponding estimate for the normalizing constant $Z$
+is
+\begin{equation*}
+  Z
+  \approx
+  \exp\bigl(\Psi(\hat{\vec{\theta}})\bigr)
+  \sqrt{
+    \frac{(2\pi)^d}
+         {\det \mat{H}}
+  }
+  =
+  p(\hat{\theta} \given \alpha, \beta)
+  \sqrt{\frac{2\pi}{H}}
+  =
+  \sqrt{\frac{2\pi(\alpha - 1)}{\beta^2}}
+  \biggl(\frac{\alpha - 1}{\beta}\biggr)^{\alpha - 1}
+  \exp\bigl(-(\alpha - 1)\bigr).
+\end{equation*}
+Plugging in $\beta = 1$ and using the true normalizing constant of the
+gamma distribution, we have the approximation
+\begin{equation*}
+  \Gamma(\alpha)
+  \approx
+  \sqrt{2\pi}
+  (\alpha - 1)^{\alpha - \nicefrac{1}{2}}
+  \exp\bigl(-(\alpha - 1)\bigr).
+\end{equation*}
+Note we also have an approximation to the logarithm
+of $\Gamma$:
+\begin{equation*}
+  \log \Gamma(\alpha)
+  \approx
+  \textstyle
+  \frac{1}{2}\log 2 \pi
+  +
+  (\alpha - \nicefrac{1}{2})
+  \log(\alpha - 1)
+  -
+  (\alpha - 1).
+\end{equation*}
+
+Figure \ref{problem_5} shows the resulting approximation to $Z =
+\Gamma(\alpha)$ as a function of $\alpha$.  The approximation
+appears to be quite good for $\alpha \geq 2$.
+
+To those who are mathematically inclined, note that $n! = \Gamma(n +
+1)$.  With a bit of manipulation, we have actually rediscovered a very
+famous result known as \emph{Stirling's approximation:}
+\begin{equation*}
+  n!
+  \approx
+  \sqrt{2\pi n}
+  \biggl(\frac{n}{e}\biggr)^n.
+\end{equation*}
+
+\begin{figure}
+  \centering
+  \input{figures/problem_5.tex}
+  \caption{Laplace approximation to $Z = \Gamma(\alpha)$ as a function
+    of $\alpha$.}
+  \label{problem_5}
+\end{figure}
+
+\end{document}
