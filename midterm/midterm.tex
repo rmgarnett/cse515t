@@ -1,0 +1,200 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\trans}{^\top}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2015) Midterm}}
+\begin{itemize}
+\item
+  There are two ways to hand in this midterm.  \textbf{Late
+    submissions will not be accepted!}  I do not recommend cutting it
+  too close.
+  \begin{itemize}
+  \item Physically in my department mailbox in the \acro{CSE} head
+    office on the fifth floor of Bryan Hall.  The due date for this
+    option is \textbf{5:00 \acro{PM}, Friday, 6 March.}
+  \item Electronically on Piazza as a private message to the
+    instructors. The due date for this option is \textbf{midnight,
+      Saturday, 7 March.}
+  \end{itemize}
+\item
+  Please do not discuss the questions with other members of the class.
+\item
+  Please post any questions as a \emph{private message to the
+    instructors} on Piazza.
+\item
+  Any corrections will be posted by the instructors on Piazza. This
+  document will also be kept up-to-date on the course webpage and in
+  GitHub.
+\end{itemize}
+
+\clearpage
+
+\begin{enumerate}
+\item
+  Consider two coins with unknown bias $\theta_1$ and $\theta_2$,
+  respectively.  We place independent, identical beta priors on these
+  quantities:
+  \begin{equation*}
+    p(\theta_1) = \mc{B}(\theta_1; 2, 2);
+    \qquad
+    p(\theta_2) = \mc{B}(\theta_2; 2, 2).
+  \end{equation*}
+  Imagine someone flips both coins and tells you that \emph{exactly
+    one} of the outcomes (but not which) was a ``head.''  Thus the
+  observation was either HT or TH, but you are not told which.  The
+  below expressions are conditioned on ``H'' to indicate this
+  observation.
+  \begin{itemize}
+  \item
+    Give an expression for the posterior of the first coin's bias
+    given this observation, $p(\theta_1 \given \text{H})$.  Simplify
+    the result as much as you can.  Plot the prior and the posterior
+    for $\theta_1$ over the interval $\theta_1 \in (0, 1)$.
+  \item
+    Give an expression for the joint posterior $p(\theta_1, \theta_2
+    \given \text{H})$. Plot the joint prior, the likelihood, and the
+    joint posterior as three separate heat maps over the unit square
+    $(\theta_1, \theta_2) \in (0, 1)^2$.  Use a grid with at least 100
+    values along each of the two $\theta$ axes.
+  \item
+    Summarize what the observation taught us about the bias of the
+    coins.
+  \end{itemize}
+
+\item
+  Consider the three-dimensional parameter vector $\vec{\theta} =
+  [\theta_1, \theta_2, \theta_3]\trans$, with the following joint
+  multivariate Gaussian prior:
+  \begin{equation*}
+    p(\vec{\theta})
+    =
+    \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma})
+    =
+    \mc{N}
+    \left(
+    \begin{bmatrix}
+      \theta_1 \\
+      \theta_2 \\
+      \theta_3
+    \end{bmatrix}
+    ;
+    \begin{bmatrix}
+      0 \\
+      1 \\
+      2
+    \end{bmatrix},
+    \begin{bmatrix}
+      1 & 2 & 0   \\
+      2 & 9 & 0 \\
+      0 & 0 & 16
+    \end{bmatrix}
+    \right).
+  \end{equation*}
+  We are going to consider a decision problem with action space
+  $\mc{A} = \{1, 2, 3\}$.  The result of choosing an action $a \in
+  \mc{A}$ will be to observe the exact value of $\theta_a$, the $a$th
+  element of $\vec{\theta}$.
+
+  Consider the following loss functions, $\ell_1$ and $\ell_2$:
+  \begin{equation*}
+    \ell_1(\vec{\theta}, a) =
+    \begin{cases}
+      1 & \theta_a   >  0 \\
+      0 & \theta_a \leq 0
+    \end{cases}
+    \qquad
+    \ell_2(\vec{\theta}, a) = \min(0, \theta_a).
+  \end{equation*}
+  For each:
+  \begin{itemize}
+  \item
+    Write a generic expression for the expected loss of action $a$ in
+    terms of $\vec{\mu}$ and $\mat{\Sigma}$.  Evaluate any integrals
+    you encounter.
+  \item
+    Give a numerical value for the expected loss of each action, using
+    the values of $(\vec{\mu}, \mat{\Sigma})$ provided above.
+  \item
+    State the Bayes action.
+  \end{itemize}
+
+\item
+  Consider a $d$-dimensional vector $\vec{\theta}$ with an arbitrary
+  multivariate Gaussian distribution:
+  \begin{equation*}
+    p(\vec{\theta})
+    =
+    \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma}).
+  \end{equation*}
+  \begin{itemize}
+  \item
+    Give a general expression for the distribution of the following
+    (scalar) value $\tau$.
+    \begin{equation*}
+      \tau = \theta_1 + 2\theta_2 + \dotsb d\theta_d
+    \end{equation*}
+  \item
+    Consider again the specific distribution of the three-dimensional
+    vector $\vec{\theta}$ from the last problem, as well as the action
+    space $\mc{A}$ with the same observation mechanism: after choosing
+    $a \in \mc{A}$, we will observe the corresponding value
+    $\theta_a$.  Suppose we may select one action and then must
+    predict $\tau$ under a squared loss function:
+    \begin{equation*}
+      \ell(\tau, \hat{\tau}) = (\tau - \hat{\tau})^2.
+    \end{equation*}
+    Using the distribution from the last problem. what is the expected
+    loss of each of the three available actions?  Which is the Bayes
+    action?
+  \end{itemize}
+
+\item
+  Consider the following data:
+  \begin{align*}
+    \vec{x} &= [0.54, 1.84, -2.26, 0.86, 0.32]\trans; \\
+    \vec{y} &= [-1.31, -0.43, 0.34, 3.58, 2.77]\trans.
+  \end{align*}
+  Consider the Bayesian linear regression model with $\phi(x) = [1,
+    x]\trans$.  Use the prior $p(\vec{w}) = \mc{N}(\vec{w}; \vec{0},
+  \mat{I})$.
+
+  Plot the posterior probability that the slope of the regression line
+  is positive as a function of the standard deviation of the
+  observation noise $\sigma$ (the noise variance is then $\sigma^2$).
+  Use a grid of at least 100 points in the range $\sigma \in (0.01,
+  10)$.
+
+\end{enumerate}
+
+\end{document}
