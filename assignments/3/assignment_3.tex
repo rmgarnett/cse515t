@@ -1,0 +1,143 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\trans}{^\top}
+\newcommand{\inv}{^{-1}}
+
+\DeclareMathOperator{\var}{var}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2015) Assignment 3}} \\
+Due Monday, 16 March 2015 \\
+
+\begin{enumerate}
+
+\item
+  (Sampling from a multivariate Gaussian distribution).
+  Assume you can sample from a univariate standard normal distribution
+  $\mc{N}(0, 1^2)$.  In the last assignment, this allowed you to
+  sample trivially from a multivariate standard normal distribution
+  $\mc{N}(\vec{0}, \mat{I})$.  Use the closure of the Gaussian
+  distribution to affine transformations to derive a procedure to
+  sample from an arbitrary multivariate Gaussian distribution
+  \begin{equation*}
+    p(\vec{x}) = \mc{N}(\vec{x}; \vec{\mu}, \mat{\Sigma})
+  \end{equation*}
+  using an oracle that can draw a sample from the univariate standard
+  normal distribution.
+
+\item
+  (Sampling from a Gaussian process).
+  Consider the squared exponential covariance function
+  \begin{equation*}
+    K(x, x'; \lambda, \ell)
+    =
+    \lambda^2
+    \exp\biggl(
+    -\frac{\lVert x - x' \rVert^2}{2\ell^2}
+    \biggr).
+  \end{equation*}
+  Take a dense grid (somewhere around 100-1\,000 points) in the domain
+  $x \in [-4, 4]$.  For several values of $(\lambda, \ell)$ of your
+  choosing, draw five samples from a Gaussian process prior with mean
+  function $\mu(x) = 0$ and this covariance.  Plot your samples.
+
+  Note: you may encounter numerical problems here.  The most common
+  issues are that the sample covariance $\mat{K}$ is not quite
+  symmetric or that it is not quite positive definite.  To ensure
+  positive definiteness, you may need to add a small constant (on the
+  order of $10^{-6}$ perhaps) to the diagonal to the covariance matrix
+  $\mat{K}$ in case of numerical instability.  If the matrix is not
+  exactly symmetric, a simple trick to symmetrize it is to take
+  $\frac{1}{2}(\mat{K} + \mat{K}\trans)$.
+
+\item
+  (Gaussian process regression).
+  Consider again the data from question 2 of assignment 2:
+  \begin{align*}
+    \vec{x}
+    &=
+    [-2.26, -1.31, -0.43, 0.32, 0.34, 0.54, 0.86, 1.83, 2.77, 3.58]\trans; \\
+    \vec{y}
+    &=
+    [1.03, 0.70, -0.68, -1.36, -1.74, -1.01, 0.24, 1.55, 1.68, 1.53]\trans.
+  \end{align*}
+  Fix the noise variance at $\sigma^2 = 0.5^2$.
+
+  \begin{itemize}
+  \item
+    Examining a scatter plot of the data, guess which values of
+    $(\lambda, \ell)$ in the above covariance (if any) might explain
+    this data well.
+  \item
+    Perform Gaussian process regression for these data on the interval
+    $x_\ast \in [-4, 4]$ using the squared exponential covariance
+    above for the same set of hyperparameters $(\lambda, \ell)$ above.
+    Plot the posterior mean and the pointwise 95\% credible interval
+    for each.  Which predictions look the best?
+  \item
+    Visualize the model evidence $p(\vec{y} \given \vec{x}, \lambda,
+    \ell, \sigma^2)$ as a function of $(\lambda, \ell)$.  You can
+    choose to make, for example, a heatmap or a contour plot of this
+    function.  Probably it will be a good idea to compute and plot the
+    logarithm of the model evidence rather than the model evidence
+    directly.
+  \item
+    Are there any settings of the hyperparameters that explain the data
+    better than the best polynomial model from question 2 of assignment 2?
+  \end{itemize}
+
+\item
+  (Optimization of mean hyperparameters).
+  Assume the mean function of a Gaussian process has a parameter
+  vector $\theta$, $\mu(\vec{x}; \theta)$.  Given a fixed covariance
+  function $K$, noise variance $\sigma^2$, and dataset $\data =
+  (\mat{X}, \vec{y})$, compute the partial derivative of the log
+  marginal likelihood with respect to the $i$th mean hyperparameter
+  $\theta_i$:
+  \begin{equation*}
+    \frac{\partial}{\partial \theta_i}
+    \log
+    p(\vec{y} \given \mat{X}, \theta, \sigma^2).
+  \end{equation*}
+
+  Consider the data from the last question.  Keep the covariance
+  hyperparameters $(\lambda, \ell)$ fixed to the best values you
+  found.  Replace the mean function $\mu$ with a constant, potentially
+  non-zero mean function $\mu(x; \theta) = \theta$.  Use the above
+  gradient you computed above to optimize the marginal likelihood of
+  the data as a function of $\theta$.  Is the best value the sample
+  mean of $\vec{y}$?  Should we expect it to be?
+\end{enumerate}
+
+\end{document}
