@@ -1,0 +1,405 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{amsthm}
+\newtheorem{defn}{Definition}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{12cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\Exp}{\mathbb{E}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{Conditioning on Outputs of Linear Operators}
+
+Suppose we have a function $f\colon \mc{X} \to \R$ with a Gaussian
+process prior distribution:
+\begin{equation*}
+  p(f) = \mc{GP}(f; \mu, K).
+\end{equation*}
+We have discussed how to perform inference about $f$ when given
+(noisy) observations of the function at a set of points $\mat{X}$:
+$\data = (\mat{X}, \vec{y})$.  Here we are going to expand the types
+of observations we may use during \acro{GP} inference.
+
+\subsection*{Functionals and linear functionals}
+
+Specifically, we are going to consider so-called \emph{linear
+  functionals} of $f$.  A \emph{functional} is a function $L[f]$ that
+takes as an input a function $f$ and returns a scalar.  (Functionals
+are sometimes called ``functions of functions.'')  A very simple
+example of a functional is the \emph{point-evaluation functional.}
+Let $x \in \mc{X}$ be an arbitrary fixed point in the domain.  We
+define a corresponding functional $L_x$ by
+\begin{equation*}
+  f \mapsto L_x[f] = f(x).
+\end{equation*}
+So, given a function $f$, the point-evaluation functional $L_x$ simply
+evaluates $f$ at $x$ and returns the result.  This is a functional we
+are very accustomed to using.
+
+A functional is said to be $\emph{linear}$ when it satisfies a simple
+linearity property.  Specifically, let $a \in \R$ be an arbitrary
+scalar constant and let $f$ and $g$ be two arbitrary functions.  A
+functional $L$ is linear if the following equality always holds:
+\begin{equation*}
+  L[af + g] = aL[f] + L[g].
+\end{equation*}
+It is easy to see that the point-evaluation functional $L_x$ is
+linear:
+\begin{equation*}
+  L_x[af + g]
+  =
+  (af + g)(x)
+  =
+  af(x) + g(x)
+  =
+  aL_x[f] + L_x[g].
+\end{equation*}
+
+There are several other quite-common linear functionals that we are
+familiar with.  The two we will discuss here are integration against
+an arbitrary function $p(x)$:
+\begin{equation*}
+  f \mapsto I_p[f] = \int_{\mc{X}} f(x) p(x) \intd{x},
+\end{equation*}
+and (partial) differentiation at a point $x$:
+\begin{equation*}
+  f \mapsto D_{x, i}[f] = \frac{\partial f(z)}{\partial z_i} \biggr\rvert_{z = x}.
+\end{equation*}
+
+\subsection*{Conditioning on linear functionals}
+
+It turns out that we can once again exploit the closure of the
+Gaussian distribution to linear transformations to condition a
+\acro{GP} on $f$ on the observation of any linear functional of $f$!
+This will allow us to both perform inference about $f$ given
+observations of, for example, derivatives of $f$, and also to perform
+inference about linear functionals of $f$ directly.  This will provide
+us with a Bayesian mechanism for estimating integrals (a task
+traditionally called \emph{quadrature}).
+
+Suppose we have an unknown function $f\colon \mc{X} \to \R$ with the
+Gaussian process prior above:
+\begin{equation*}
+  p(f) = \mc{GP}(f; \mu, K),
+\end{equation*}
+and let $L$ be a linear functional.  We will write $\ell = L[f]$.
+Just as Gaussian distributions are closed under linear
+transformations, so are Gaussian processes closed under the evaluation
+of linear functionals!  The prior distribution for $\ell$ is a
+Gaussian distribution:
+\begin{equation*}
+  p(\ell)
+  =
+  \mc{N}\bigl(\ell; L[\mu], L^2[K]\bigr)
+\end{equation*}
+where
+\begin{equation*}
+  L^2[K]
+  =
+  L\Bigl[L\bigl[K(\cdot, x')\bigr]\Bigr]
+  =
+  L\Bigl[L\bigl[K(x, \cdot)\bigr]\Bigr].
+\end{equation*}
+This result is essentially equivalent to the result for linear
+transformations of Gaussian-distributed vectors we have been using
+thus far, written with different notation.  Notice also that if we
+consider the point-evaluation functional $L_x$, we recover a basic
+result:
+\begin{equation*}
+  p\bigl(f(x) \given x\bigr)
+  =
+  \mc{N}\bigl(f(x); L_x[\mu], L_x^2[K]\bigr);
+  =
+  \mc{N}\bigl(f(x); \mu(x), K(x, x)\bigr).
+\end{equation*}
+Considering the integration functional, we obtain a perhaps
+more-interesting result:
+\begin{equation*}
+  p\biggl(\int f(x) p(x) \intd{x} \biggr)
+  =
+  \mc{N}\biggl(\int f(x) p(x) \intd{x}; \int \mu(x) p(x) \intd{x}, \iint K(x, x') p(x) p(x') \intd{x} \intd{x'} \biggr).
+\end{equation*}
+Therefore a Gaussian process distribution on $f$ implies a Gaussian
+distribution on its integral against an arbitrary function $p(x)$!
+Further, the problem of estimating the integral of the (perhaps quite
+complicated) function $f$ has been reduced to the perhaps-simpler
+problem of integrating the mean and covariance functions $\mu$ and
+$K$.  This is the main idea behind \emph{Bayesian quadrature,} also
+called \emph{Bayesian Monte Carlo.}
+
+Given an observation of $L[f] = \ell$, we may condition our prior on
+this observation in a manner equivalent to that used to derive the
+posterior distribution of $f$.  Let $\mat{X}$ be an arbitrary set of
+input locations.  As before, we write the joint distribution between
+$\ell$ and $\vec{f} = f(\mat{X})$:
+\begin{equation*}
+  p\Biggl(
+  \begin{bmatrix}
+    \ell
+    \\
+    \vec{f}
+  \end{bmatrix}
+  \given
+  \vec{X}
+  \Biggr)
+  =
+  \mc{N}
+  \Biggl(
+  \begin{bmatrix}
+    \ell
+    \\
+    \vec{f}
+  \end{bmatrix}
+  ;
+  \begin{bmatrix}
+    L[\mu]
+    \\
+    \vec{\mu}
+  \end{bmatrix}
+  ,
+  \begin{bmatrix}
+    L^2[K] & \text{?}
+    \\
+    \text{?} & \mat{K}
+  \end{bmatrix}
+  \Biggr),
+\end{equation*}
+where we have defined:
+\begin{equation*}
+  \vec{\mu} = \mu(\mat{X})
+  \qquad
+  \mat{K} = K(\mat{X}, \mat{X}).
+\end{equation*}
+To fill in the missing observations, we need to know the covariance
+between $\ell$ and the $i$th function value $f_i = f(\vec{x}_i)$.  Here
+we can exploit the linearity of covariance:
+\begin{equation*}
+  \cov(\ell, f_i)
+  =
+  \cov\bigl(L[f], L_{\vec{x}_i}[f]\bigr)
+  =
+  L\Bigl[L_{\vec{x}_i}\bigl[
+      \cov(f, f)
+  \bigr]\Bigr]
+  =
+  L\Bigl[L_{\vec{x}_i}\bigl[
+      K
+  \bigr]\Bigr]
+  =
+  L\bigl[K(\cdot, \vec{x}_i)\bigr].
+\end{equation*}
+Now we have the general result
+\begin{equation*}
+  p\Biggl(
+  \begin{bmatrix}
+    \ell
+    \\
+    \vec{f}
+  \end{bmatrix}
+  \given
+  \vec{X}
+  \Biggr)
+  =
+  \mc{N}
+  \Biggl(
+  \begin{bmatrix}
+    \ell
+    \\
+    \vec{f}
+  \end{bmatrix}
+  ;
+  \begin{bmatrix}
+    L[\mu]
+    \\
+    \vec{\mu}
+  \end{bmatrix}
+  ,
+  \begin{bmatrix}
+    L^2[K] & L\bigl[K(\cdot, \mat{X})\bigr]
+    \\
+    L\bigl[K(\mat{X}, \cdot)\bigr] & \mat{K}
+  \end{bmatrix}
+  \Biggr).
+\end{equation*}
+Finally, we may condition this joint distribution on the observed
+value $\ell = L[f]$ to find the posterior of $\vec{f}$, which will be
+an updated multivariate Gaussian distribution.  Because the set of
+points $\mat{X}$ was arbitrary, we may conclude that the posterior
+distribution is also a Gaussian process.  The posterior mean and
+covariance functions are
+\begin{align*}
+  \mu_{f \given \ell}(\vec{x})
+  &=
+  \mu(\vec{x})
+  +
+  \frac{L\bigl[K(\cdot, \mat{X})\bigr]}{L^2[K]}
+  \bigl(\ell - L[\mu]);
+  \\
+  K_{f \given \ell}(\vec{x}, \vec{x}')
+  &=
+  K(\vec{x}, \vec{x}')
+  -
+  \frac{L\bigl[K(\cdot, \mat{X})\bigr]L\bigl[K(\mat{X}, \cdot)\bigr]}{L^2[K]}.
+\end{align*}
+We can easily extend this result to include multiple observations of
+functionals and also to incorporate Gaussian noise on each of these
+observations.
+
+An example is shown in Figure \ref{example}, where we condition a
+Gaussian process prior on the integral observation $\int_{0}^{10} f(x)
+\intd{x} = 5$.  Notice that the posterior samples all have integral
+exactly equal to 5.
+
+\begin{figure}
+  \centering
+  \input{figures/samples_example_1.tex}
+  \input{figures/integral_posterior.tex}
+  \caption{Above: a Gaussian process prior on a function $f$ with mean
+    zero and squared exponential covariance.  Below: the posterior
+    distribution on $f$ after conditioning on the obesrvation
+    $\int_{0}^{10} f(x) \intd{x} = 5$.  The posterior samples all have
+    integral identically equal to 5.}
+  \label{example}
+\end{figure}
+
+\section*{Bayesian Quadrature}
+
+Above, we conditioned a Gaussian process on an integral observation.
+In \emph{Bayesian quadrature,} we do the opposite: given (potentially
+noisy) observations of a function $\data = (\mat{X}, \vec{y})$, we
+perform inference about an integral of interest, for example the
+expectation of $f$ under a distribution $p$:
+\begin{equation*}
+  I_p[f] = \int f(x) p(x) \intd{x}.
+\end{equation*}
+The traditional method for estimating integrals of this form is
+\emph{Monte Carlo} estimation, where we sample some points $\{ x_i
+\}_{i = 1}^N$ from the distribution $p(x)$ and estimate
+\begin{equation*}
+  \int f(x) p(x) \intd{x}
+  \approx
+  \sum_{i = 1}^N f(x_i).
+\end{equation*}
+
+In Bayesian quadrature, we place a Gaussian process prior on $f$,
+which we condition on the observations $\data$.  Notice that the input
+locations $\mat{X}$ do not need to be random samples from $p$, but
+rather we are allowed to evaluate $f$ anywhere.  The result is the posterior
+\begin{equation*}
+  p(f \given \data)
+  =
+  \mc{GP}(f; \mu_{f \given \data}, K_{f \given \data}).
+\end{equation*}
+Following the above, we may also derive the posterior distribution
+of the expectation $I_p[f]:$
+\begin{equation*}
+  p\bigl(I_p[f] \given \data \bigr)
+  =
+  \mc{N}
+  \biggl(
+  I_p[f];
+  \int \mu_{f \given \data}(x) p(x) \intd{x},
+  \iint K_{f \given \data}(x, x') p(x) p(x') \intd{x} \intd{x'}
+  \biggr).
+\end{equation*}
+For some choices of the prior prior mean and covariance functions
+$\mu$ and $K$ and the distribution $p$, we may compute the required
+integrals exactly, giving a closed-form expression for the posterior
+distribution of the integral of interest.
+
+Why is this useful?  The main advantages to this approach are that we
+may explicitly model the structure of $f$ via the covariance function
+$K$, and that the posterior variance of the integral may be used to
+derive an active sampling scheme, revealing the most-informative
+points to evaluate the function so as to estimate the integral with
+the highest precision.  Note that the posterior variance of the
+integral only depends on where we sample the function, and not the
+actual values we observe.  This property can be exploited to design
+optimal quadrature rules.
+
+\end{document}
