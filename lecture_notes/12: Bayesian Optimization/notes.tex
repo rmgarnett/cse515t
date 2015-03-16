@@ -1,0 +1,316 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{amsthm}
+\newtheorem{defn}{Definition}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{12cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\Exp}{\mathbb{E}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{Bayesian Optimization}
+
+Suppose we have a function $f\colon \mc{X} \to \R$ that we with to
+minimize on some domain $X \subseteq \mc{X}$.  That is, we wish to
+find
+\[
+  x^\ast = \argmin_{x \in X} f(x).
+\]
+In numerical analysis, this problem is typically called (global)
+\emph{optimization} and has been the subject of decades of study.  We
+draw a distinction between global optimization, where we seek the
+absolute optimum in $X$, and local optimization, where we seek to find
+a local optimum in the neighborhood of a given initial point $x_0$.
+
+A common approach to optimization problems is to make some assumptions
+about $f$.  For example, when the objective function $f$ is known to
+be convex and the domain $X$ is also convex, the problem is known as
+\emph{convex optimization} and has been widely studied.  Convex
+optimization is a common tool used across machine learning.
+
+If an exact functional form for $f$ is not available (that is, $f$
+behaves as a ``black box''), what can we do?  \emph{Bayesian
+  optimization} proceeds by maintaining a probabilistic belief about
+$f$ and designing a so-called \emph{acquisition function} to determine
+where to evaluate the function next.  Bayesian optimization is
+particularly well-suited to global optimization problems where $f$ is
+an \emph{expensive} black-box function; for example, evaluating $f$
+might require running an expensive simulation.  Bayesian optimization
+has recently become popular for training expensive machine-learning
+models whose behavior depend in a complicated way on their parameters
+(e.g., convolutional neural networks).  This is an example of the
+``AutoML'' paradigm.
+
+Although not strictly required, Bayesian optimization almost always
+reasons about $f$ by choosing an appropriate Gaussian process prior:
+\[
+  p(f) = \mc{GP}(f; \mu, K).
+\]
+Given observations $\data = (\mat{X}, \vec{f})$,\footnote{We will
+  assume these observations to be noiseless here, but we could extend
+  the methods here to the noisy case without difficulty.} we can
+condition our distribution on $\data$ as usual:
+\[
+  p(f \given \data) = \mc{GP}(f; \mu_{f \given \data}, K_{f \given \data}).
+\]
+
+Given this set of observations, how do we select where to observe the
+function next?  The meta-approach in Bayesian optimization is to
+design an acquisition function $a(x)$. The acquisition function is
+typically an inexpensive function that can be evaluated at a given
+point that is commensurate with how desirable evaluating $f$ at $x$ is
+expected to be for the minimization problem.  We then optimize the
+acquisition function to select the location of the next observation.
+Of course, we have merely replaced our original optimization problem
+with another optimization problem, but on a much-cheaper function
+$a(x)$.
+
+\section*{Acquisition Functions}
+
+Many acquisition functions can be interpreted in the framework of
+Bayesian decision theory as evaluating an expected loss associated
+with evaluating $f$ at a point $x$.  We then select the point with the
+lowest expected loss, as usual.
+
+In the below we drop the $f \given \data$ subscripts on the mean $\mu$
+and covariance $K$ functions for $f$.
+
+\subsection*{Probability of improvement}
+
+Perhaps the first acquisition function designed for Bayesian
+optimization was \emph{probability of improvement.}  Suppose
+\[
+  f' = \min \vec{f}
+\]
+is the minimal value of $f$ observed so far.  Probability of
+improvement evaluates $f$ at the point most likely to improve upon
+this value.  This corresponds to the following utility
+function\footnote{Recall a utility function is simply a negative loss
+  function.} associated with evaluating $f$ at a given point $x$:
+\[
+  u(x)
+  =
+  \begin{cases}
+    0 & f(x) > f' \\
+    1 & f(x) \leq f'.
+  \end{cases}
+\]
+That is, we receive a unit reward if $f(x)$ turns out to be less than
+$f'$, and no reward otherwise.  The probability of improvement
+acquisition function is then the expected utility as a function of
+$x$:
+\begin{align*}
+  a_{\text{\acro{PI}}}(x)
+  =
+  \mathbb{E}\bigl[ u(x) \given x, \data \bigr]
+  &=
+  \int_{-\infty}^{f'}
+  \mc{N}\bigl(f; \mu(x), K(x, x)\bigr)
+  \intd{f}
+  \\
+  &=
+  \Phi\bigl(f'; \mu(x), K(x, x)\bigr).
+\end{align*}
+The point with the highest probability of improvement (the maximal
+expected utility) is selected.  This is the Bayes action under this
+loss.
+
+\subsection*{Expected improvement}
+
+The loss function associated with probability of improvement is
+somewhat odd: we get a reward for improving upon the current minimum
+independent of the size of the improvement!  This can sometimes lead
+to odd behavior, and in practice can get stuck in local optima and
+underexplore globally.
+
+An alternative acquisition function that does account for the size of
+the improvement is \emph{expected improvement.}  Again suppose that
+$f'$ is the minimal value of $f$ observed so far.  Expected
+improvement evaluates $f$ at the point that, in expectation, improves
+upon $f'$ the most.  This corresponds to the following utility
+function:
+\[
+  u(x)
+  =
+  \max\bigl(0, f' - f(x)\bigr).
+\]
+That is, we receive a reward equal to the ``improvement'' $f' - f(x)$
+if $f(x)$ turns out to be less than $f'$, and no reward otherwise.
+The expected improvement acquisition function is then the expected
+utility as a function of $x$:
+\begin{align*}
+  a_{\text{\acro{EI}}}(x)
+  =
+  \mathbb{E}\bigl[ u(x) \given x, \data \bigr]
+  &=
+  \int_{-\infty}^{f'}
+  (f' - f)
+  \,
+  \mc{N}\bigl(f; \mu(x), K(x, x)\bigr)
+  \intd{f}
+  \\
+  &=
+  \bigl(f' - \mu(x)\bigr)
+  \Phi\bigl(f'; \mu(x), K(x, x)\bigr)
+  +
+  K(x, x)
+  \mc{N}\bigl(f'; \mu(x), K(x, x)\bigr).
+\end{align*}
+The point with the highest expected improvement (the maximal expected
+utility) is selected.
+
+The expected improvement has two components.  The first can be
+increased by reducing the mean function $\mu(x)$.  The second can be
+increased by increasing the variance $K(x, x)$.  These two terms can
+be interpreted as explicitly encoding a tradeoff between
+\emph{exploitation} (evaluating at points with low mean) and
+\emph{exploration} (evaluating at points with high uncertainty).  The
+exploitation--exploration tradeoff is a classic consideration in such
+problems, and the expected improvement criterion \emph{automatically}
+captures both as a result of the Bayesian decision theoretic
+treatment.
+
+\subsection*{Entropy search}
+
+A third alternative is \emph{entropy search.}  Here, we seek to
+minimize the uncertainty we have in the \emph{location} of the optimal
+value
+\[
+  x^\ast = \argmin_{x \in X} f(x).
+\]
+Notice that our belief over $f$ induces a distribution over $x^\ast$,
+$p(x^\ast \given \data)$.  Unfortunately, there is no closed-form
+expression for this distribution.
+
+Entropy search seeks to evaluate points so as to minimize the entropy
+of the induced distribution $p(x^\ast \given \data)$.  Here the
+utility function is the reduction in this entropy given a new
+measurement at $x$, $\bigl(x, f(x)\bigr)$:
+\[
+  u(x)
+  =
+  H[x^\ast \given \data]
+  -
+  H\bigl[x^\ast \given \data, x, f(x)\bigr].
+\]
+As in probability of improvement and expected improvement, we may
+build an acquisition function by evaluating the expected utility
+provided by evaluating $f$ at a point $x$.  Due to the nature of the
+distribution $p(x^\ast \given \data)$, this is somewhat complicated,
+and a series of approximations must be made.
+
+\subsection*{Upper confidence bound}
+
+A final alternative acquisition function is typically known as
+\acro{GP-UCB}, where \acro{UCB} stands for \emph{upper confidence
+  bound.}  \acro{GP-UCB} is typically described in terms of maximizing
+$f$ rather than minimizing $f$; however in the context of minimization,
+the acquisition function would take the form
+\[
+  a_{\text{\acro{UCB}}}(x; \beta)
+  =
+  \mu(x)
+  -
+  \beta
+  \sigma(x),
+\]
+where $\beta > 0$ is a tradeoff parameter and $\sigma(x) = \sqrt{K(x,
+  x)}$ is the marginal standard deviation of $f(x)$.\footnote{In the
+  context of minimization, this is better described as a \emph{lower}
+  confidence bound, but \acro{UCB} is ingrained in the literature as a
+  standard term.}
+
+Again, the \acro{GP-UCB} acquisition function contains explicit
+exploitation ($\mu(x)$) and exploration ($\sigma(x)$) terms.
+Interestingly, the acquisition function cannot be interpreted as
+computing a natural expected utility function.  Nonetheless, strong
+theoretical results are known for \acro{GP-UCB}, namely, that under
+certain conditions, the iterative application of this acquisition
+function will converge to the true global minimum of $f$.
+
+\end{document}
