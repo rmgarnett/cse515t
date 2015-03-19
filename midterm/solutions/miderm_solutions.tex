@@ -1,0 +1,694 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{8cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{7cm}
+\setlength{\squarefigureheight}{6cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\trans}{^\top}
+\newcommand{\inv}{^{-1}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+
+\DeclareMathOperator{\var}{var}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2015) Midterm solutions}}
+\begin{enumerate}
+\item
+  Consider two coins with unknown bias $\theta_1$ and $\theta_2$,
+  respectively.  We place independent, identical beta priors on these
+  quantities:
+  \begin{equation*}
+    p(\theta_1) = \mc{B}(\theta_1; 2, 2);
+    \qquad
+    p(\theta_2) = \mc{B}(\theta_2; 2, 2).
+  \end{equation*}
+  Imagine someone flips both coins and tells you that \emph{exactly
+    one} of the outcomes (but not which) was a ``head.''  Thus the
+  observation was either HT or TH, but you are not told which.  The
+  below expressions are conditioned on ``H'' to indicate this
+  observation.
+  \begin{itemize}
+  \item
+    Give an expression for the posterior of the first coin's bias
+    given this observation, $p(\theta_1 \given \text{H})$.  Simplify
+    the result as much as you can.  Plot the prior and the posterior
+    for $\theta_1$ over the interval $\theta_1 \in (0, 1)$.
+  \item
+    Give an expression for the joint posterior $p(\theta_1, \theta_2
+    \given \text{H})$. Plot the joint prior, the likelihood, and the
+    joint posterior as three separate heat maps over the unit square
+    $(\theta_1, \theta_2) \in (0, 1)^2$.  Use a grid with at least 100
+    values along each of the two $\theta$ axes.
+  \item
+    Summarize what the observation taught us about the bias of the
+    coins.
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+
+The outcome of the unseen experiment was either HT or TH.  These are
+mutually exhaustive and independent events, so we may use the sum
+rule to derive the desired posterior:
+\begin{equation*}
+  p(\theta_1 \given \text{H})
+  =
+  \Pr(\text{HT})p(\theta_1 \given \text{HT})
+  +
+  \Pr(\text{TH})p(\theta_1 \given \text{TH})
+  .
+\end{equation*}
+Notice that both $p(\theta_1 \given \text{HT})$ and $p(\theta_1 \given
+\text{TH})$ can be computed explicitly as updated beta distributions,
+now that the coins in the outcomes have been identified:
+\begin{align*}
+  p(\theta_1 \given \text{HT})
+  &=
+  \mc{B}(\theta_1; 3, 2)
+  \\
+  p(\theta_1 \given \text{TH})
+  &=
+  \mc{B}(\theta_1; 2, 3).
+\end{align*}
+
+What is $\Pr(\text{HT})$?  It can be calculated explicitly, but a
+simpler approach is to appeal to symmetry between the coins to
+conclude $\Pr(\text{HT}) = \Pr(\text{TH}) = \nicefrac{1}{2}$.  Thus
+\begin{equation*}
+  p(\theta_1 \given \text{H})
+  =
+  \tfrac{1}{2}
+  \bigl(
+  p(\theta_1 \given \text{HT}) +
+  p(\theta_1 \given \text{TH})
+  \bigr)
+  =
+  \tfrac{1}{2}
+  \bigl(
+  \mc{B}(\theta_1; 3, 2) +
+  \mc{B}(\theta_1; 2, 3)
+  \bigr)
+  .
+\end{equation*}
+We can simply this expression further.  The posterior is proportional
+to
+\begin{equation*}
+  p(\theta_1 \given \text{H})
+  \propto
+  \theta_1^2 (1 - \theta_1)
+  +
+  \theta_1 (1 - \theta_1)^2
+  =
+  \theta_1(1 - \theta_1)
+  \propto
+  \mc{B}(\theta_1; 2, 2).
+\end{equation*}
+Therefore the distribution of $\theta_1$ has not changed given our
+observation!  The prior (and posterior!) for $\theta_1$ is plotted
+in Figure \ref{problem_1_prior_1}.
+
+\begin{figure}
+  \centering
+  \input{figures/problem_1_prior_1}
+  \caption{The prior and posterior (given the observation H) of
+    $\theta_1$.}
+  \label{problem_1_prior_1}
+\end{figure}
+
+There are two ways to compute the joint posterior over $(\theta_1,
+\theta_2)$: the easy way and the hard way.  The easy way is to use the
+sum rule again to write
+\begin{align*}
+  p(\theta_1, \theta_2 \given \text{H})
+  &=
+  \Pr(\text{HT})
+  p(\theta_1, \theta_2 \given \text{HT})
+  +
+  \Pr(\text{TH})
+  p(\theta_1, \theta_2 \given \text{TH})
+  \\
+  &=
+  \tfrac{1}{2}
+  \mc{B}(\theta_1; 3, 2)
+  \mc{B}(\theta_2; 2, 3)
+  +
+  \tfrac{1}{2}
+  \mc{B}(\theta_1; 2, 3)
+  \mc{B}(\theta_2; 3, 2).
+\end{align*}
+
+If we go with the hard way, we begin by computing the joint prior.  By
+independence, we have:
+\begin{equation*}
+  p(\theta_1, \theta_2)
+  =
+  \mc{B}(\theta_1; 2, 2)
+  \mc{B}(\theta_2; 2, 2).
+\end{equation*}
+To derive the likelihood, we again note that our observation could
+have been generated by two mutually independent events: HT or TH.
+Given $\theta_1$ and $\theta_2$, the total probability of these
+events is:
+\begin{equation*}
+  \Pr(\text{H} \given \theta_1, \theta_2)
+  =
+  \theta_1(1 - \theta_2)
+  +
+  (1 - \theta_1)\theta_2;
+\end{equation*}
+the first term accounts for HT and the second term for TH.  The
+posterior is now:
+\begin{align*}
+  p(\theta_1, \theta_2 \given \text{H})
+  &=
+  \tfrac{1}{Z}
+  \Pr(\text{H} \given \theta_1, \theta_2)
+  p(\theta_1, \theta_2)
+  \\
+  &=
+  \tfrac{1}{Z}
+  \bigl(
+  \theta_1(1 - \theta_2)
+  +
+  (1 - \theta_1)\theta_2
+  \bigr)
+  \mc{B}(\theta_1; 2, 2)
+  \mc{B}(\theta_2; 2, 2).
+\end{align*}
+The normalization constant is
+\begin{equation*}
+  Z
+  =
+  \Pr(\text{H})
+  =
+  \int_0^1
+  \int_0^1
+  \bigl(
+  \theta_1(1 - \theta_2)
+  +
+  (1 - \theta_1)\theta_2
+  \bigr)
+  \mc{B}(\theta_1; 2, 2)
+  \mc{B}(\theta_2; 2, 2)
+  \intd{\theta_1}
+  \intd{\theta_2}.
+\end{equation*}
+This integral is tractable and equals
+\nicefrac{1}{2}.\footnote{\url{http://goo.gl/wRofuX}} In fact, this is
+always true for any arbitrary mean-\nicefrac{1}{2} beta priors on
+$\theta_1, \theta_2$: if our best guess is that each coin is unbiased,
+then the outcomes HT/TH always have equal combined probability as the
+outcomes HH/TT.
+
+The posterior is now
+\begin{equation*}
+  p(\theta_1, \theta_2 \given \text{H})
+  =
+  2
+  \bigl(
+  \theta_1(1 - \theta_2)
+  +
+  (1 - \theta_1)\theta_2
+  \bigr)
+  \mc{B}(\theta_1; 2, 2)
+  \mc{B}(\theta_2; 2, 2).
+\end{equation*}
+This is equivalent to the expression we derived with ``the easy way.''
+
+The prior, likelihood, and posterior are plotted below.  From the
+posterior, we can see that joint probabilities corresponding to
+jointly low or high values: these combinations would correspond to a
+higher probability of seeing either HH or TT observations.  Despite
+the marginals for $\theta_1$ and $\theta_2$ remaining unchanged, the H
+observation has entangled the previously independent beliefs in the
+anticorrelated posterior.
+
+\begin{figure}
+  \centering
+  \input{figures/problem_1_joint_prior.tex}
+  \caption{The joint prior $p(\theta_1, \theta_2)$.}
+  \label{problem_joint_prior}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \input{figures/problem_1_joint_likelihood.tex}
+  \caption{The joint likelihood $p(\text{H} \given \theta_1, \theta_2)$.}
+  \label{problem_joint_likelihood}
+\end{figure}
+
+\begin{figure}
+  \centering
+  \input{figures/problem_1_joint_posterior.tex}
+  \caption{The joint posterior $p(\theta_1, \theta_2 \given \text{H})$.}
+  \label{problem_joint_posterior}
+\end{figure}
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item
+  Consider the three-dimensional parameter vector $\vec{\theta} =
+  [\theta_1, \theta_2, \theta_3]\trans$, with the following joint
+  multivariate Gaussian prior:
+  \begin{equation*}
+    p(\vec{\theta})
+    =
+    \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma})
+    =
+    \mc{N}
+    \left(
+    \begin{bmatrix}
+      \theta_1 \\
+      \theta_2 \\
+      \theta_3
+    \end{bmatrix}
+    ;
+    \begin{bmatrix}
+      0 \\
+      1 \\
+      2
+    \end{bmatrix},
+    \begin{bmatrix}
+      1 & 2 & 0   \\
+      2 & 9 & 0 \\
+      0 & 0 & 16
+    \end{bmatrix}
+    \right).
+  \end{equation*}
+  We are going to consider a decision problem with action space
+  $\mc{A} = \{1, 2, 3\}$.  The result of choosing an action $a \in
+  \mc{A}$ will be to observe the exact value of $\theta_a$, the $a$th
+  element of $\vec{\theta}$.
+
+  Consider the following loss functions, $\ell_1$ and $\ell_2$:
+  \begin{equation*}
+    \ell_1(\vec{\theta}, a) =
+    \begin{cases}
+      1 & \theta_a   >  0 \\
+      0 & \theta_a \leq 0
+    \end{cases}
+    \qquad
+    \ell_2(\vec{\theta}, a) = \min(0, \theta_a).
+  \end{equation*}
+  For each:
+  \begin{itemize}
+  \item
+    Write a generic expression for the expected loss of action $a$ in
+    terms of $\vec{\mu}$ and $\mat{\Sigma}$.  Evaluate any integrals
+    you encounter.
+  \item
+    Give a numerical value for the expected loss of each action, using
+    the values of $(\vec{\mu}, \mat{\Sigma})$ provided above.
+  \item
+    State the Bayes action.
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+
+First, we note that the loss functions only depend on $\vec{\theta}$
+through $\theta_a$, so we must only consider the marginal belief about
+$\theta_a$ when contemplating action $a$.  By applying the marginalization
+formula for multivariate Gaussians, this belief is:
+\begin{equation*}
+  p(\theta_a) = \mc{N}(\theta_a; \mu_a, \Sigma_{aa}).
+\end{equation*}
+For loss $\ell_1$, we may calculate the expected loss of each action:
+\begin{equation*}
+  \mathbb{E}
+  \bigl[
+    \ell_1(\vec{\theta}, a)
+  \bigr]
+  =
+  \int_{-\infty}^\infty
+  \ell_1(\vec{\theta}, a)
+  p(\theta_a)
+  \intd{\theta_a}
+  =
+  \int_0^\infty
+  \mc{N}(\theta_a; \mu_a, \Sigma_{aa})
+  \intd{\theta_a}
+  =
+  1 - \Phi(0; \mu_a, \Sigma_{aa}).
+\end{equation*}
+Using this result, we may numerically calculate the expected loss for
+each action:
+\begin{equation*}
+  \mathbb{E}\bigl[\ell_1(\vec{\theta}, 1)\bigr]
+  =
+  0.5 \qquad
+  \mathbb{E}\bigl[\ell_1(\vec{\theta}, 2)\bigr]
+  =
+  0.631 \qquad
+  \mathbb{E}\bigl[\ell_1(\vec{\theta}, 3)\bigr]
+  =
+  0.691.
+\end{equation*}
+The Bayes action is $a = 1$, with the lowest expected loss.
+
+For loss $\ell_2$, we proceed in the same way:
+\begin{equation*}
+  \mathbb{E}
+  \bigl[
+    \ell_2(\vec{\theta}, a)
+  \bigr]
+  =
+  \int_{-\infty}^\infty
+  \ell_2(\vec{\theta}, a)
+  p(\theta_a)
+  \intd{\theta_a}
+  =
+  \int_{-\infty}^0
+  \theta_a
+  \mc{N}(\theta_a; \mu_a, \Sigma_{aa})
+  \intd{\theta_a}.
+\end{equation*}
+We may compute this definite integral; I used a table of Gaussian
+integrals\footnote{\url{http://en.wikipedia.org/wiki/List_of_integrals_of_Gaussian_functions}}
+and the identity
+\begin{equation*}
+  \phi\biggl(
+  \frac{a - \mu}{\sigma}
+  \biggr)
+  =
+  \sigma \mc{N}(a; \mu, \sigma^2)
+\end{equation*}
+to derive
+\begin{equation*}
+  \mathbb{E}
+  \bigl[
+    \ell_2(\vec{\theta}, a)
+  \bigr]
+  =
+  \mu_a \Phi(0; \mu_a, \Sigma_{aa})
+  -
+  \Sigma_{aa}
+  \mc{N}(0; \mu_a, \Sigma_{aa}).
+\end{equation*}
+Using this result, we may numerically calculate the expected loss for
+each action:
+\begin{equation*}
+  \mathbb{E}\bigl[\ell_2(\vec{\theta}, 1)\bigr]
+  =
+  -0.399 \qquad
+  \mathbb{E}\bigl[\ell_2(\vec{\theta}, 2)\bigr]
+  =
+  -0.763 \qquad
+  \mathbb{E}\bigl[\ell_2(\vec{\theta}, 3)\bigr]
+  =
+  -0.791.
+\end{equation*}
+The Bayes action is now $a = 3$, with the lowest expected loss.
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{2}
+\item
+  Consider a $d$-dimensional vector $\vec{\theta}$ with an arbitrary
+  multivariate Gaussian distribution:
+  \begin{equation*}
+    p(\vec{\theta})
+    =
+    \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma}).
+  \end{equation*}
+  \begin{itemize}
+  \item
+    Give a general expression for the distribution of the following
+    (scalar) value $\tau$.
+    \begin{equation*}
+      \tau = \theta_1 + 2\theta_2 + \dotsb d\theta_d
+    \end{equation*}
+  \item
+    Consider again the specific distribution of the three-dimensional
+    vector $\vec{\theta}$ from the last problem, as well as the action
+    space $\mc{A}$ with the same observation mechanism: after choosing
+    $a \in \mc{A}$, we will observe the corresponding value
+    $\theta_a$.  Suppose we may select one action and then must
+    predict $\tau$ under a squared loss function:
+    \begin{equation*}
+      \ell(\tau, \hat{\tau}) = (\tau - \hat{\tau})^2.
+    \end{equation*}
+    Using the distribution from the last problem. what is the expected
+    loss of each of the three available actions?  Which is the Bayes
+    action?
+  \end{itemize}
+\end{enumerate}
+
+\subsection*{Solution}
+
+Define the (row) vector $\vec{d}\trans = [1, 2, \dotsc, d]$.  We first
+notice that $\tau$ is simply a linear transformation of
+$\vec{\theta}$:
+\begin{equation*}
+  \tau = \vec{d}\trans \vec{\theta};
+\end{equation*}
+therefore $\tau$ has a multivariate Gaussian distribution:
+\begin{equation*}
+  p(\tau)
+  =
+  p(\vec{d}\trans \vec{\theta})
+  =
+  \mc{N}(\tau; \vec{d}\trans \vec{\mu}, \vec{d}\trans \mat{\Sigma} \vec{d}).
+\end{equation*}
+
+In the second part of the question, we must consider estimating $\tau$
+under a squared loss function $\ell(\tau, \hat{\tau}) = (\tau -
+\hat{\tau})^2$.  A general result from Bayesian decision theory is
+that the Bayes action is to estimate $\hat{\tau}$ as the (posterior)
+mean of $\tau$.  For example, given the initial belief from the last
+problem, we would predict $\hat{\tau} = \vec{d}\trans \vec{\mu} = 8$.
+What is the \emph{expected} loss when predicting the mean $\hat{\tau}
+= \mathbb{E}[\tau]$?
+\begin{equation*}
+  \mathbb{E}
+  \Bigl[
+    \ell\bigl(\tau, \mathbb{E}[\tau]\bigr)
+  \Bigr]
+  =
+  \mathbb{E}
+  \Bigl[
+    \bigl(\tau - \mathbb{E}[\tau]\bigr)^2
+  \Bigr]
+  =
+  \var [ \tau ]
+  =
+  \vec{d}\trans \mat{\Sigma} \vec{d}.
+\end{equation*}
+The expected squared loss is simply the variance of $\tau$!  Conveniently,
+we have a closed-form expression for this variance.
+
+The problem asks us to consider how we would proceed with estimating
+$\tau$ if we could observe one of the entries of the vector
+$\vec{\theta}$ before making our prediction $\hat{\tau}$.  If we wish
+to minimize our expected loss, we should minimize the variance of
+$\tau$ with our observation.  Observing an entry of $\vec{\theta}$ is
+a conditioning observation of a multivariate Gaussian.  We have a
+closed-form expression for the posterior covariance of $\vec{\theta}$
+after observing any entry $\theta_a$.  Remarkably, the posterior
+covariance of $\vec{\theta}$ does not depend on the actual value we
+observe, only the index of the entry we choose, $a$.  The posterior
+covariance matrices $\mat{\Sigma}_{\vec{\theta} \given \theta_a}$ for
+each available action $a \in \mc{A}$ are:
+\begin{align*}
+  \mat{\Sigma}_{\vec{\theta} \given \theta_1}
+  &=
+  \begin{bmatrix}
+    0 & 0 & 0   \\
+    0 & 5 & 0   \\
+    0 & 0 & 16
+  \end{bmatrix}
+  \\
+  \mat{\Sigma}_{\vec{\theta} \given \theta_2}
+  &=
+  \begin{bmatrix}
+    \frac{5}{9} & 0 & 0   \\
+    0           & 0 & 0   \\
+    0           & 0 & 16
+  \end{bmatrix}
+  \\
+  \mat{\Sigma}_{\vec{\theta} \given \theta_3}
+  &=
+  \begin{bmatrix}
+    1 & 2 & 0 \\
+    2 & 9 & 0 \\
+    0 & 0 & 0
+  \end{bmatrix}.
+\end{align*}
+The expected losses of our final prediction of $\hat{\tau}$
+given $\theta_a$ is now given by
+\begin{equation*}
+  \mathbb{E}\bigl[\ell(\tau, \hat{\tau}) \given \theta_a \bigr]
+  =
+  \vec{d}\trans \mat{\Sigma}_{\vec{\theta} \given \theta_a} \vec{d}.
+\end{equation*}
+For our particular problem, the expected final loss after each potential
+action is:
+\begin{equation*}
+  \mathbb{E}\bigl[\ell(\tau, \hat{\tau}) \given \theta_1\bigr]
+  =
+  164 \qquad
+  \mathbb{E}\bigl[\ell(\tau, \hat{\tau}) \given \theta_2\bigr]
+  =
+  144\,\nicefrac{5}{9} \qquad
+  \mathbb{E}\bigl[\ell(\tau, \hat{\tau}) \given \theta_3\bigr]
+  =
+  45.
+\end{equation*}
+The Bayes action is $a = 3$.  Despite the fact that $\theta_3$ is
+uncorrelated with the other two entries, collapsing its large variance
+from $16$ to zero has the effect of reducing the variance of $\tau$
+(and therefore our expected loss) by $3^2 \cdot 16 = 144$.
+
+\clearpage
+\begin{enumerate}
+\setcounter{enumi}{3}
+\item
+  Consider the following data:
+  \begin{align*}
+    \vec{x} &= [0.54, 1.84, -2.26, 0.86, 0.32]\trans; \\
+    \vec{y} &= [-1.31, -0.43, 0.34, 3.58, 2.77]\trans.
+  \end{align*}
+  Consider the Bayesian linear regression model with $\phi(x) = [1,
+    x]\trans$.  Use the prior $p(\vec{w}) = \mc{N}(\vec{w}; \vec{0},
+  \mat{I})$.
+
+  Plot the posterior probability that the slope of the regression line
+  is positive as a function of the standard deviation of the
+  observation noise $\sigma$ (the noise variance is then $\sigma^2$).
+  Use a grid of at least 100 points in the range $\sigma \in (0.01,
+  10)$.
+\end{enumerate}
+
+\subsection*{Solution}
+
+Using the given linear regression model, we assume
+\begin{equation*}
+  y
+  =
+  \phi(x)\trans \vec{w} + \varepsilon
+  =
+  w_1 + w_2 x + \varepsilon.
+\end{equation*}
+The second entry of the weight vector $\vec{w}$, $w_2$, therefore
+serves as the slope of the regression line.
+
+The Bayesian linear regression model gives the following posterior for
+$\vec{w}$ given observations $\data$ and a specified noise variance
+$\sigma^2$:
+\begin{equation*}
+  p(\vec{w} \given \data, \sigma^2)
+  =
+  \mc{N}(\vec{w};
+  \vec{\mu}_{\vec{w}\given\data},
+  \mat{\Sigma}_{\vec{w}\given\data}
+  ),
+\end{equation*}
+where
+\begin{align*}
+  \vec{\mu}_{\vec{w}\given\data}
+  &=
+  \mat{X}\trans
+  (\mat{X}\mat{X}\trans + \sigma^2 \mat{I})\inv
+  \vec{y};
+  \\
+  \mat{\Sigma}_{\vec{w}\given\data}
+  &=
+  \mat{I}
+  -
+  \mat{X}\trans
+  (\mat{X}\mat{X}\trans + \sigma^2 \mat{I})\inv
+  \mat{X},
+\end{align*}
+where we have plugged the given prior $p(\vec{w}) = \mc{N}(\vec{w};
+\vec{0}, \mat{I})$ into the general result.
+
+Given a value of $\sigma$, the formulas above give the posterior over
+$\vec{w}$.  To determine the probability that $w_2$ is positive, we
+simply take the marginal posterior distribution and evaluate the
+normal \acro{CDF}:
+\begin{equation*}
+  \Pr(w_2 > 0 \given \data, \sigma^2)
+  =
+  1 -
+  \Phi\bigl(
+  0;
+  (\vec{\mu}_{\vec{w}\given\data})_2
+  ,
+  (\mat{\Sigma}_{\vec{w}\given\data})_{22}
+  \bigr).
+\end{equation*}
+
+This quantity is plotted as a function of $\sigma$ in Figure
+\ref{problem_4}.  The larger the noise, the less confident we become
+about the sign of the slope.
+
+\begin{figure}
+  \centering
+  \input{figures/problem_4.tex}
+  \caption{The posterior probability that the slope of the regression
+    line is positive as a function of the noise standard deviation
+    $\sigma$.  Note the limits on the $y$-axis.}
+  \label{problem_4}
+\end{figure}
+
+\end{document}
