@@ -1,0 +1,222 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{amsthm}
+\newtheorem{defn}{Definition}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{12cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\Exp}{\mathbb{E}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{Gaussian Process Classification}
+
+Just as we could use the kernel trick to extend Bayesian linear
+regression to Gaussian processes for general-purpose nonlinear
+regression, we may also extend Bayesian linear classification in the
+same way.  In Gaussian process classification, we assume there is a
+latent function $f\colon \mc{X} \to \R$ that is commensurate with the
+probability of a positive observation; higher latent function values
+correspond to higher probabilities of positive observations.  In
+Bayesian linear classification, we assumed a parametric (linear) form
+for this latent function:
+\[
+  f(\vec{x}) = \vec{x}\trans \vec{w}.
+\]
+In Gaussian process classification, rather than choosing a parametric
+form for $f$, we instead place a Gaussian process prior on $f$:
+\[
+  p(f) = \mc{GP}(f; \mu, K).
+\]
+Note that a Gaussian prior on the weight vector $\vec{w}$ above
+induces a Gaussian process prior on $f$ with mean function
+\[
+  \mu(\vec{x}) = \vec{x}\trans \vec{\mu}
+\]
+and covariance function
+\[
+  K(\vec{x}, \vec{x}') = \vec{x}\trans \mat{\Sigma} \vec{x},
+\]
+where $p(\vec{w}) = \mc{N}(\vec{w}; \vec{\mu}, \mat{\Sigma})$. The
+Gaussian process formalism allows us to model arbitrary nonlinear
+classification boundaries by using any desired mean and covariance
+function for $f$.
+
+\subsection*{Likelihood}
+
+Suppose we have made binary observations at a set of values $\mat{X}$,
+and define $\vec{f} = f(\mat{X})$ to be the associated set of latent
+function values.  As in Bayesian linear classification, we assume
+the following likelihood for a given binary observation $y_i$
+associated with $\vec{x}_i$:
+\[
+  p(y_i = 1 \given f_i)
+  =
+  \sigma(f_i),
+\]
+where $\sigma\colon \R \to (0, 1)$ is a monotonically increasing
+sigmoid function such as the logisitic function or the standard normal
+\acro{CDF}.  We again assume the observations are conditionally
+independent given the latent function values:
+\[
+  p(\vec{y} \given \vec{f})
+  =
+  \prod p(y_i \given f_i).
+\]
+
+\subsection*{Inference}
+
+Given our prior $p(f) = \mc{GP}(f; \mu, K)$ and a set of observations
+$\data = (\mat{X}, \vec{y})$, we wish to find the posterior
+distribution of the latent function values $\vec{f} = f(\mat{X})$.
+Note that if we had a Gaussian posterior $\vec{f}$, this would induce
+a Gaussian process posterior for the function $f$ given $\data$.
+The posterior is
+\[
+  p(\vec{f} \given \data)
+  =
+  \frac{1}{Z}
+  p(\vec{f} \given \mat{X})
+  p(\vec{y} \given \vec{f})
+  =
+  \mc{N}\bigl(\vec{f}; \mu(\mat{X}), K(\mat{X}, \mat{X})\bigr)
+  \prod_i p(y_i \given f_i).
+\]
+Unfortunately, the sigmoid likelihood coupled with the Gaussian prior
+do not couple to form a tractable posterior.  Instead, we must
+approximate this posterior in some way.  Previously we described the
+Laplace approximation, which approximates the unnormalized log
+posterior with a second-order Taylor expansion, resulting in a
+Gaussian approximate posterior centered at the posterior mode
+\[
+  \hat{\vec{f}} = \argmax_{\vec{f}} p(\vec{f} \given \data).
+\]
+
+Here we will consider two more general-purpose approximation
+techniques for approximating intractable posterior distributions.
+These techniques are useful when the likelihood factorizes into
+one-dimensional terms, as in \acro{GP} classification.
+
+\section*{Assumed Density Filtering}
+
+Consider a posterior distribution of the form
+\[
+  p(\vec{\theta} \given \data)
+  =
+  \frac{1}{Z}
+  p(\vec{\theta})
+  \prod_i^N
+  p(y_i \given \vec{\theta}).
+\]
+We assume the prior $p(\vec{\theta})$ has been chosen to be some nice
+form, for example a Gaussian.  In \emph{assumed density filtering}
+(\acro{ADF}), we assume that the posterior has the same form as this
+prior.
+
+Consider just the first two terms in this product:
+\[
+  p(\vec{\theta} \given y_1)
+  =
+  \frac{1}{Z_1}
+  p(\vec{\theta})
+  p(y_1 \given \vec{\theta})
+\]
+This product will not have the same nice form of the prior, but has
+only been warped ``slightly'' away from the prior via a single
+likelihood term.  In many cases, this distribution will be at least
+partially manageable.  Perhaps there will not be a nice closed
+expression, but we might still be able to compute the normalizing
+constant $Z_1$ or the moments of the posterior.  In assumed density
+filtering, we approximate this product with a member of the density
+family the prior belongs to.  This is done by matching the moments
+between the product and the approximate density.  For example, suppose
+$p(\vec{\theta}) = \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma})$.
+We compute
+\begin{align}
+  Z
+
+\end{document}
