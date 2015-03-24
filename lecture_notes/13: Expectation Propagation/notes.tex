@@ -214,9 +214,14 @@ each of the likelihood terms $t_i$.  The result is
   q(\vec{\theta})
   =
   p_0(\vec{\theta})
-  \prod_{i = 1}^N \tilde{Z}_i \tilde{t}_i(\vec{\theta}),
+  \prod_{i = 1}^N \tilde{Z}_i \tilde{t}_i(\vec{\theta}; \tilde{\vec{\theta}}_i),
 \]
-and this product will belong to the desired family by conjugacy.
+and this product will belong to the desired family by conjugacy.  Here
+the constants $\tilde{Z}_i$ and the local parameter vectors
+$\{\tilde{\vec{\theta}}_i\}$ are free parameters, called \emph{site
+  parameters}, we may choose for each of the approximating
+distributions $\tilde{t}_i$ to try to improve the fit of the
+approximating distribution.
 
 For example, the Gaussian distribution is self-conjugate, so the
 \acro{ADF} approximation will in this case take the form
@@ -229,8 +234,13 @@ For example, the Gaussian distribution is self-conjugate, so the
   \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma})
   \prod_{i=1}^N
   \tilde{Z}_i
-  \mc{N}(\vec{\theta}; \tilde{\vec{\mu}}_i, \tilde{\vec{\Sigma}}_i).
+  \mc{N}(\vec{\theta}; \tilde{\vec{\mu}}_i, \tilde{\mat{\Sigma}}_i),
 \]
+where the site parameters are the constants $\{\tilde{Z}_i\}$ (chosen
+so that the approximation normalizes) as well as the local mean
+vectors $\{\tilde{\vec{\mu}}_i\}$ and covariance matrices
+$\tilde{\mat{\Sigma}}_i$.
+
 Note that in the \acro{GP} classification case, the likelihood terms
 in the product are in fact one dimensional, because the likelihood for
 $y_i$ only depends on $f_i$:
@@ -240,12 +250,12 @@ $y_i$ only depends on $f_i$:
   \mc{N}(\vec{f}; \vec{\mu}, \mat{\Sigma})
   \prod_{i=1}^N
   \tilde{Z}_i
-  \mc{N}(f_i; \tilde{\mu}_i, \tilde{\sigma^2}_i).
+  \mc{N}(f_i; \tilde{\mu}_i, \tilde{\sigma}^2_i).
 \]
 
 Consider just the first two terms in this product:
 \[
-  p(\vec{\theta} \given y_1)
+  p(\vec{\theta} \given \data_1)
   \propto
   p_0(\vec{\theta})
   t_1(\vec{\theta}).
@@ -257,16 +267,188 @@ partially manageable.  Perhaps there will not be a nice closed
 expression, but we might still be able to compute the normalizing
 constant or the moments of the posterior.
 
-In assumed density filtering, we will approximate this product with
+In assumed density filtering, we will approximate this product with a
+member of the desired family:
+\[
+  q_1(\vec{\theta})
+  =
+  \tilde{Z}_1
+  p_0(\vec{\theta})
+  \tilde{t}_1(\vec{\theta}; \tilde{\vec{\theta}}_1)
+  \approx
+  p(\vec{\theta} \given \data_1)
+  \propto
+  p_0(\vec{\theta})
+  t_1(\vec{\theta}).
+\]
+This approximation is done by matching the moments between the
+approximation $q_1(\vec{\theta})$ and the true posterior
+$p(\vec{\theta} \given \data_1)$.
 
-
-This is done by
-matching the moments between the product and the approximate density.
-
-For example, consider  $p_0(\vec{\theta}) = \mc{N}(\vec{\theta};
-\vec{\mu}, \mat{\Sigma})$.  We compute
+For example, consider $p_0(\vec{\theta}) = \mc{N}(\vec{\theta};
+\vec{\mu}, \mat{\Sigma})$.  We select the site parameters
+\[
+  \tilde{Z}_1^{-1}
+  \qquad
+  \tilde{\vec{\mu}}_1 \qquad
+  \tilde{\mat{\Sigma}}_1
+\]
+such that
 \begin{align*}
-
+  \int q_1(\vec{\theta}) \intd{\vec{\theta}} &= 1 \\
+  \mathbb{E}\bigl[q_1(\vec{\theta})\bigr] &= \mspace{14.5mu} \mathbb{E}\bigl[ p(\vec{\theta} \given \data_1) \bigr] \\
+  \cov\bigl[q_1(\vec{\theta})\bigr] &= \cov\bigl[ p(\vec{\theta} \given \data_1) \bigr].
 \end{align*}
+Now the approximate distribution is in the desired density family
+(Gaussians) and matches the true posterior up to the second moment.
+
+Now consider the first three terms of the product:
+\[
+  p(\vec{\theta} \given \data_1, \data_2)
+  \propto
+  p_0(\vec{\theta})
+  t_1(\vec{\theta})
+  t_2(\vec{\theta})
+  \propto
+  p(\vec{\theta} \given \data_1)
+  t_2(\vec{\theta}).
+\]
+The idea in assumed density filtering is to substitute in our
+approximation $q_1(\vec{\theta})$, giving:
+\[
+  p(\vec{\theta} \given \data_1, \data_2)
+  \stackrel{\propto}{\sim}
+  q_1(\vec{\theta})
+  t_2(\vec{\theta}).
+\]
+Now we are in the same situation we were in before!  We have a nice
+``prior'' distribution $q_1$ multiplied by a single likelihood term
+$t_2$.  We proceed as before, replacing the true likelihood term $t_2$
+with an approximate (conjugate) term $\tilde{Z}_2
+\tilde{t}_2(\vec{\theta}; \tilde{\vec{\theta}}_2)$, where we again
+choose the site parameters $(\tilde{Z}_2, \tilde{\vec{\theta}}_2)$ to
+match the moments between our new approximation
+\[
+  q_2(\vec{\theta})
+  =
+  \tilde{Z}_2
+  q_1(\vec{\theta})
+  \tilde{t}_2(\vec{\theta}; \tilde{\vec{\theta}}_2)
+  =
+  \tilde{Z}_1
+  \tilde{Z}_2
+  p_0(\vec{\theta})
+  \tilde{t}_1(\vec{\theta}; \tilde{\vec{\theta}}_1)
+  \tilde{t}_2(\vec{\theta}; \tilde{\vec{\theta}}_2).
+\]
+and the ``less-approximate'' posterior
+$q_1(\vec{\theta})t_2(\vec{\theta})$.  We proceed in this fashion
+until we have processed all the local likelihood terms, resulting
+in the final approximation
+\[
+  q(\vec{\theta})
+  =
+  p_0(\vec{\theta})
+  \prod_{i = 1}^N \tilde{Z}_i \tilde{t}_i(\vec{\theta}; \tilde{\vec{\theta}}_i).
+\]
+
+\section*{Expectation Propagation}
+
+One thing to note about assumed density filtering is that our final
+approximation is dependent on the sequence in which we process the
+likelihood terms $\{t_i\}$.  Note that we are always matching the
+moments between
+\[
+  q_{i-1}(\vec{\theta})t_i(\vec{\theta}),
+\]
+the approximation using data up to the $i$th term as well as the true
+$i$th likelihood term, and the new approximation
+\[
+  q_i(\vec{\theta})
+  =
+  \tilde{Z}_i
+  q_{i-1}(\vec\theta)
+  \tilde{t}_i(\vec{\theta}; \tilde{\vec{\theta}}_i).
+\]
+This moment matching at time $i$ therefore never considers data that
+appears in future terms.  For this reason, we might accumulate errors
+and/or wish to later ``revisit'' a particular term and update the site
+parameters $(\tilde{Z}_i, \tilde{\vec{\theta}}_i)$ in light of future
+data.  This idea leads to \emph{expectation propagation,} a refinement
+of assumed density filtering that can address some of these issues.
+
+The idea is simple.  Once we have processed each of the likelihood
+terms, resulting in the approximation above
+\[
+  q(\vec{\theta})
+  =
+  p_0(\vec{\theta})
+  \prod_{i = 1}^N \tilde{Z}_i \tilde{t}_i(\vec{\theta}; \tilde{\vec{\theta}}_i),
+\]
+we repeatedly revisit each term and update its site parameters.  The
+mechanism for doing so is quite simple.  First, we select a site $1
+\leq i \leq N$ to update, then form the so-called \emph{cavity
+  distribution,} which is our approximation using all but the $i$th
+term in the product:
+\[
+  q_{-i}(\vec{\theta})
+  =
+  p_0(\vec{\theta})
+  \prod_{j \neq i} \tilde{Z}_j \tilde{t}_j(\vec{\theta}; \tilde{\vec{\theta}}_j),
+\]
+where we have divided by the old site term $\tilde{Z}_i
+\tilde{t}_i(\vec{\theta}; \tilde{\vec{\theta}}_i)$.  Now we replace
+the removed site term with the true likelihood term $t_i$, forming the
+\emph{tilted distribution}
+\[
+  q_{-i}(\vec{\theta})
+  t_i(\vec{\theta}).
+\]
+Finally, we select new site parameters to (re)match the moments
+between the tilted distribution and our new approximation:
+\[
+  q_{\text{new}}(\vec{\theta})
+  =
+  \tilde{Z}_i
+  q_{-i}(\vec{\theta})
+  \tilde{t}_i(\vec{\theta}; \tilde{\vec{\theta}}_i).
+\]
+We proceed continually updating site parameters in this manner until
+we reach convergence (i.e., none of the site parameters changes very
+much) or we expend a chosen computational budget.
+
+\subsection*{Theoretical motivation}
+
+We conclude with one brief note about the theoretical motivation
+behind the moment matching used in assumed density filtering and
+expectation propagation.  The Kullback--Leibler (\acro{KL}) divergence
+(also called \emph{relative entropy}) is a notion of ``distance''
+between probability distributions, defined by
+\[
+d_{\text{\acro{KL}}}\bigl(p(\vec{\theta}) \parallel q(\vec{\theta})\bigr)
+  =
+  \int
+  p(\vec{\theta})
+  \frac{p(\vec{\theta})}{q(\vec{\theta})}
+  \intd{\vec{\theta}}.
+\]
+Notice that \acro{KL} divergence is not a true distance, as it is not
+symmetric, but it does satisfy $d_{\text{\acro{KL}}}(p \parallel q)
+\geq 0$ with $d_{\text{\acro{KL}}}(p \parallel q) = 0$ if and only if
+$p(\vec{\theta}) = q(\vec{\theta})$ almost everywhere.
+
+A well-known result is that the \acro{KL} divergence between an
+arbitrary probability distribution $p(\vec{\theta})$ and a
+multivariate Gaussian distribution $q(\vec{\theta})$ (in the direction
+$d_{\text{\acro{KL}}}(p \parallel q)$) is minimized when $q$ is chosen
+to match the moments of $p$.  Therefore, in the case of Gaussian
+approximations, these methods can be seen as iteratively building up
+an approximate posterior in the desired family by minimizing the
+\acro{KL} divergence at every step.
+
+Minimizing \acro{KL} divergence in ``the other direction,''
+$d_{\text{\acro{KL}}}(q \parallel p)$, gives rise to another family of
+approximation techniques known as \emph{variational Bayesian
+  inference.}
 
 \end{document}
