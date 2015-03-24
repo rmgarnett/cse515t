@@ -188,35 +188,85 @@ Consider a posterior distribution of the form
   p(\vec{\theta} \given \data)
   =
   \frac{1}{Z}
-  p(\vec{\theta})
-  \prod_i^N
-  p(y_i \given \vec{\theta}).
+  p_0(\vec{\theta})
+  \prod_{i = 1}^N
+  t_i(\vec{\theta}),
 \]
-We assume the prior $p(\vec{\theta})$ has been chosen to be some nice
-form, for example a Gaussian.  In \emph{assumed density filtering}
-(\acro{ADF}), we assume that the posterior has the same form as this
-prior.
+where the $t_i$ are typically likelihood terms, for example our $p(y_i
+\given f_i)$ above.  We assume the prior $p_0(\vec{\theta})$ has been
+chosen to be some nice form, for example a Gaussian, and we will use
+the Gaussian case to illustrate the idea below.
+
+In \emph{assumed density filtering} (\acro{ADF}), we assume that the
+posterior has the same form as the prior $p_0$, and we seek an
+approximating distribution
+\[
+  q(\vec{\theta}) \approx p(\vec{\theta} \given \data)
+\]
+from the same family as $p_0$ that approximates the true posterior
+``as well as possible.''
+
+Mechanically, ensuring that our approximate distribution $q$ remains
+in the same family as $p_0$ is achieved by selecting an (unnormalized)
+member $\tilde{t}_i$ from the likelihood conjugate to the prior for
+each of the likelihood terms $t_i$.  The result is
+\[
+  q(\vec{\theta})
+  =
+  p_0(\vec{\theta})
+  \prod_{i = 1}^N \tilde{Z}_i \tilde{t}_i(\vec{\theta}),
+\]
+and this product will belong to the desired family by conjugacy.
+
+For example, the Gaussian distribution is self-conjugate, so the
+\acro{ADF} approximation will in this case take the form
+\[
+  q(\vec{\theta})
+  =
+  p_0(\vec{\theta})
+  \prod_{i=1}^N t_i(\vec{\theta})
+  \approx
+  \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma})
+  \prod_{i=1}^N
+  \tilde{Z}_i
+  \mc{N}(\vec{\theta}; \tilde{\vec{\mu}}_i, \tilde{\vec{\Sigma}}_i).
+\]
+Note that in the \acro{GP} classification case, the likelihood terms
+in the product are in fact one dimensional, because the likelihood for
+$y_i$ only depends on $f_i$:
+\[
+  q(\vec{f})
+  =
+  \mc{N}(\vec{f}; \vec{\mu}, \mat{\Sigma})
+  \prod_{i=1}^N
+  \tilde{Z}_i
+  \mc{N}(f_i; \tilde{\mu}_i, \tilde{\sigma^2}_i).
+\]
 
 Consider just the first two terms in this product:
 \[
   p(\vec{\theta} \given y_1)
-  =
-  \frac{1}{Z_1}
-  p(\vec{\theta})
-  p(y_1 \given \vec{\theta})
+  \propto
+  p_0(\vec{\theta})
+  t_1(\vec{\theta}).
 \]
 This product will not have the same nice form of the prior, but has
 only been warped ``slightly'' away from the prior via a single
 likelihood term.  In many cases, this distribution will be at least
 partially manageable.  Perhaps there will not be a nice closed
 expression, but we might still be able to compute the normalizing
-constant $Z_1$ or the moments of the posterior.  In assumed density
-filtering, we approximate this product with a member of the density
-family the prior belongs to.  This is done by matching the moments
-between the product and the approximate density.  For example, suppose
-$p(\vec{\theta}) = \mc{N}(\vec{\theta}; \vec{\mu}, \mat{\Sigma})$.
-We compute
-\begin{align}
-  Z
+constant or the moments of the posterior.
+
+In assumed density filtering, we will approximate this product with
+
+
+This is done by
+matching the moments between the product and the approximate density.
+
+For example, consider  $p_0(\vec{\theta}) = \mc{N}(\vec{\theta};
+\vec{\mu}, \mat{\Sigma})$.  We compute
+\begin{align*}
+
+\end{align*}
 
 \end{document}
