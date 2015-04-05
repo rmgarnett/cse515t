@@ -1,0 +1,281 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{subcaption}
+\usepackage{bm}
+
+\usepackage{amsthm}
+\newtheorem{defn}{Definition}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{pgfplots}
+\pgfplotsset{
+  compat=newest,
+  plot coordinates/math parser=false,
+  tick label style={font=\footnotesize, /pgf/number format/fixed},
+  label style={font=\small},
+  legend style={font=\small},
+  every axis/.append style={
+    tick align=outside,
+    clip mode=individual,
+    scaled ticks=false,
+    thick,
+    tick style={semithick, black}
+  }
+}
+
+\pgfkeys{/pgf/number format/.cd, set thousands separator={\,}}
+
+\usepgfplotslibrary{external}
+\tikzexternalize[prefix=tikz/]
+
+\newlength\figurewidth
+\newlength\figureheight
+
+\setlength{\figurewidth}{12cm}
+\setlength{\figureheight}{6cm}
+
+\newlength\squarefigurewidth
+\newlength\squarefigureheight
+
+\setlength{\squarefigurewidth}{4cm}
+\setlength{\squarefigureheight}{4cm}
+
+\newlength\smallsquarefigurewidth
+\newlength\smallsquarefigureheight
+
+\setlength{\smallsquarefigurewidth}{3.25cm}
+\setlength{\smallsquarefigureheight}{3.25cm}
+
+\newlength\smallfigurewidth
+\newlength\smallfigureheight
+
+\setlength{\smallfigurewidth}{6.25cm}
+\setlength{\smallfigureheight}{4cm}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\inv}{^{-1}}
+\newcommand{\trans}{^\top}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\R}{\mathbb{R}}
+\renewcommand{\epsilon}{\varepsilon}
+\newcommand{\Exp}{\mathbb{E}}
+
+\DeclareMathOperator{\var}{var}
+\DeclareMathOperator{\cov}{cov}
+\DeclareMathOperator{\diag}{diag}
+\DeclareMathOperator*{\argmin}{arg\,min}
+\DeclareMathOperator*{\argmax}{arg\,max}
+
+\begin{document}
+
+\section*{Dynamical Systems and the Kalman Filter}
+
+Suppose you periodically make noisy observations of an object that you
+wish to track.  We assume that the state of the object is evolving
+under known dymanics.  This is a reasonable assumption in many
+scenarios, where the dynamics might be known.  For example, the system
+might be evolving under well-understood Newtonian mechanics.
+
+The \emph{Kalman filter} is a probabilistic mechanism for reasoning
+about a sequence of state variables at discrete time steps:
+\[
+  \{\vec{x}_0, \vec{x}_1, \dotsc \}
+\]
+evolving (noisily) under known mechanics that are assumed to be
+linear.  Specifically, the assumption we make is
+\[
+  \vec{x}_t = \mat{F}_t \vec{x}_{t - 1} + \vec{w}_t,
+\]
+where $\mat{F}_t$ is a known, possibly time-dependent matrix and
+$\vec{w}_t$ is a noise term.  We wish to maintain a probabilistic
+belief about the state variables $\{\vec{x}_t\}$.
+
+To inform our beliefs, we assume that we make noisy measurements of
+$\vec{x}$ at every time step.  Specifically, in the Kalman filter, we
+assume that we make a noisy measurement $\vec{z}_t$ at time $t$ that
+is related to $\vec{x}_t$ via a linear transformation and the possible
+addition of more noise:
+\[
+  \vec{z}_t = \mat{H}_t \vec{x}_t + \vec{v}_t,
+\]
+where $\mat{H}_t$ is again a known, possibly time-dependent matrix
+and $\vec{v}_t$ is a noise term.
+
+\subsection*{Kalman filter: modeling details}
+
+The Kalman filter repeatedly applies Gaussian identities to
+reason about the evolution of a hidden state $\vec{x}$ given
+the observation sequence $\{ \vec{z}_t \}$.
+
+In the Kalman filter, we maintain a probabilistic belief about
+$\vec{x}_t$ that is a multivariate Gaussian distribution.
+Specifically, we will assume (for the sake of induction) that our
+belief about the state $\vec{x}_{t - 1}$ given all observations
+up to time $t - 1$ was a multivariate Gaussian distribution:
+\[
+  p(\vec{x}_{t - 1} \given \mat{Z}_{t - 1})
+  =
+  \mc{N}(\vec{x}_{t - 1};
+  \hat{\vec{x}}_{t - 1 \given t - 1},
+  \mat{P}_{t - 1 \given t - 1}
+  ),
+\]
+where we have defined $\mat{Z}_{t - 1}$ to indicate all observations
+up to time $t - 1$ and have adopted standard Kalman filter notation,
+using the subscript $t \given t'$ to indicate our belief about
+$\vec{x}_t$ given observations $\mat{Z}_{t'}$.
+
+To make inference tractable, the Kalman filter additionally assumes
+that the noise term $\vec{w}_t$ is independent of $\vec{x}_t$, with
+zero mean and known covariance $\vec{Q}_t$:
+\[
+  p(\vec{w}_t) = \mc{N}(\vec{w_t}; \mat{0}, \mat{Q}_t).
+\]
+Recalling our assumption about the dynamics of $\vec{x}$:
+\[
+  \vec{x}_t = \mat{F}_t \vec{x}_{t - 1} + \vec{w}_t,
+\]
+we may derive our belief about $\vec{x}_t$ given $\mat{Z}_{t - 1}$; we
+have simply linearly transformed $\vec{x}_{t - 1}$ and added
+independent Gaussian noise.  Applying standard results, we may derive:
+\[
+  p(\vec{x}_t \given \mat{Z}_{t - 1})
+  =
+  \mc{N}(\vec{x}_t;
+  \hat{\vec{x}}_{t \given t - 1},
+  \mat{P}_{t \given t - 1}
+  ),
+\]
+where
+\begin{align*}
+  \hat{\vec{x}}_{t \given t - 1}
+  &=
+  \mat{F}_t \hat{\vec{x}}_{t - 1 \given t - 1}
+  \\
+  \mat{P}_{t \given t - 1}
+  &=
+  \mat{F}_t
+  \mat{P}_{t - 1 \given t - 1}
+  \mat{F}_t\trans
+  +
+  \mat{Q}_t.
+\end{align*}
+Additionally, we may again apply standard results to derive the joint
+distribution of $\vec{x}_t$ and the observation $\vec{z}_t$
+\emph{before} we receive observation $\vec{z}_t$.  This will be a
+multivariate Gaussian distribution that we will condition on the
+true value of the observation, updating our belief about $\vec{x}_t$
+given $\mat{Z}_t$.
+
+We recall the linear observation assumption:
+\[
+  \vec{z}_t = \mat{H}_t \vec{x}_t + \vec{v}_t.
+\]
+Again, the Kalman filter assumes that the observation noise at time
+$t$ is independent and zero-mean with known covariance $\mat{R}_t$:
+\[
+  p(\vec{v}_t) = \mc{N}(\vec{v_t}; \mat{0}, \mat{R}_t).
+\]
+Now the joint distribution of $\vec{x}_t$ and $\vec{z}_t$ given
+the previous observations $\mat{Z}_{t - 1}$ takes a familiar form:
+\[
+  p(\vec{x}_t, \vec{z}_t \given \mat{Z}_{t - 1})
+  =
+  \mc{N}\biggl(
+  \begin{bmatrix}
+    \vec{x}_t
+    \\
+    \vec{z}_t
+  \end{bmatrix}
+  ;
+  \begin{bmatrix}
+    \hat{\vec{x}}_{t \given t - 1}
+    \\
+    \mat{H}_t
+    \hat{\vec{x}}_{t \given t - 1}
+  \end{bmatrix}
+  ,
+  \begin{bmatrix}
+    \mat{P}_{t \given t - 1}
+    &
+    \mat{P}_{t \given t - 1}
+    \mat{H}_t\trans
+    \\
+    \mat{H}_t \mat{P}_{t \given t - 1}
+    &
+    \mat{H}_t \mat{P}_{t \given t - 1} \mat{H}_t\trans + \mat{R}_t
+  \end{bmatrix}\biggr).
+\]
+This is called the \emph{predict} step of the Kalman filter, and was
+made tractable due to the linearity of the state and observation
+dynamics and the multivariate Gaussian assumptions made about the
+previous state $\mat{x}_{t - 1}$ and the noise terms $\vec{w}_t$ and
+$\vec{v}_t$.
+
+Now we observe the value $\vec{z}_t$ and condition the above
+distribution to derive the new belief $p(\vec{x}_t \given \mat{Z}_t)$.
+First, we define
+\begin{align*}
+  \mat{S}_t &= \mat{H}_t \mat{P}_{t \given t - 1} \mat{H}_t\trans + \mat{R}_t \\
+  \mat{K}_t &= \mat{P}_{t \given t - 1} \mat{H}_t\trans \mat{S}_t\inv.
+\end{align*}
+The first term is simply the covariance of $\vec{z}_t$ given
+$\mat{Z}_{t - 1}$, and the second term is traditionally called the
+\emph{Kalman gain.}  The Kalman gain simply falls out from the
+standard conditioning formula for multivariate Gaussians.
+Now
+\[
+  p(\vec{x}_t \given \mat{Z}_t)
+  =
+  \mc{N}(\vec{x}_t;
+  \hat{\vec{x}}_{t \given t},
+  \mat{P}_{t \given t}
+  ),
+\]
+where
+\begin{align*}
+  \hat{\vec{x}}_{t \given t}
+  &=
+  \hat{\vec{x}}_{t \given t - 1}
+  + \mat{K}_t (\mat{z}_t - \mat{H}_t \hat{\vec{x}}_{t - 1 \given t})
+  \\
+  \mat{P}_{t \given t}
+  &=
+  (\mat{I}
+  -
+  \mat{K}_t
+  \mat{H}_t
+  )
+  \mat{P}_{t \given t - 1}.
+\end{align*}
+This is called the \emph{update} step of the Kalman filter.  Notice
+that our new belief about $\vec{x}_t$ given $\mat{Z}_t$ is once again
+a multivariate Gaussian distribution, so we may continue this process
+recursively.
+
+\end{document}
