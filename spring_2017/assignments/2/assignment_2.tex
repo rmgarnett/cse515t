@@ -1,0 +1,198 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\trans}{^\top}
+\newcommand{\inv}{^{-1}}
+
+\DeclareMathOperator{\var}{var}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2017) Assignment 2}} \\
+Due Tuesday, 21 March 2017 \\
+
+\begin{enumerate}
+
+\item
+  (Curse of dimensionality.)
+  Consider a $d$-dimensional, zero-mean, spherical multivariate
+  Gaussian distribution:
+  \begin{equation*}
+    p(\vec{x}) = \mc{N}(\vec{x}; \vec{0}, \mat{I}_d).
+  \end{equation*}
+  Equivalently, each entry of $\vec{x}$ is drawn iid from a univariate
+  standard normal distribution.
+
+  In familiar small dimensions ($d \leq 3$), ``most'' of the vectors
+  drawn from a multivariate Gaussian distribution will lie near the
+  mean.  For example, the famous 68--95--99.7 rule for $d = 1$
+  indicates that large deviations from the mean are unusual.  Here we
+  will consider the behavior in larger dimensions.
+  \begin{itemize}
+  \item Draw 10\,000 samples from $p(\vec{x})$ for each dimension in
+    $d \in \{1, 5, 10, 50, 100\},$ and compute the length of each
+    vector drawn: $y_d = \sqrt{\vec{x}\trans \vec{x}} = (\sum_i^d
+    x_i^2)^{\nicefrac{1}{2}}$.  Estimate the distribution of each
+    $y_d$ using either a histogram or a kernel density estimate (in
+    \acro{MATLAB}, \texttt{hist} and \texttt{ksdensity},
+    respectively).  Plot your estimates.  (Please do not hand in your
+    raw samples!)  Summarize the behavior of this distribution as $d$
+    increases.
+  \item
+    The true distribution of $y_d^2$ is a chi-square distribution with
+    $d$ degrees of freedom (the distribution of $y_d$ itself is the
+    less-commonly seen chi distribution).  Use this fact to compute
+    the probability that $y_d < 5$ for each of the dimensions in the
+    last part.
+  \item
+    For $d = 1\,000$, compute the 5th and 95th percentiles of $y_d$.
+    Is the mean $\vec{x} = \vec{0}$ a representative summary of the
+    distribution in high dimensions?  This behavior has been called
+    ``the curse of dimensionality.''
+  \end{itemize}
+
+\item
+  (Bayesian linear regression.)
+  Consider the following data:
+  \begin{align*}
+    \vec{x}
+    &=
+    [-1.11, -0.85, -0.76, -0.65, -0.57, -0.56, -0.20, 0.18, 0.59, 1.18]\trans; \\
+    \vec{y}
+    &=
+    [1.24, 0.62, 0.14, 0.08, -0.23, -0.22, -1.09, -1.03, -0.35, 5.04]\trans.
+  \end{align*}
+  Fix the noise variance at $\sigma^2 = 0.1^2$.
+  \begin{itemize}
+  \item
+    Perform Bayesian linear regression for these data using the
+    polynomial basis functions $\phi_k(x) = [1, x, x^2, \dotsc
+      x^k]\trans$ for $k \in \{1, 2, 3\}$, in each case using the
+    parameter prior $p(\vec{w}) = \mc{N}(\vec{w}; \vec{0}, \mat{I})$.
+    Evaluate and plot the posterior means $\mathbb{E}[\vec{y}_\ast
+      \given \mat{X}_\ast, \data, \sigma^2]$ on the interval $x_\ast
+    \in [-4, 4]$ for each model.  Also plot the posterior mean
+    plus-or-minus two times the posterior standard deviation:
+    \begin{equation*}
+      \mathbb{E}[\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2] \pm
+      2 \sqrt{\var[\vec{y}_\ast \given \mat{X}_\ast, \data, \sigma^2]}.
+    \end{equation*}
+    This is a pointwise 95\% credible interval for the regression
+    function.  Where is the pointwise uncertainty the largest?
+  \item
+    Compute the marginal likelihood of the data for each of the basis
+    expansions above: $p(\vec{y} \given \mat{X}, k, \sigma^2)$.  Which
+    model explains the data the best?
+  \end{itemize}
+
+\item
+  (Optimal design for Bayesian linear regression.)
+  Consider the data from the last problem, and suppose we have
+  selected the quadratic model corresponding to $k = 3$ (do not assume
+  that this is the answer to the last part of the last question).
+  Imagine we are allowed to evaluate the function at a point $x'$ of
+  our choosing, giving a new dataset $\data' = \data \cup \bigl\{ (x',
+  y') \bigr\}$ and a new posterior for the parameters $p(\vec{w}
+  \given \data', \sigma^2) = \mc{N}(\vec{w};
+  \vec{\mu}_{\vec{w}\given\data'},
+  \mat{\Sigma}_{\vec{w}\given\data'})$.  We hope to select the
+  location $x'$ to best improve our current model, under some quality
+  measure.
+
+  Assume that we ultimately wish to predict the function at a grid of
+  points
+  \begin{equation*}
+    \vec{x}_\ast = [-4, -3.5, -3, \dotsc, 3.5, 4]\trans.
+  \end{equation*}
+  We select the squared loss for a set of predictions
+  $\hat{\vec{y}}_\ast$ at these points:
+  \begin{equation*}
+    \ell(\vec{y}_\ast, \hat{\vec{y}}_\ast)
+    =
+    \sum_i \bigl((y_\ast)_i - (\hat{y}_\ast)_i\bigr)^2;
+  \end{equation*}
+  therefore, we will predict using the new posterior mean
+  $\hat{\vec{y}}_\ast = \mat{X}_\ast \vec{\mu}_{\vec{w}\given\data'}$.
+  \begin{itemize}
+  \item
+    Given a potential observation location $x'$, derive a closed-form
+    expression for the expected loss
+    $\mathbb{E}\bigl[\ell(\vec{y}_\ast, \hat{\vec{y}}_\ast) \given x',
+      \data \bigr]$.  Note: this does not require integration over
+    $y'$!  (What is the expected squared deviation from the mean?)
+  \item
+    Plot the expected loss over the interval $x' \in [-4, 4]$.  Where
+    is the optimal location to sample the function?
+  \end{itemize}
+
+  Note: this approach of actively selecting where to sample a function
+  to maximize some utility function is known as \emph{active learning}
+  in machine learning and \emph{optimal experimental design} in
+  statistics.  Bayesian decision theory provides a convenient and
+  consistent framework for performing active learning with a variety
+  of objectives.
+
+\item
+  Perform a Gaussian process regression using the same data and
+  observation model as above, using the squared exponential kernel
+  \[K(x, x') = \exp\biggl(-\frac{(x - x')^2}{2}\biggr).\]
+  Plot the mean and 95\% credible interval as before.  Find the
+  marginal likelihood. How does this model compare with the polynomial
+  models?
+
+  Compare the behavior of the model when extrapolating. How is it
+  different qualitatively? Can you explain the differences?
+
+\item
+  (Laplace approximation.)
+  Find a Laplace approximation to the gamma distribution:
+  \begin{equation*}
+    p(\theta \given \alpha, \beta)
+    =
+    \frac{1}{Z}
+    \theta^{\alpha - 1}
+    \exp(-\beta\theta).
+  \end{equation*}
+  Plot the approximation against the true density for $(\alpha, \beta)
+  = (3, 1)$.
+
+  The true value of the normalizing constant is
+  \begin{equation*}
+    Z = \frac{\Gamma(\alpha)}{\beta^\alpha}.
+  \end{equation*}
+  If we fix $\beta = 1$, then $Z = \Gamma(\alpha)$, so we may use the
+  Laplace approximation to estimate the Gamma function.  Analyze the
+  quality of this approximation as a function of $\alpha$.
+
+\end{enumerate}
+
+\end{document}
