@@ -1,0 +1,239 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\model}{\mc{M}}
+\newcommand{\trans}{^\top}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2017) Midterm}}
+\begin{itemize}
+\item
+  There are two ways to hand in this midterm.  \textbf{Late
+    submissions will not be accepted!}  I do not recommend cutting it
+  too close.
+  \begin{itemize}
+  \item Physically in class.  The due date for this option is
+    \textbf{4:00 \acro{PM}, Thursday, 9 March.}
+  \item Electronically on Piazza as a private message to the
+    instructors. The due date for this option is \textbf{23:59
+      \acro{CST} Friday, 10 March} (the ``midnight'' that occurs after
+    the full day of Friday passes in the central time zone).
+  \end{itemize}
+\item
+  Please do not discuss the questions with other members of the class.
+\item
+  Please post any questions as a \emph{private message to the
+    instructors} on Piazza.
+\item
+  Any corrections will be posted by the instructors on Piazza. This
+  document will also be kept up-to-date on the course webpage and in
+  GitHub.
+\end{itemize}
+
+\clearpage
+
+We will consider a series of questions relating to an application of
+Bayesian inference to numerical analysis, specifically
+quadrature.\footnote{This is my attempt to reinforce some fascinating
+  concepts to make up for a somewhat confusing lecture.  I hope these
+  exercises help clarify things!}
+
+We are going to consider the function
+\[f(x) = \exp(-x^2)\]
+and its definite integral
+\[Z = \int_{-\infty}^\infty f(x) \intd x.\]
+The function $f$ has no elementary antiderivative, so the calculation
+of $Z$ is not straightforward. There is a famous method for computing
+$Z$ with the trick of considering $Z^2$ instead, rewriting the
+resulting 2$d$ integral in polar coordinates, and making a convenient
+substitution.\footnote{This is commonly credited to Gauss, but the
+  idea goes back at least to Poisson.} If you haven't seen this, it's
+beautiful and worth checking out. The result is
+\[Z = \sqrt{\pi}.\]
+
+We will consider modeling $f$ with a Gaussian process prior
+distribution:
+\[p(f) = \mc{GP}(f; \mu, K),\]
+and conditioning on the following set of data $\data = (\vec{x},
+\vec{y})$:
+\begin{align*}
+  \vec{x} &= [-3, -2, -1, 0, 1, 2, 3]\trans; \\
+  \vec{y} &= \exp(-\vec{x}^2) \\
+          &= [1.2341 \times 10^{-4}, 1.8316 \times 10^{-2}, 0.36788, 1,
+              0.36788, 1.8316 \times 10^{-2}, 1.2341 \times 10^{-4}]\trans.
+\end{align*}
+We will fix the prior mean function $\mu$ to be identically zero;
+$\mu(x) = 0$.
+
+\begin{enumerate}
+\item
+  First, let us consider the question of model, specifically kernel,
+  selection.
+
+  Consider the following four choices for the covariance function $K$:
+  \begin{align*}
+    K_1(x, x') &= \exp\bigl(-\lvert x - x' \rvert^2\bigr) \\
+    K_2(x, x') &= \exp\bigl(-\lvert x - x' \rvert\bigr) \\
+    K_3(x, x') &= \bigl(1 + \sqrt{3} \lvert x - x' \rvert\bigr)
+                  \exp\bigl(-\sqrt{3} \lvert x - x' \rvert\bigr) \\
+    K_4(x, x') &= \delta(x - x'),
+  \end{align*}
+  where $\delta$ is the Kronecker delta function. Note that I am not
+  parameterizing any of these kernels; please consider them to be fixed
+  as given.
+
+  Each kernel defines a Gaussian process model for the data in a natural way:
+  \[p(f \given \model_i) = \mc{GP}(f; \mu, K_i).\]
+  Consider a uniform prior distribution over these models:
+  \[\Pr(\model_i) = \nicefrac{1}{4} \qquad i = 1, 2, 3, 4.\]
+
+  \begin{enumerate}
+  \item
+    Compute the log model evidence for each model given the data
+    $\data$ above.
+  \item
+    Compute the model posterior $\Pr(\model \given \data)$.
+  \item
+    Can you find a kernel with higher model evidence given the data
+    above?  (I will award an extra credit point to the person who
+    provides the kernel with the highest evidence.)
+  \end{enumerate}
+
+\item
+
+  Now let's turn to prediction.
+
+  \begin{enumerate}
+  \item
+    For each kernel above, plot the predictive distribution over the
+    interval $x^\ast \in [-5, 5]$.  For each model $\model_i$, please
+    plot, in a separate figure, the predictive mean $p(y^\ast \given
+    x^\ast, \data, \model_i)$ and a 95\% credible interval.  These
+    plots should be the result of a computer program.  Please add
+    legends and axes labels, etc., and plot the true function on the
+    same interval for reference.
+  \item
+    In addition, please write out the predictive mean and standard
+    deviation at $x^\ast = 2.5$ for each of the kernels, $p(y^\ast
+    \given x^\ast = 2.5, \data, \model_i)$.
+  \item
+    What is the model-marginal predictive distribution, $p(y^\ast
+    \given x^\ast, \data)$? Write this in terms of the
+    model-conditional predictive distribution and the model posterior.
+  \item
+    Assume that the model posterior is uniform; $\Pr(\model_i \given
+    \data) = \nicefrac{1}{4}$ for all models $i$ (this is \emph{not}
+    the case, if you are worried about your answer to 1(b)).
+
+    Plot the model-marginal predictive mean function
+    $\mathbb{E}[y^\ast \given \data]$ over the interval $x^\ast \in
+    [-5, 5]$.
+  \end{enumerate}
+
+\item
+
+  Let us consider conditioning a Gaussian process on the observation
+  of a derivative.
+
+  \begin{enumerate}
+  \item
+    Write down the joint distribution implied by an arbitrary Gaussian
+    process distribution on a function $f\colon \mathbb{R} \to
+    \mathbb{R}$, $\mc{GP}(f; \mu, K)$, between the function value at
+    an arbitrary point $x$, $f(x)$, and the value of a derivative at
+    another arbitrary point $x'$, $f'(x) =
+    \frac{\mathrm{d}f}{\mathrm{d}x} \rvert_{x'}$.
+  \item
+    Fix the zero mean function $\mu(x) = 0$ and the squared
+    exponential covariance $K_1(x, x')$ from above. Write down the
+    joint distribution from part (a), evaluating any derivatives or
+    integrals you may encounter. (I do not expect the expression $K_1$
+    to appear in your answer, but maybe things like $\exp(\dots)$
+    instead. That is, I want explicit formulas.)
+  \item
+    Show that for this model, the function value at a point $x$ and
+    the value of the derivative at that point are uncorrelated \emph{a
+      priori.}
+  \item
+    Consider the Gaussian process from part 1 with covariance function
+    $K_1$. Condition the model on the data $\data$ given previously as
+    well as the observation that the derivative is $0$ at $x = 0$,
+    finding $p\bigl(f \given \data, f'(0) = 0,
+    \model_1\bigr)$. Prepare a plot of the predictive distribution on
+    the interval $x^\ast \in [-5, 5]$ as before.
+  \end{enumerate}
+
+\item
+  Now we will consider integration.
+
+  Perform Bayesian quadrature to estimate the definite integral
+  $\int_{-5}^5 f(x) \intd{x}$, using the model $\model_1$ from
+  question 1.  What is the predictive mean and standard deviation,
+  $p(Z \given \data, \model_1)$?  (You may give a numeric answer.)
+  How does this compare with the true answer?
+
+\item
+  Finally, we will consider a decision problem. Suppose we have
+  already made some observations $\data$.  How can we select the
+  \emph{most-informative} next observation $\bigl(x^\ast,
+  f(x^\ast)\bigr)$ to make?  This is a decision problem where the
+  action space (parametrizing the next observation location) is the
+  domain, $x^\ast \in \mc{X}$.
+
+  Suppose that we are to estimate $Z$ with a point estimate $\hat{Z}$,
+  and that we have selected the squared loss
+  \[\ell(Z, \hat{Z}) = (Z - \hat{Z})^2.\]
+
+  \begin{enumerate}
+  \item
+    Given a set of observations $\data$, what is the Bayesian optimal
+    action? What is the expected loss of that action?
+  \item
+    Compute the expected loss of the Bayesian optimal action after
+    adding a new observation to $\data$ located at a point $x^\ast$.
+    Plot this result as a function of $x^\ast \in [-5, 5]$.  What is
+    the optimal location to measure the function next? (By symmetry
+    there may be multiple equivalent answers.)
+  \item
+    Condition the function on an observation of the function at the
+    chosen location and plot the predictive distribution as in part
+    2(a).  Recompute the predictive distribution for $Z$. Did our
+    estimate improve?
+  \item
+    How does the answer to the above part relate to the observation
+    $f'(0) = 0$ we considered above?  Which observation is preferable?
+  \end{enumerate}
+
+\end{enumerate}
+
+\end{document}
