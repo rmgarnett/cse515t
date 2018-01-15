@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>CSE 515T: Bayesian Methods in Machine Learning &ndash; Spring 2018</title>
+    <meta name="description" content="Course webpage for CSE 515T: Bayesian Methods in Machine Learning, Spring Semester 2018" />
+    <meta name="author" content="Roman Garnett" />
+    <link href="http://fonts.googleapis.com/css?family=Droid+Sans" rel="stylesheet" type="text/css" />
+    <link rel="stylesheet" href="style.css" />
+    <!--[if lt IE 9]>
+	<script>
+	  document.createElement("header" );
+	  document.createElement("footer" );
+	  document.createElement("section");
+	  document.createElement("aside"  );
+	  document.createElement("nav"    );
+	  document.createElement("article");
+	  document.createElement("hgroup" );
+	  document.createElement("time"   );
+	</script>
+	<noscript>
+	  <strong>Warning!</strong>
+	  Because your browser does not support HTML5, some elements are simulated using JScript.
+	  Unfortunately your browser has disabled scripting. Please enable it in order to display this page.
+	</noscript>
+	<![endif]-->
+  </head>
+  <body>
+    <header>
+      <h1>CSE 515T: Bayesian Methods in Machine Learning &ndash; Spring 2018</h1>
+      <p>Instructor: Professor Roman Garnett<br />
+	Time/Location: Monday/Wednesday 4&ndash;5:30pm, Cupples I 215 (subject to change!)<br />
+	Office hours (Garnett): Wednesday 5:30&ndash;6:30pm, Jolley Hall 504<br />
+	<a href="files/syllabus.pdf">syllabus</a><br />
+	<a href="https://piazza.com/wustl/spring2018/cse515t/home/">Piazza message board</a></br />
+    </header>
+    <hr />
+    <section>
+      <h2>Description</h2>
+      <p>This course will cover modern machine learning techniques from a Bayesian probabilistic perspective. Bayesian probability allows us to model and reason about all types of uncertainty. The result is a powerful, consistent framework for approaching many problems that arise in machine learning, including parameter estimation, model comparison, and decision making. We will begin with a high-level introduction to Bayesian inference, then proceed to cover more-advanced topics.</p>
+    </section>
+    <section>
+      <h2>Project</h2>
+      <p>You can find <a href="project.html">more info on the project here</a>, including some ideas and datasets, etc.</p>
+    </section>
+    <section>
+      <h2>Lectures</h2>
+      <section>
+	<h3 class="lecture">Lecture 1: Introduction to the Bayesian Method</h3>
+	<span class="time">Wednesday, 17 January 2018</span><br />
+	<a href="files/lecture_notes/1.pdf">lecture notes</a>
+	<p>Additional Resources:</p>
+	<ul>
+	  <li>Book: Bishop PRML: Section 1.2 (Probability theory)</li>
+	  <li>Book: Barber BRML: Chapter 1 (Probabilistic reasoning)</li>
+	  <li>Video: <a href="http://vimeo.com/72116712">Bayesian Method for Hackers</a> (Cam Davidson Pilon) Great high-level overview from an atypical perspective!</li>
+	  <li>Video: <a href="https://www.youtube.com/watch?v=pid0lUH467o">Introduction to Machine Learning</a> (Nando de Freitas)</li>
+	  <li>Video: <a href="https://www.youtube.com/watch?v=mgBrXnjF8R4">Bayesian Inference I</a> (Zoubin Ghahramani) (the first 30 minutes or so)</li>
+	  <li>Video: <a href="https://class.coursera.org/ml-005/lecture/preview">Machine Learning Coursera course</a> (Andrew Ng) The first week gives a good general overview of machine learning and the third week provides a linear-algebra refresher.</li>
+	</ul>
+      </section>
+<!--
+      <section>
+      	<h3 class="lecture">Lecture 2: Bayesian Inference I (coin flipping)</h3>
+      	<span class="time">Thursday, 19 January 2017</span><br />
+      	<a href="files/lecture_notes/2.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Section 2.1 (Binary variables)</li>
+      	  <li>Website: Wikipedia has an article on <a href="http://en.wikipedia.org/wiki/Checking_whether_a_coin_is_fair">checking whether a coin is fair.</a></li>
+      	  <li>Website: Marcus Brinkmann (lambdafu) has put together a <a href="http://nbviewer.ipython.org/github/lambdafu/notebook/blob/master/math/Bayesian%20Coin%20Flip.ipynb">Python notebook on Bayesian coin flipping.</a></li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 3: Bayesian Inference II (decision theory)</h3>
+      	<span class="time">Tuesday, 24 January 2017</span><br />
+      	<a href="files/lecture_notes/3.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Section 1.5 (Decision theory)</li>
+      	  <li>Book: Berger Chapter 1 (Basic concepts), Section 4.4 (Bayesian decision theory)</li>
+      	  <li>Book: Robert Section 4.2 (Bayesian decision theory)</li>
+      	  <li>Videos: YouTube user mathematicalmonk has a <a href="https://www.youtube.com/playlist?list=PLD0F06AA0D2E8FFBA">great series of machine-learning lectures</a> available. Chapter 11 concerns decision theroy.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 4: The Gaussian Distribution</h3>
+      	<span class="time">Tuesday, 31 January 2017</span><br />
+      	<a href="files/lecture_notes/4.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Section 2.3 (The Gaussian Distribution).  This is a truly excellent and in-depth discussion!</li>
+      	  <li>Book: Barber BRML: Section 8.4 (Multivariate Gaussian).</li>
+      	  <li>Book/reference: Rasmussen and Williams GPML: Section A.2 (Gaussian Identities), <a href="http://www.gaussianprocess.org/gpml/chapters/RWA.pdf">available here</a>. This is a good cheat sheet!</li>
+      	  <li>Notes: Chuong B. Do put together some notes on the multivariate Gaussian for the Stanford machine learning class <a href="http://cs229.stanford.edu/section/more_on_gaussians.pdf">here</a>.  These go a bit more in depth than my notes, if you want to see more details.</li>
+      	  <li>Website: The Wikipedia articles on <a href="http://en.wikipedia.org/wiki/Normal_distribution">the normal distribution</a> and <a href="http://en.wikipedia.org/wiki/Multivariate_normal_distribution">the multivariate normal distribution</a> are quite complete.</li>
+      	  <li>Video: YouTube user mathematicalmonk has a <a href="https://www.youtube.com/watch?v=TC0ZAX3DA88">lecture on the multivariate normal</a> available as well.</li>
+      	  <li>Video: Alexander Ihler also has a <a href="https://www.youtube.com/watch?v=eho8xH3E6mE">lecture on the multivariate normal</a>, including information on how to sample from the distribution.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 5: Bayesian Linear Regression</h3>
+      	<span class="time">Thursday, 2 February 2017</span><br />
+      	<a href="files/lecture_notes/5.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Section 3.3 (Bayesian Linear Regression).</li>
+      	  <li>Book: Barber BRML: Section 18.1 (Regression with Additive Gaussian Noise).</li>
+      	  <li>Book: Rasmussen and Williams GPML: Section 2.1 (Weight-space View), <a href="http://www.gaussianprocess.org/gpml/chapters/RW2.pdf">available here</a>.</li>
+      	  <li>Video: YouTube user mathematicalmonk has an entire section devoted to Bayesian linear regression.  See ML 10.1&ndash;7 <a href="https://www.youtube.com/watch?v=dtkGq9tdYcI">here</a>.</li>
+      	  <li>Videos: Nando de Freitas has a series of lectures on Bayesian linear regression.  Part one is <a href="https://www.youtube.com/watch?v=Fae0j1WN1zA">here</a>, and part two is <a href="https://www.youtube.com/watch?v=2KXoC6Dxhxs">here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 6: Bayesian Model Selection</h3>
+      	<span class="time">Thursday, 9 February 2017</span><br />
+      	<a href="files/lecture_notes/6.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Section 3.4 (Bayesian Model Comparison).</li>
+      	  <li>Book: Barber BRML: Chapter 12 (Bayesian Model Selection).</li>
+      	  <li>Book: MacKay ITILA: Chapter 28 (Occam's Razor and Model Comparison).</li>
+      	  <li>Video: YouTube user mathematicalmonk has a <a href="https://www.youtube.com/watch?v=1CFof6hU3cI">lecture about Bayesian model selection</a> (some nearby videos are related as well).</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 7: Bayesian Logistic Regression / The Laplace Approximation</h3>
+      	<span class="time">Tuesday, 14 February 2017</span><br />
+      	<a href="files/lecture_notes/7.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Chapter 4 (Linear Models for Classificaiton).</li>
+      	  <li>Book: Barber BRML: Section 18.2 (Classification).</li>
+      	  <li>Book: Rasmussen and Williams GPML: Sections 3.1 and 3.2 (Classification Problems and Linear Models for Classification), <a href="http://www.gaussianprocess.org/gpml/chapters/RW3.pdf">available here</a>.</li>
+      	  <li>Video: YouTube user mathematicalmonk has a <a href="https://www.youtube.com/watch?v=dtkGq9tdYcI">lecture about Bayesian logistic regression</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 8: The Kernel Trick</h3>
+      	<span class="time">Thursday, 16 February 2017</span><br />
+      	<a href="files/lecture_notes/8.pdf">lecture notes</a>
+      	<p>Additional Resources:</p>
+      	<ul>
+      	  <li>Book: Rasmussen and Williams GPML: Chapter 2 through 2.1 (Weight-space View), <a href="http://www.gaussianprocess.org/gpml/chapters/RW2.pdf">available here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 9: Gaussian Process Regression</h3>
+      	<span class="time">Tuesday, 21 February 2017</span><br />
+      	<a href="files/lecture_notes/9.pdf">lecture slides</a>
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Book: Rasmussen and Williams GPML: Sections 2.2 &ndash; 2.5, <a href="http://www.gaussianprocess.org/gpml/chapters/RW2.pdf">available here</a>.</li>
+      	  <li>Book: Barber BRML: Chapter 19 (Gaussian processes).</li>
+      	  <li>Video: Nando de Freitas has a lecture <a href="https://www.youtube.com/watch?v=4vGiHC35j9s">here.</a></li>
+      	  <li>Video: Philipp Hennig has a series of lectures from the 2013 Machine Learning Summer School; <a href="http://www.youtube.com/watch?v=50Vgw11qn0o">part one is here</a>.  The slides, which have some cool animations, are <a href="http://mlss.tuebingen.mpg.de/2013/hennig_slides1.pdf">available here</a>.</li>
+      	  <li>Video: Carl Rasmussen has a two-part introduction to Gaussian processes <a href="http://videolectures.net/mlss09uk_rasmussen_gp/">here</a>.</li>
+      	  <li>Video: David MacKay gave an introduction to Gaussian processes <a href="http://videolectures.net/gpip06_mackay_gpb/">here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 10: Kernels</h3>
+      	<span class="time">Thursday, 23 March 2017</span><br />
+      	<p>Resources/Notes:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Chapter 6 (Kernel Methods).</li>
+      	  <li>Book: Barber BRML: Section 19.3 (Covariance Functions).</li>
+      	  <li>Book: Rasmussen and Williams GPML: Chapter 4 (Covariance Functions), <a href="http://www.gaussianprocess.org/gpml/chapters/RW4.pdf">available here</a>.</li>
+      	  <li>Website: David Duvenaud has made a "kernel cookbook," <a href="http://mlg.eng.cam.ac.uk/duvenaud/cookbook/index.html">available here</a>.  This webpage also became <a href="https://raw.githubusercontent.com/duvenaud/phd-thesis/master/kernels.pdf">a chapter of his thesis.</a></li>
+      	  <li>Website: Metacademy has a pages on <a href="http://metacademy.org/graphs/concepts/kernel_trick#lfocus=kernel_trick">the kernel trick</a> and <a href="http://metacademy.org/graphs/concepts/constructing_kernels#lfocus=constructing_kernels">constructing kernels</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 11: Bayesian Quadrature</h3>
+      	<span class="time">Tuesday, 27 February 2017</span><br />
+      	<a href="files/lecture_notes/11.pdf">lecture notes</a>
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Slides: David Duvenaud has a set of slides introucing Bayesian quadrature, <a href="https://www.cs.toronto.edu/~duvenaud/talks/intro_bq.pdf">available here</a>.</li>
+      	  <li>Paper: Carl Rasmussen and Zoubin Ghahramani discuss Bayesian quadrature under the name "Bayesian Monte Carlo" <a href="http://mlg.eng.cam.ac.uk/zoubin/papers/RasGha03.pdf">in this paper</a>.  Many references therein are also interesting, especially the provocatively titled <a href="http://www.jstor.org/stable/2348519?seq=1#page_scan_tab_contents">Monte Carlo is fundamentally unsound</a> by Anthony O'Hagan.</li>
+      	  <li>Paper: Tom Minka wrote a report on "Deriving quadrature rules from Gaussian processes," <a href="http://research.microsoft.com/en-us/um/people/minka/papers/quadrature.html">available here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 12: GP Classification / Assumed Density Filtering / Expectation Propagation</h3>
+      	<span class="time">Thursday, 2 March 2017</span><br />
+      	<a href="files/lecture_notes/12.pdf">lecture notes</a>
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Book: Rasmussen and Williams GPML: Chapter 3 (Classification), especially Section 3.6 (Expecation Propagation) <a href="http://www.gaussianprocess.org/gpml/chapters/RW3.pdf">available here</a>.</li>
+      	  <li>Book: Barber BRML: Section 28.8 (Expectation Propagation).</li>
+      	  <li>Book: Bishop PRML: Section 10.7 (Expectation Propagation).</li>
+      	  <li>Paper: <a href="http://arxiv.org/pdf/1412.4869v1.pdf">Expectation propagation as a way of life</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 13: Bayesian Optimization</h3>
+      	<span class="time">Tuesday, 7 March 2017</span><br />
+      	<a href="files/lecture_notes/13.pdf">lecture notes</a>
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Tutorial: Eric Brochu, Vlad M. Cora, and Nando de Freitas have a tutorial on Bayesian optimization, <a href="http://arxiv.org/abs/1012.2599">available here</a>.</li>
+      	  <li>Paper: Michael Osborne, Stephen J. Roberts, and I discuss the expected improvement approach to Bayesian optimization (with some tweaks/extensions) <a href="http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.352.9682&rep=rep1&type=pdf">in this paper</a>.</li>
+      	  <li>Paper: Niranjan Srinivas, Andreas Krause, Sham Kakade, and Mattias Seeger discuss the GP-UCB algorithm (including theoretical results!) <a href="http://las.ethz.ch/files/srinivas10gaussian.pdf">in this landmark paper</a>.</li>
+      	  <li>Paper: Jasper Snoek, Hugo Larochelle, and Ryan P. Adams discuss the AutoML application of Bayesian optimization <a href="http://papers.nips.cc/paper/4522-practical-bayesian-optimization-of-machine-learning-algorithms.pdf">here</a>.</li>
+      	  <li>Slides: Ryan P. Adams has a set of tutorial slides covering many topics <a href="http://www.iro.umontreal.ca/~bengioy/cifar/NCAP2014-summerschool/slides/Ryan_adams_140814_bayesopt_ncap.pdf">available here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 14: Monte Carlo, Sampling, Rejection Sampling</h3>
+      	<span class="time">Thursday, 23 March 2017</span><br />
+      	<a href="http://homepages.inf.ed.ac.uk/imurray2/teaching/09mlss/slides.pdf">lecture slides</a> (from Iain Murray's introduction at the 2009 Machine Learning Summer School)
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Video: You can watch Iain Murray present the slides himself <a href="https://www.youtube.com/watch?v=hn0Vfzcnmig">here</a>.</li>
+      	  <li>Book: Barber BRML: Section 27.1 (Sampling: Introduction).</li>
+      	  <li>Book: Bishop PRML: Section 11.1 (Basic Sampling Algorithms).</li>
+      	  <li>Videos: YouTube user mathematicalmonk has a chapter devoted to sampling methods (#17), beginning <a href="https://www.youtube.com/watch?v=AadKNJU1-lk&list=PLD0F06AA0D2E8FFBA&index=127">here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 15: Importance Sampling, MCMC</h3>
+      	<span class="time">Tuesday, 28 March 2017</span><br />
+      	<a href="http://homepages.inf.ed.ac.uk/imurray2/teaching/09mlss/slides.pdf">lecture slides</a> (from Iain Murray's introduction at the 2009 Machine Learning Summer School)
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Video: You can watch Iain Murray present the slides himself <a href="https://www.youtube.com/watch?v=hn0Vfzcnmig">here</a>.</li>
+      	  <li>Book: Barber BRML: Sections 27.4 (Markov Chain Monte Carlo (MCMC)), 27.3 (Gibbs Sampling), and 27.6 (Importance Sampling).</li>
+      	  <li>Book: Bishop PRML: Sections 11.2 (Markov Chain Monte Carlo) and 11.3 (Gibbs Sampling).</li>
+      	  <li>Videos: YouTube user mathematicalmonk has a chapter devoted to sampling methods (#17), beginning <a href="https://www.youtube.com/watch?v=AadKNJU1-lk&list=PLD0F06AA0D2E8FFBA&index=127">here</a>.</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 16: The Kalman Filter</h3>
+      	<span class="time">Thursday, 30 March 2017</span><br />
+      	<a href="files/lecture_notes/14.pdf">lecture notes</a>
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Book: Bishop PRML: Section 13.3 (Linear Dynamical Systems).</li>
+      	</ul>
+      </section>
+      <section>
+      	<h3 class="lecture">Lecture 17: Bayesian Deep Learning?</h3>
+      	<span class="time">Tuesday, 11 April 2017</span><br />
+      	<p>Additional Resources/Notes:</p>
+      	<ul>
+      	  <li>Workshop: The <a href="http://bayesiandeeplearning.org">Bayesian Deep Learning</a> workshop at NIPS 2016.</li>
+      	  <li>Video: A panel discussion entitled <a href="https://www.youtube.com/watch?v=HumFmLu3CJ8&t=1700s">"Is Bayesian deep learning the most brilliant thing ever?"</a> at the same workshop.</li>
+	  <li>Blog: A great <a href="ttp://twiecki.github.io/blog/2016/06/01/bayesian-deep-learning/">blog post</a> about probabilistic programming and Bayesian deep learning.</li>
+	  <li>Paper: A <a href="https://arxiv.org/pdf/1602.04133.pdf">nice paper on deep Gaussian processes.</a></li>
+	  <li>Video: <a href="https://www.youtube.com/watch?v=YAb5C5_g-kk">"Modern Deep Learning through Bayesian Eyes"</a></li>
+      	</ul>
+      </section>
+    </section>
+    -->
+    <section>
+      <h2>Resources</h2>
+      <section>
+	<h3 class="resource">Books</h3>
+	<p>There is no required book for this course.  That said, there are a wide variety of machine-learning books available, some of which are available for free online.  The following books all have a Bayesian slant to them:</p>
+	<ul>
+	  <li><em>Pattern Recognition and Machine Learning</em> (PRML) by <span class="author">Christopher M. Bishop.</span>  Covers many machine-learning topics thoroughly.  Definite Bayesian focus.  Can also be very mathematical and take some effort to read.</li>
+	  <li><em>Bayesian Reasoning and Machine Learning</em> (BRML) by <span class="author">David Barber.</span>  Geared (as much as a machine-learning book can be!) towards computer scientists.  Lots of material on graphical models.  <a href="http://www.cs.ucl.ac.uk/staff/d.barber/brml/">Freely available online.</a></li>
+	  <li><em>Gaussian Processes for Machine Learning</em> (GPML) by <span class="author">Carl Rasmussen and Christopher Williams.</span>  Excellent reference for Gaussian processes. <a href="http://gaussianprocess.org/gpml/">Freely available online.</a></li>
+	  <li><em>Information Theory, Inference, and Learning Algorithms</em> by <span class="author">David J. C. Mackay.</span> Very strong focus on information theory.  If you have a background in physics or are interested in information theory, this is the book for you.  <a href="http://www.inference.phy.cam.ac.uk/mackay/itila/book.html">Freely available online.</a></li>
+	</ul>
+	For a more-frequentist perspective, check out the excellent <em>The Elements of Statistical Learning</em> by <span class="author">Trevor Hastie, Robert Tibshirani, and Jerome Friedman.</span>  <a href="http://statweb.stanford.edu/~tibs/ElemStatLearn/">Freely available online.</a>
+	<section>
+	  <h3 class="resource">Websites</h3>
+	  <ul>
+	    <li>I will post the source for lecture notes, demo code, etc. <a href="https://github.com/rmgarnett/cse515t">on this GitHub page.</a>  Even the source for the syllabus and this website are there.</li>
+	    <li>I have created <a href="https://piazza.com/wustl/spring2017/cse515t/home/">a Piazza message board for this class.</a>  Please post any questions about the homework, etc. to the message board!  Chances are that someone else has the same question and we can all benefit from a public discussion.  If you have a question just for me and/or me and the TA, please also post this to Piazza rather than emailing us directly; you should be able to mark your message appropriately to keep it private.</li>
+	    <li><a href="http://www.metacademy.org/roadmaps/rgrosse/bayesian_machine_learning">Metacademy's roadmap to Bayesian machine learning.</a>  This is a great resource for finding additional materials related to essentially every subject we will cover in this course.</li>
+	    <li>There are several relevant courses available on <a href="https://www.coursera.org/">Coursera.</a>  Coursera gives you access to video lecture series, often from world experts, all available for free!  In particular, the following three courses are all presented by leaders in the field:
+	      <ul>
+		<li><a href="https://www.coursera.org/course/ml">Andrew Ng's Machine Learning course</a> (Stanford University)</li>
+		<li><a href="https://www.coursera.org/course/machlearning">Pedro Domingos's Machine Learning course</a> (University of Washington)</li>
+		<li><a href="https://www.coursera.org/course/pgm">Daphne Koller's Probabilistic Graphical Models course</a> (Stanford University)</li>
+	      </ul>
+	    </li>
+	  </ul>
+	</section>
+	<section>
+	  <h3 class="resource">Other</h3>
+	  <p>The <a href="http://www2.imm.dtu.dk/pubdb/views/edoc_download.php/3274/pdf/imm3274.pdf">Matrix Cookbook</a> by Kaare B. Petersen and Michael S. Pedersen can be incredibly useful for helping with tricky linear alegbra problems!
+    </section>
+  </body>
+</html>
