@@ -152,7 +152,7 @@ First we handle the normalization constant $\Pr(x \given n, \alpha, \beta)$:
   \\
   &=
   \binom{n}{x}
-  \frac{B(\alpha + x, \beta + n - x)}{B(\alpha + \beta)}.
+  \frac{B(\alpha + x, \beta + n - x)}{B(\alpha, \beta)}.
 \end{align*}
 
 Now we apply Bayes theorem:
@@ -166,7 +166,7 @@ Now we apply Bayes theorem:
   &=
   \biggl[
     \binom{n}{x}
-    \frac{B(\alpha + x, \beta + n - x)}{B(\alpha + \beta)}
+    \frac{B(\alpha + x, \beta + n - x)}{B(\alpha, \beta)}
   \biggr]\inv
   \biggl[
     \binom{n}{x} \theta^x (1 - \theta)^{n - x}
