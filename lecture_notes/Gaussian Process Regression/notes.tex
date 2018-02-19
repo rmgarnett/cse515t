@@ -198,9 +198,11 @@ function spaces.  The key definition is the following.
   random variables such that the joint distribution of any finite
   number of them is multivariate Gaussian.
 \end{defn}
-So the way we extend the finite-dimensional Gaussian distribution is
-by allowing arbitrary inputs but only ever reasoning about finitely
-many of them at a time.
+There are infinitely many random variables are the values of the
+function $f$ at every location $x \in \mc{X}$.  The way we extend the
+finite-dimensional Gaussian distribution to such a collection of
+variables is by allowing arbitrary inputs but only ever reasoning
+about finitely many of them at a time.
 
 A Gaussian process prior distribution on $f$ is written
 \begin{equation*}
@@ -249,9 +251,44 @@ f(\mat{X})$:
 \end{equation*}
 That is, we simply evaluate the mean and covariance functions at
 $\mat{X}$ and take the associated multivariate Gaussian distribution.
-Very simple!  Notice the similarity to the expression above, except
-that we have regained the ability to use non-zero prior means via the
-(arbitrary) prior mean function $\mu$.
+Very simple!  Notice the similarity to the expression above.
 
+Let us return to the Bayesian linear regression setting.  We will see
+that we have been specifying a Gaussian process on a latent function
+$f(\vec{x}) = \phi(\vec{x})\trans \vec{w}$ all along.  Let the feature
+expansion function $\phi$ be given, as well as the Gaussian prior on
+$\vec{w}$: $p(\vec{w}) = \mc{N}(\vec{w}; \vec{\mu}, \mat{K})$.
+Consider a finite number of input locations $\mat{X}$.  We may derive
+the prior distribution for the associated latent function values
+$\vec{f} = f(\mat{X}) = \mat{\Phi}\vec{w}$ by recognizing it as a
+linear transformation of the Gaussian-distributed vector $\vec{w}$:
+\begin{equation*}
+  p(\vec{f} \given \mat{X})
+  =
+  \mc{N}(\vec{f}; \mat{\Phi}\vec{\mu}, \mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans).
+\end{equation*}
+Therefore we have shown that the joint distribution of any finite
+combination of our random variables $\{f(\vec{x})\}_{\vec{x} \in
+  \mc{X}}$ is multivariate Gaussian, and therefore according to the
+above definition we have a Gaussian process!  We may identify the mean
+and covariance functions of the Bayesian linear regression Gaussian
+process:
+\begin{align*}
+  \mu(\vec{x})
+  &=
+  \phi(\vec{x})\trans
+  \vec{\mu}
+  \\
+  K(\vec{x}, \vec{x}')
+  &=
+  \phi(\vec{x})\trans
+  \mat{\Sigma}
+  \phi(\vec{x}).
+\end{align*}
+By starting over ``from the beginning,'' we may free ourselves from
+the constraint of needing to explicitly specify the feature expansion
+function $\phi$.  Instead, we may choose arbitrary mean and covariance
+functions $\mu$ and $K$ and reason about $f$ in an essentially
+identical manner.
 
 \end{document}
