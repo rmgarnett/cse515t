@@ -51,6 +51,8 @@ Due Monday, 19 March 2018 \\
   using an oracle that can draw a sample from the univariate standard normal
   distribution.
 
+  Hint: the \emph{Cholesky decomposition} may be helpful.
+
 \item
   (Sampling from a Gaussian process).
   Consider the squared exponential covariance function
@@ -85,8 +87,19 @@ Due Monday, 19 March 2018 \\
     \\
     K(x, x')
     &=
-    \bigl(1 + \lvert x - x' \rvert^2\bigr).
+    \biggl(1 + \frac{\lvert x - x' \rvert^2}{2}\biggr)^{-1}.
   \end{align*}
+
+  Note: in the \acro{GPML} toolkit for \acro{MATLAB,} the first would be written
+
+  \verb|covariance_function = {@covMaterniso, 1};|
+
+  and the second
+
+  \verb|covariance_function = {@covRQiso};|
+
+  for particular settings of the hyperparameters. Try \texttt{help covMaterniso}
+  and \texttt{help covRQiso} for help on the hyperparameters.
 
 \item
   (Gaussian process regression).
