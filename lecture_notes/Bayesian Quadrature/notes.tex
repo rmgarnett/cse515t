@@ -220,9 +220,9 @@ $\ell$ and $\vec{f} = f(\mat{X})$:
 \begin{equation*}
   p\Biggl(
   \begin{bmatrix}
-    \ell
-    \\
     \vec{f}
+    \\
+    \ell
   \end{bmatrix}
   \given
   \vec{X}
@@ -231,21 +231,21 @@ $\ell$ and $\vec{f} = f(\mat{X})$:
   \mc{N}
   \Biggl(
   \begin{bmatrix}
-    \ell
-    \\
     \vec{f}
+    \\
+    \ell
   \end{bmatrix}
   ;
   \begin{bmatrix}
-    L[\mu]
-    \\
     \vec{\mu}
+    \\
+    L[\mu]
   \end{bmatrix}
   ,
   \begin{bmatrix}
-    L^2[K] & \text{?}
+    \mat{K} & \text{?}
     \\
-    \text{?} & \mat{K}
+    \text{?} & L^2[K]
   \end{bmatrix}
   \Biggr),
 \end{equation*}
@@ -259,27 +259,27 @@ To fill in the missing observations, we need to know the covariance
 between $\ell$ and the $i$th function value $f_i = f(\vec{x}_i)$.  Here
 we can exploit the linearity of covariance:
 \begin{equation*}
-  \cov(\ell, f_i)
+  \cov(f_i, \ell)
   =
-  \cov\bigl(L[f], L_{\vec{x}_i}[f]\bigr)
+  \cov\bigl(L_{\vec{x}_i}[f], L[f]\bigr)
   =
-  L\Bigl[L_{\vec{x}_i}\bigl[
+  L_{\vec{x}_i}\Bigl[L\bigl[
       \cov(f, f)
   \bigr]\Bigr]
   =
-  L\Bigl[L_{\vec{x}_i}\bigl[
+  L_{\vec{x}_i}\Bigl[L\bigl[
       K
   \bigr]\Bigr]
   =
-  L\bigl[K(\cdot, \vec{x}_i)\bigr].
+  L\bigl[K(\vec{x}_i, \cdot)\bigr].
 \end{equation*}
 Now we have the general result
 \begin{equation*}
   p\Biggl(
   \begin{bmatrix}
-    \ell
-    \\
     \vec{f}
+    \\
+    \ell
   \end{bmatrix}
   \given
   \vec{X}
@@ -288,21 +288,21 @@ Now we have the general result
   \mc{N}
   \Biggl(
   \begin{bmatrix}
-    \ell
-    \\
     \vec{f}
+    \\
+    \ell
   \end{bmatrix}
   ;
   \begin{bmatrix}
-    L[\mu]
-    \\
     \vec{\mu}
+    \\
+    L[\mu]
   \end{bmatrix}
   ,
   \begin{bmatrix}
-    L^2[K] & L\bigl[K(\cdot, \mat{X})\bigr]
+    \mat{K} & L\bigl[K(\mat{X}, \cdot)\bigr]
     \\
-    L\bigl[K(\mat{X}, \cdot)\bigr] & \mat{K}
+    L\bigl[K(\cdot, \mat{X})\bigr] & L^2[K]
   \end{bmatrix}
   \Biggr).
 \end{equation*}
@@ -317,14 +317,14 @@ covariance functions are
   &=
   \mu(\vec{x})
   +
-  \frac{L\bigl[K(\cdot, \mat{X})\bigr]}{L^2[K]}
+  \frac{L\bigl[K(\vec{x}, \cdot)\bigr]}{L^2[K]}
   \bigl(\ell - L[\mu]);
   \\
   K_{f \given \ell}(\vec{x}, \vec{x}')
   &=
   K(\vec{x}, \vec{x}')
   -
-  \frac{L\bigl[K(\cdot, \mat{X})\bigr]L\bigl[K(\mat{X}, \cdot)\bigr]}{L^2[K]}.
+  \frac{L\bigl[K(\vec{x}, \cdot)\bigr]L\bigl[K(\cdot, \vec{x}')\bigr]}{L^2[K]}.
 \end{align*}
 We can easily extend this result to include multiple observations of
 functionals and also to incorporate Gaussian noise on each of these
