@@ -1,0 +1,160 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2019) Assignment 1}} \\
+Due Wednesday, 6 February 2019 \\
+
+\begin{enumerate}
+
+\item
+  (Barber, originally adopted from David Spiegelhalter)
+  A secret government agency has developed a scanner which determines
+  whether a person is a terrorist. The scanner is fairly reliable;
+  95\% of all scanned terrorists are identified as terrorists, and
+  95\% of all upstanding citizens are identified as such. An informant
+  tells the agency that exactly one passenger of 100 aboard an
+  aeroplane in which you are seated is a terrorist. The police haul
+  off the plane the first person for which the scanner tests
+  positive. What is the probability that this person is a terrorist?
+
+  Additionally, if the police were to scan all passengers, how many
+  positive detections should we expect?
+
+\item
+  Suppose $k$ has a geometric distribution with unknown success
+  probability $\theta$
+  \begin{equation*}
+    \Pr(k \given \theta) = (1 - \theta)^{k - 1} \theta,
+    \qquad
+    k = 1, 2, \dotsc
+  \end{equation*}
+  The geometric distribution is appropriate for modeling the number of
+  independent Bernoilli trials required, each with success probability
+  $\theta$, before observing the first ``success.''
+
+  Let the prior for $\theta$ be a beta distribution:
+  \begin{equation*}
+    p(\theta \given \alpha, \beta)
+    =
+    \frac{\theta^{\alpha - 1} (1 - \theta)^{\beta - 1}}
+         {B(\alpha, \beta)}
+    \qquad 0 < \theta < 1
+  \end{equation*}
+  where $B$ is the beta function.  Show that, given an observation
+  $k$, the posterior $p(\theta \given k, \alpha, \beta)$ is a beta
+  distribution with updated parameters $(\alpha', \beta')$.
+
+  Hint: it may help to look up properties of the Beta function, e.g., on
+  Wikipedia.
+
+\item
+  Suppose that in the last question, we received a sample of $n$
+  observations $\{k_1, k_2, \dotsc, k_n\}$. What is the posterior
+  $p(\theta \given k_1, k_2, \dotsc, k_n, \alpha, \beta)$? What is the
+  posterior mean? The posterior mode?
+
+  In light of this and the previous question, can you give an
+  interpretation of the prior parameters $\alpha$ and $\beta$?
+  What happens in the limit as $n \to \infty$?
+
+\item
+  (Scenario quoted from Morey, et al.)  A 10-meter-long research
+  submersible with several people on board has lost contact with its
+  surface support vessel. The submersible has a rescue hatch exactly
+  halfway along its length, to which the support vessel will drop a
+  rescue line. Because the rescuers only get one rescue attempt, it is
+  crucial that when the line is dropped to the craft in the deep water
+  that the line be as close as possible to this hatch. The researchers
+  on the support vessel do not know where the submersible is, but they
+  do know that it forms distinctive bubbles. These bubbles could form
+  anywhere along the craft's length, independently, with equal
+  probability, and float to the surface where they can be seen by the
+  support vessel.
+
+  We wish to perform inference about the location of the rescue
+  hatch given observed bubbles; call this location $\theta$.
+
+  A common ``trick'' when wishing to express absolute prior ignorance
+  of a parameter is to use a so-called \emph{uninformative} prior. In
+  this case, we will consider the uninformative ``prior'' $p(\theta) =
+  1$. This prior does not normalize, but we will see that it does not
+  lead to major problems.
+
+  (a) Suppose the researchers observe the locations of exactly two
+  bubbles, $x_1$ and $x_2$. Write down an appropriate likelihood for
+  these data given $\theta$ and derive the posterior distribution for
+  the location of the hatch, $p(\theta \given x_1, x_2)$, using the
+  uninformative prior described above.
+
+  (b) Now find a 50\% Bayesian credible interval for $\theta$ given
+  $(x_1, x_2)$. Plot the width of this interval as a function of
+  $\lvert x_1 - x_2 \rvert$. Is this the relationship you would
+  expect?
+
+\item
+  (Maximum-likelihood estimation.)  Suppose you flip a coin with
+  unknown bias $\theta$; $\Pr(x = \text{H} \given \theta) = \theta$,
+  three times and observe the outcome HHH.  What is the maximum
+  likelihood estimator for $\theta$?  Do you think this is a good
+  estimator?  Would you want to use it to make predictions?
+
+  Consider a Bayesian analysis of $\theta$ with a beta prior $p(\theta
+  \given \alpha, \beta) = \mc{B}(\theta; \alpha, \beta)$.  What is the
+  posterior mean of $\theta$?  What is the posterior mode?  Consider
+  $(\alpha, \beta) = (50, 50)$.  Plot the posterior density in this
+  case.  Is the maximum likelihood estimator a good summary of the
+  distribution?
+
+\item
+  (Optimal \emph{Price is Right} bidding.)
+  Suppose you have a standard normal belief about an unknown parameter
+  $\theta$, $p(\theta) = \mc{N}(\theta; 0, 1^2)$.  You are asked to
+  give a point estimate $\hat{\theta}$ of $\theta$, but are told that
+  there is a heavy penalty for guessing too high.  The loss function is
+  \begin{equation*}
+    \ell(\hat{\theta}, \theta; c)
+    =
+    \begin{cases}
+      (\theta - \hat{\theta})^2 & \hat{\theta}  <   \theta; \\
+      c                         & \hat{\theta} \geq \theta
+    \end{cases},
+  \end{equation*}
+  where $c > 0$ is a constant cost for overestimating.  What is the Bayesian
+  estimator in this case?  How does it change as a function of $c$? Plot the
+  optimal action as a function of $c$ for $0 < c < 10$.
+
+  Hint: you may need to minimize certain expressions you encounter numerically
+  as an analytic solution may not be available.
+
+\end{enumerate}
+
+\end{document}
