@@ -7,6 +7,7 @@
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsmath}
+\usepackage{amsfonts}
 \usepackage{nicefrac}
 \usepackage{microtype}
 \usepackage{bm}
@@ -135,6 +136,42 @@ Due Wednesday, 6 February 2019 \\
   distribution?
 
 \item
+  (Effect of weird priors.)  Let us consider the following set of
+  observations. We flip a coin independently $n = 1\,000$ times and
+  observe $x = 900$ successes. Call the unknown bias of the coin
+  $\theta \in (0, 1)$.
+
+  For each of the prior distributions $p(\theta)$ below, please:
+  \begin{itemize}
+  \item
+    plot the prior distribution $p(\theta)$ over the range $0 < \theta < 1$
+  \item
+    plot the posterior distribution given the above data, $p(\theta
+    \given \data)$, over the range $0 < \theta < 1$
+  \item
+    report the posterior mean,
+    $\mathbb{E}[\theta \given \data] = \int \theta\,p(\theta\given\data)\intd\theta.$
+  \end{itemize}
+
+  (a) A uniform prior on $\theta$, which can be realized by selecting
+  the beta distribution with $\alpha = \beta = 1$:
+  \[
+    p(\theta) = \mathcal{B}(\theta; \alpha = 1, \beta = 1).
+  \]
+
+  (b) A prior with extreme bias toward small values of $\theta$:
+  \[
+    p(\theta) = \mathcal{B}(\theta; \alpha = 1, \beta = 100).
+  \]
+
+  (c) A prior that has no support on values greater than $\theta =
+  \nicefrac{1}{2}$:
+  \[
+    p(\theta) = \begin{cases} 2 & \theta <    \nicefrac{1}{2}; \\
+                              0 & \theta \geq \nicefrac{1}{2}. \end{cases}
+  \]
+
+\item
   (Optimal \emph{Price is Right} bidding.)
   Suppose you have a standard normal belief about an unknown parameter
   $\theta$, $p(\theta) = \mc{N}(\theta; 0, 1^2)$.  You are asked to
@@ -148,12 +185,11 @@ Due Wednesday, 6 February 2019 \\
       c                         & \hat{\theta} \geq \theta
     \end{cases},
   \end{equation*}
-  where $c > 0$ is a constant cost for overestimating.  What is the Bayesian
-  estimator in this case?  How does it change as a function of $c$? Plot the
-  optimal action as a function of $c$ for $0 < c < 10$.
-
-  Hint: you may need to minimize certain expressions you encounter numerically
-  as an analytic solution may not be available.
+  where $c > 0$ is a constant cost for overestimating.  What is the
+  Bayesian estimator in this case?  How does it change as a function
+  of $c$? Plot the optimal action as a function of $c$ for $0 < c <
+  10$. Hint: you may need to minimize certain expressions you
+  encounter numerically as an analytic solution may not be available.
 
 \end{enumerate}
 
