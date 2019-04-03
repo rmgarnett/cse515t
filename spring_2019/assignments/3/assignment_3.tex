@@ -1,0 +1,123 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\model}{\mc{M}}
+\newcommand{\trans}{^\top}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2019) Assignment 3}} \\
+Due Wednesday, 10 April 2019 \\
+
+\begin{enumerate}
+\item
+  (Sampling from a multivariate Gaussian distribution).  Assume you can sample
+  from a univariate standard normal distribution $\mc{N}(0, 1^2)$.  In the last
+  assignment, this allowed you to sample trivially from a multivariate standard
+  normal distribution $\mc{N}(\vec{0}, \mat{I})$.  Use the closure of the
+  Gaussian distribution to affine transformations to derive a procedure to
+  sample from an arbitrary multivariate Gaussian distribution
+  \[
+    p(\vec{x}) = \mc{N}(\vec{x}; \vec{\mu}, \mat{\Sigma})
+  \]
+  using an oracle that can draw a sample from the univariate standard normal
+  distribution.
+
+  Hint: the \emph{Cholesky decomposition} may be helpful.
+\end{enumerate}
+
+\clearpage
+Now we will consider a series of questions relating to an application of
+Bayesian inference to numerical analysis, specifically quadrature.
+
+We are going to consider the function
+\[f(x) = \exp(-x^2)\]
+and its definite integral
+\[Z = \int_{-\infty}^\infty f(x) \intd x.\]
+The function $f$ has no elementary antiderivative, so the calculation of $Z$ is
+not straightforward. There is a famous method for computing $Z$ with the trick
+of considering $Z^2$ instead, rewriting the resulting 2$d$ integral in polar
+coordinates, and making a convenient substitution.\footnote{This is commonly
+  credited to Gauss, but the idea goes back at least to Poisson.} If you haven't
+seen this, it's beautiful and worth checking out. The result is
+\[Z = \sqrt{\pi}.\]
+
+We will consider modeling $f$ with a Gaussian process prior distribution:
+\[p(f) = \mc{GP}(f; \mu, K),\]
+and conditioning on the following set of data $\data = (\vec{x}, \vec{y})$:
+\begin{align*}
+  \vec{x} &= [-2.5, -1.5, -0.5, 0.5, 1.5, 2.5]\trans; \\
+  \vec{y} &= \exp(-\vec{x}^2) \\
+          &= [0.0019305, 0.1054, 0.7788, 0.7788, 0.1054, 0.0019305]\trans.
+\end{align*}
+We will fix the prior mean function $\mu$ to be identically zero; $\mu(x) = 0$.
+
+\begin{enumerate}
+\setcounter{enumi}{1}
+\item
+  First, let us consider the question of model, specifically kernel, selection.
+
+  Consider the following three choices for the covariance function $K$:
+  \begin{align*}
+    K_1(x, x') &= \exp\bigl(-\lvert x - x' \rvert^2\bigr) \\
+    K_2(x, x') &= \exp\bigl(-\lvert x - x' \rvert\bigr) \\
+    K_3(x, x') &= \bigl(1 + \sqrt{3} \lvert x - x' \rvert\bigr)
+                  \exp\bigl(-\sqrt{3} \lvert x - x' \rvert\bigr).
+  \end{align*}
+  Note that I am not parameterizing any of these kernels; please consider them
+  to be fixed.
+
+  Each kernel defines a Gaussian process model for the data in a natural way:
+  \[p(f \given \model_i) = \mc{GP}(f; \mu, K_i).\]
+  Consider a uniform prior distribution over these models:
+  \[\Pr(\model_i) = \nicefrac{1}{3} \qquad i = 1, 2, 3.\]
+
+  \begin{enumerate}
+  \item
+    Compute the log marginal likelihood for each model given the data $\data$
+    above.
+  \item
+    Compute the model posterior $\Pr(\model \given \data)$. Is there strong
+    evidence for one model being the best?
+  \end{enumerate}
+
+\item
+  Now we will consider integration.
+
+  Perform Bayesian quadrature to estimate the definite integral $\int_{-5}^5
+  f(x) \intd{x}$, using the model $\model_1$ from question 1.  What is the
+  predictive mean and standard deviation, $p(Z \given \data, \model_1)$?  (You
+  may give a numeric answer.)  How does this compare with the true answer?
+
+\end{enumerate}
+
+\end{document}
