@@ -1,0 +1,230 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\model}{\mc{M}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\trans}{^\top}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+
+\DeclareMathOperator{\var}{var}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Spring 2019) Midterm}}
+\begin{itemize}
+\item
+  There are two ways to hand in this midterm.  \textbf{Late submissions will not
+    be accepted!}  I do not recommend cutting it too close.
+  \begin{itemize}
+  \item Physically in class.  The due date for this option is \textbf{5:30
+    \acro{PM}, Wednesday, 24 April (the last day of class).}
+  \item Electronically on Piazza as a private message to the instructors. The
+    due date for this option is \textbf{23:59 \acro{CDT} Monday, 29 April} (the
+    midnight of the Monday at the start of reading week).
+  \end{itemize}
+\item
+  Please do not discuss the questions with other members of the class.
+\item
+  Please post any questions as a \emph{private message to the instructors} on
+  Piazza.
+\item
+  Any corrections will be posted by the instructors on Piazza. This document
+  will also be kept up-to-date on the course webpage and in GitHub.
+\end{itemize}
+
+\clearpage
+
+In this question we will consider a discrete parameter $\theta \in \{1, 2\}$
+with a uniform prior distribution: $\Pr(\theta = 1) = \Pr(\theta = 2) =
+\nicefrac{1}{2}$.
+
+A series of observations $\{x_1, x_2, \dotsc\} \in \R$ will be generated
+\emph{independently and identically distributed} (iid) according to the
+following distributions conditional on the unknown parameter $\theta$:
+\[
+  p(x \given \theta = 1) = \mc{N}(x; 0, 1^2);
+  \qquad
+  p(x \given \theta = 2) = \mc{N}(x; 1, 2^2).
+\]
+
+\begin{enumerate}
+\item
+  \begin{enumerate}
+  \item
+    Plot the probability density function of the marginal prior predictive
+    distribution for the first value $p(x_1)$ over the interval $x_1 \in [-5,
+      7]$, and report the value of this pdf at $x_1 = 0$ and $x_1 = 1$ to three
+    decimal places.
+  \item
+    Assume we make an observation $x_1 = 0$. What is the posterior $\Pr(\theta
+    \given x_1)$?
+  \item
+    What is the posterior mean and variance of $p(x_2 \given x_1 = 0)$?
+  \item
+    Are there any possible value(s) for $x_1$ that would not change our prior
+    belief about $\theta$, so that $\Pr(\theta \given x_1) = \Pr(\theta)$? If
+    so, what is it/are they?
+  \item
+    What would be the observation $x_1$ that would maximize the posterior
+    probability $\Pr(\theta = 1 \given x_1)$? Report its value to three decimal
+    places.
+  \end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+Consider the following dataset $\data = (\vec{x}, \vec{y})$:
+\begin{align*}
+  \vec{x} &= [-1.30, 0.293, -0.974, -1.44, -1.12, -0.151, 1.08, -0.292, 2.36, -0.04]; \\
+  \vec{y} &= [-1.68, 0.563, -0.954, -0.924, -0.905, -0.833, 0.952, -0.124, 0.838, 0.198].
+\end{align*}
+We are going to perform regression with these data assuming the observation
+model $y = f(x) + \varepsilon$, where $f\colon \R \to \R$ is a latent function
+we wish to estimate. Assume that the noise $\varepsilon$ is generated iid with
+distribution $p(\varepsilon) = \mc{N}(\varepsilon; 0, \nicefrac{1}{3}^2)$.
+
+Consider two Gaussian process models for $f$ with zero prior mean.  Model
+$\model_1$ has a linear covariance:
+\[
+  p(f \given \model_1) = \mc{GP}(f; 0, K_1);
+  \qquad
+  K_1(x, x') = x\trans x'.
+\]
+Model $\model_2$ has a squared exponential covariance with unit length scale and
+output scale:
+\[
+  p(f \given \model_2) = \mc{GP}(f; 0, K_2);
+  \qquad
+  K_2(x, x') = \exp\bigl(-\tfrac{1}{2}(x - x')^2\bigr).
+\]
+
+\begin{enumerate}\setcounter{enumi}{1}
+\item
+  \begin{enumerate}
+  \item What is the log model evidence for each model, $\log p(\vec{y} \given \vec{x}, \model_i)$?
+  \item What is the model posterior, $\Pr(\model \given \data)$? Report each
+    value to three decimal places.
+  \item
+    Can you find a kernel with higher model evidence given the data above,
+    keeping the mean function and noise variance fixed?  (I will award an extra
+    credit point to the person who provides the kernel with the highest
+    evidence.)
+  \end{enumerate}
+\end{enumerate}
+
+In the following assume the model posterior is actually uniform $\Pr(\model_1
+\given \data) = \Pr(\model_2 \given \data) = \nicefrac{1}{2}$, even though it is
+not.
+\begin{enumerate}\setcounter{enumi}{2}
+\item
+  \begin{enumerate}
+  \item Plot the pdf of the predictive distribution at $x = 4$, $p\bigl(f(x)
+    \given, x = 4, \data\bigr)$, over the range $-4 \leq f(x) \leq 4$.
+  \item
+    Plot the model-marginal mean function $\mathbb{E}[f \given \data]$ over the
+    range $-4 \leq x \leq 4$.
+  \end{enumerate}
+\end{enumerate}
+We will adopt the second model $\model_2$ \emph{only} for the next
+question. That is, the prior on $f$ is only
+\[
+  p(f) = \mc{GP}(f; 0, K);
+  \qquad
+  K(x, x') = \exp\bigl(-\tfrac{1}{2}(x - x')^2\bigr).
+\]
+We will consider a decision problem where we can augment our dataset $\data$
+with a single random measurement at a point $x^\ast$ of our choosing, receiving
+a measurement $y^\ast = f(x^\ast) + \varepsilon$.
+
+Define a loss function $\ell(x^\ast, y^\ast, \data)$ by the posterior predictive
+standard deviation of $f(0)$:
+\[
+  \ell(x^\ast, y^\ast, \data) =
+  \sqrt{\var\bigl[f(x) \given x = 0, \data, x^\ast, y^\ast\bigr]}.
+\]
+
+\begin{enumerate}\setcounter{enumi}{3}
+\item
+  \begin{enumerate}
+  \item
+    Plot the expected loss $\mathbb{E}[\ell \given x^\ast, \data]$ over the
+    range $-4 \leq x^\ast \leq 4$. Report its value at $x^\ast = 1$ to three
+    decimal places.
+  \item
+    What is the optimal final measurement location? Report its value to three
+    decimal places.
+  \end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+Let $f\colon \R \to \R$ have an arbitrary Gaussian process prior:
+\[
+  p(f) = \mc{GP}(f; \mu, K),
+\]
+where $K$ is differentiable everywhere.
+
+Let $x \in \R$ be an arbitrary point. We will consider inference of the
+derivative of $f$ at $x$, $f'(x)$.
+
+Given $h > 0$, consider the value
+\[
+  a_h = \frac{f(x + h) - f(x)}{h}.
+\]
+\begin{enumerate}\setcounter{enumi}{3}
+\item
+  \begin{enumerate}
+  \item
+    What is the variance of $a_h$? Take the limit as $h \to 0$ and interpret the
+    result.
+  \item
+    Let $x' \in \R$ be another arbitrary point. What is the covariance between
+    $a_h$ and $f(x')$? Take the limit as $h \to 0$ and interpret the result.
+  \item
+    Using the above, find the joint distribution between $f'(x)$ and $f(x')$.
+  \end{enumerate}
+\end{enumerate}
+
+\clearpage
+
+Let $\theta \in \R^d$ be a $d$-dimensional random variable, and let $p(\theta)$
+be an arbitrary prior distribution.
+
+Suppose we discover information $\data$ that informs us every entry of $\theta$
+is actually positive, without providing any additional information. That is,
+$\theta_i \geq 0; \forall i$.
+\begin{enumerate}\setcounter{enumi}{4}
+\item
+  Describe a rejection sampling procedure for sampling from the posterior
+  distribution $p(\theta \given \data)$.
+\end{enumerate}
+
+\end{document}
