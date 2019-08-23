@@ -1,0 +1,223 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{microtype}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T: Bayesian Methods in Machine Learning (Fall 2019)}} \\[1ex]
+
+\begin{tabular}{rl}
+               Instructor & Professor Roman Garnett                                 \\
+                \acro{TA} & Matt Gleeson (\texttt{gleesonm})                        \\
+                \acro{TA} & Adam Kern (\texttt{adam.kern})                          \\
+            Time/Location & Monday/Wednesday 4--5:20pm, Hillman 60                  \\
+            Office Hours (Garnett) & Wednesday 5:30--6:30pm, Hillman 60             \\
+ Office Hours (\acro{TA}) & \acro{TBA}                                              \\
+               \acro{URL} & \url{http://cse.wustl.edu/~garnett/cse515t/}            \\
+                   GitHub & \url{https://github.com/rmgarnett/cse515t/fall_2019}    \\
+     Piazza message board & \url{https://piazza.com/wustl/fall2019/cse515t}
+\end{tabular}
+
+\section*{Course Description}
+
+This course will cover modern machine learning techniques from a Bayesian
+probabilistic perspective. Bayesian probability allows us to model and reason
+about all types of uncertainty. The result is a powerful, consistent framework
+for approaching many problems that arise in machine learning, including
+parameter estimation, model comparison, and decision making. We will begin with
+a high-level introduction to Bayesian inference, then proceed to cover
+more-advanced topics.
+
+This course is meant to lay the groundwork for research in these
+areas. If you are looking for a practical introduction with a focus on
+implementation, etc. this may not be the best course for you.
+
+\section*{Prerequisites}
+
+We will make heavy use of mathematics in this course.  You should have a good
+grasp of multivariable calculus (integration, partial derivation, maximization,
+etc.), probability (conditional probability, expectations, etc.), and linear
+algebra (solving linear systems, eigendecompositions, etc.).
+
+Please note that this is not an introduction to machine learning; the \acro{CSE
+  417T/517A} courses fill that role.  I will assume prior familiarity with the
+main concepts of machine learning: supervised and unsupervised learning,
+classification, regression, clustering, etc.
+
+\section*{Book}
+
+There is no required book. For each lecture, I will provide a list of related
+materials, including book chapters, videos, papers, code, etc.\ on the course
+webpage.  These are to give you different viewpoints on the subject.  Hopefully
+you can find one that suits you.
+
+Although no book will be required, the following books are highly aligned with
+this course:
+\begin{itemize}
+\item \emph{Pattern Recognition and Machine Learning} by Christopher M.\ Bishop.
+  Covers many machine-learning topics thoroughly.  Very Bayesian.  Can also be
+  very mathematical and take some effort to read.
+\item \emph{Bayesian Reasoning and Machine Learning} by David Barber.  Geared
+  (as much as a machine-learning book could be) towards computer scientists.
+  Lots of material on graphical models.  Freely available
+  online.\footnote{\url{http://www.cs.ucl.ac.uk/staff/d.barber/brml/}, link also
+    on course webpage.}
+\item \emph{Gaussian Processes for Machine Learning} by Carl Rasmussen and
+  Christopher Williams.  Excellent reference for Gaussian processes.  Freely
+  available online.\footnote{\url{http://www.gaussianprocess.org/gpml/}, link
+    also on course webpage.}
+\end{itemize}
+
+The following books are good resources for Bayesian statistics:
+\begin{itemize}
+\item \emph{Statistical Decision Theory and Bayesian Analysis} by James Berger.
+  An old book (1980, advertises ``with 23 illustrations'' on the title page),
+  but nonetheless an excellent introduction to Bayesian methods.  Very clear.
+  Provides convincing philosophical arguments for the Bayesian viewpoint.
+\item \emph{The Bayesian Choice: From Decision-Theoretic Foundations to
+  Computational Implementation} by Christian Robert.  Another fairly technical
+  resource with passionate arguments for the Bayesian perspective.
+\end{itemize}
+
+\section*{Assignments}
+
+There will be a small number of assignments throughout the semester, with two
+weeks available to complete each one.
+
+The assignments will form 30\% of your grade, and each will have two types of
+questions: traditional ``pencil-and-paper'' questions, and programming exercises
+meant to give more insight into applying the techniques we will discuss on
+actual data.  The former \emph{will not be corrected.}  If you make a reasonable
+attempt to answer a question, I will give you full credit.  After each
+assignment, I will provide solutions online.
+
+The programming exercises will require you to implement some of the theoretical
+ideas we discuss in class.  The point of these exercises is both to lead to a
+better understanding by forcing a different viewpoint (that of the designer),
+and also to enable interaction.  I encourage you to play with the data,
+parameters, etc. associated with these exercises to see how the results change.
+The point of the exercises is \emph{not} for me to judge your programming
+skills, so \emph{please do not hand in your code.}  Rather, you should convey
+your answers via plots, tables, and/or discussion, as appropriate.  As I don't
+need to read your code, feel free to use any language you'd like, but note that
+if I provide you with my own code, I will do so in \acro{MATLAB.}
+
+\subsection*{Late policy}
+
+Assignments will be due during class on the dates specified on the course
+homepage.  I will allow you to turn in your assignment up to one class late with
+no penalty.
+
+\subsection*{Collaboration policy}
+
+Please feel free to collaborate on the paper-and-pencil questions!  This is a
+good way to gain a deeper understanding of the material.  Of course, you will be
+expected to write up your answers separately.  Also feel free to collaborate on
+a high level on the programming exercises, but please write your own code and
+produce your own results.
+
+\section*{Midterm}
+
+There will be a take-home midterm on a date to be determined later (probably
+just before or just after Spring Break).This will count for 30\% of your grade.
+
+\section*{Project}
+
+In the second half of the semester, you will complete a project, which will
+comprise 30\% of your final grade. The goal of the project will be to apply
+Bayesian techniques to a real dataset in a nontrivial way.  I will compile a
+list of datasets on the course webpage, but you should of course feel free to
+find your own that is aligned with your interests.  The project should reach
+beyond the scope of the homework problems.  I will judge the success of a
+project based on the methodological approach rather than the quantitative
+details of the final outcome.  This is an exercise in applying theoretical ideas
+in practice, and even the most carefully constructed models or techniques can
+fail on a particular problem.  Note that I would expect you to think about
+\emph{why} your method might have failed (or succeeded!).
+
+You can complete this project in groups of one, two, or three people.  Of
+course, I will expect more out of larger groups.
+
+There will be four components to this project:
+\begin{itemize}
+\item A project proposal, due \acro{TBD}.  This should be an approximately one
+  page document describing your idea.  I will read this and give
+  feedback/suggestions.
+\item A status report, due \acro{TBD}.  I expect this to be one or two pages,
+  updating me on the progress of your project, including data processing,
+  implementation, experimental design decisions, etc.
+\item A 15-minute presentation describing the project.  These will be held in
+  class during the last class sessions, beginning on \acro{TBD}.  The
+  presentation should briefly explain the idea, the data, and the results of
+  your investigation.
+\item A final report, due \acro{TBD}. This should be an approximately four-page
+  document explaining the idea, experimental setup, results, and your
+  interpretation of them.
+\end{itemize}
+
+\section*{Grading}
+
+Your final grade will consist of the following weighted components:
+\begin{center}
+  \begin{tabular}{lc}
+    \toprule
+    component                    &   \% \\
+    \midrule
+    assignments                  & 30\% \\
+    midterm                      & 30\% \\
+    project proposal             & 10\% \\
+    project status report        & 10\% \\
+    project presentation         & 10\% \\
+    project final report         & 10\% \\
+    \midrule
+    final project total          & 40\% \\
+    \bottomrule
+  \end{tabular}
+\end{center}
+
+\section*{Topics}
+
+An outline of the topics I expect to cover is below; this is subject to change,
+more likely by deletion than addition.  If there is a particular topic you would
+like me to spend more time on (or don't care about at all!), please let me know.
+
+I will keep the course webpage updated with lecture-specific information and
+resources.
+
+\begin{itemize}
+\item \textbf{Introduction to the Bayesian method:} review of probability,
+  Bayes' theorem, Bayesian inference, Bayesian parameter estimation, Bayesian
+  decision theory, Bayesian model selection.
+\item \textbf{Approximate inference:} the Laplace approximation, variational
+  Bayes, expectation propagation.
+\item \textbf{Sampling methods:} rejection sampling, importance sampling, Markov
+  chain Monte Carlo.
+\item \textbf{Parametric models:} Bayesian linear regression, logistic
+  regression, general linear models, basis expansions, mixture models, latent
+  Dirichlet allocation.
+\item \textbf{Nonparametric models:} Gaussian proesses for regression and
+  classification.
+\item \textbf{Bayesian numerical analysis:} Bayesian optimization, Bayesian
+  quadrature.
+\end{itemize}
+
+\end{document}
