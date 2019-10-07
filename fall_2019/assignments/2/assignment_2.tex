@@ -1,0 +1,142 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\mat}[1]{\bm{\mathrm{#1}}}
+\renewcommand{\vec}[1]{\bm{\mathrm{#1}}}
+\newcommand{\trans}{^\top}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Fall 2019) Assignment 2}} \\
+Due Monday, 16 October 2019 \\
+
+\begin{enumerate}
+
+\item
+  Show the correspondence between the decision rule derived from
+  Bayesian decision theory (minimizing the posterior expected loss)
+  and from the ``Bayes rule'' derived from the frequentist perspective
+  (choosing a ``prior'' $p(\theta)$ and minimizing risk).
+
+\item
+  (Curse of dimensionality.)
+  Consider a $d$-dimensional, zero-mean, spherical multivariate
+  Gaussian distribution:
+  \begin{equation*}
+    p(\vec{x}) = \mc{N}(\vec{x}; \vec{0}, \mat{I}_d).
+  \end{equation*}
+  Equivalently, each entry of $\vec{x}$ is drawn iid from a univariate
+  standard normal distribution.
+
+  In familiar small dimensions ($d \leq 3$), ``most'' of the vectors
+  drawn from a multivariate Gaussian distribution will lie near the
+  mean.  For example, the famous 68--95--99.7 rule for $d = 1$
+  indicates that large deviations from the mean are unusual.  Here we
+  will consider the behavior in larger dimensions.
+  \begin{itemize}
+  \item Draw 10\,000 samples from $p(\vec{x})$ for each dimension in
+    $d \in \{1, 5, 10, 50, 100\},$ and compute the length of each
+    vector drawn: $y_d = \sqrt{\vec{x}\trans \vec{x}} = (\sum_i^d
+    x_i^2)^{\nicefrac{1}{2}}$.  Estimate the distribution of each
+    $y_d$ using either a histogram or a kernel density estimate (in
+    \acro{MATLAB}, \texttt{hist} and \texttt{ksdensity},
+    respectively).  Plot your estimates.  (Please do not hand in your
+    raw samples!)  Summarize the behavior of this distribution as $d$
+    increases.
+  \item
+    The true distribution of $y_d^2$ is a chi-square distribution with
+    $d$ degrees of freedom (the distribution of $y_d$ itself is the
+    less-commonly seen chi distribution).  Use this fact to compute
+    the probability that $y_d < 5$ for each of the dimensions in the
+    last part.
+  \item
+    For $d = 1\,000$, compute the 5th and 95th percentiles of $y_d$.
+    Is the mean $\vec{x} = \vec{0}$ a representative summary of the
+    distribution in high dimensions?  This behavior has been called
+    ``the curse of dimensionality.''
+  \end{itemize}
+
+\item
+  (Laplace approximation.)
+  Find a Laplace approximation to the gamma distribution:
+  \begin{equation*}
+    p(\theta \given \alpha, \beta)
+    =
+    \frac{1}{Z}
+    \theta^{\alpha - 1}
+    \exp(-\beta\theta).
+  \end{equation*}
+  Plot the approximation against the true density for $(\alpha, \beta)
+  = (3, 1)$.
+
+  The true value of the normalizing constant is
+  \begin{equation*}
+    Z = \frac{\Gamma(\alpha)}{\beta^\alpha}.
+  \end{equation*}
+  If we fix $\beta = 1$, then $Z = \Gamma(\alpha)$, so we may use the
+  Laplace approximation to estimate the Gamma function.  Analyze the
+  quality of this approximation as a function of $\alpha$.
+
+  Read the Wikipedia article about Stirling's approximation. Do you see
+  a connection?
+
+\item
+  (Gaussian process regression).
+  Consider the following data:
+  \begin{align*}
+    \vec{x}
+    &=
+    [-2.26, -1.31, -0.43, 0.32, 0.34, 0.54, 0.86, 1.83, 2.77, 3.58]\trans; \\
+    \vec{y}
+    &=
+    [1.03, 0.70, -0.68, -1.36, -1.74, -1.01, 0.24, 1.55, 1.68, 1.53]\trans.
+  \end{align*}
+  Fix the observation noise variance at $\sigma^2 = 0.5^2$.
+
+  \begin{itemize}
+  \item
+    Examining a scatter plot of the data, guess which values of
+    $(\lambda, \ell)$ in the squared exponential covariance (if any)
+    might explain this data well.
+  \item
+    Perform Gaussian process regression for these data on the interval
+    $x_\ast \in [-4, 4]$ using the squared exponential covariance for
+    the same set of hyperparameters $(\lambda, \ell)$ above.  Plot the
+    posterior mean and the pointwise 95\% credible interval for each.
+    Which predictions look the best?
+  \item
+    Visualize the log model evidence $\log p(\vec{y} \given \vec{x},
+    \lambda, \ell, \sigma^2)$ as a function of $(\lambda, \ell)$.  You
+    can choose to make, for example, a heatmap or a contour plot of
+    this function.
+  \end{itemize}
+
+\end{enumerate}
+
+\end{document}
