@@ -108,8 +108,9 @@ giving rise to the following likelihood:
 \begin{equation*}
   p(\vec{y} \given \mat{X}, \vec{w}, \sigma^2)
   =
-  \mc{N}(\vec{y}; \mat{X}\vec{w}, \sigma^2 \mat{I}).
+  \mc{N}(\vec{y};\mat{\Phi}\trans \vec{w}, \sigma^2 \mat{I}),
 \end{equation*}
+where we have defined $\mat{\Phi} = \phi(\mat{X})$.
 
 In Bayesian linear regression, we further chose a multivariate
 Gaussian prior for $\vec{w}$:
@@ -146,9 +147,8 @@ where
   \mat{\Phi}\trans
   (\mat{\Phi}\mat{\Sigma}\mat{\Phi}\trans + \sigma^2 \mat{I})\inv
   \mat{\Phi}
-  \mat{\Sigma},
+  \mat{\Sigma}.
 \end{align*}
-where we have defined $\mat{\Phi} = \phi(\mat{X})$.
 
 If we wish to use our model to predict the outputs $\vec{y}_\ast$
 associated with a set of inputs $\mat{X}_\ast$, we previously derived:
