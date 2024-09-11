@@ -1,0 +1,123 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Fall 2024) Assignment 1}} \\
+Due Wednesday, 18 September 2024 \\
+
+\begin{enumerate}
+
+\item
+  Your doctor supposes that you may have a rare disease, Bayesian
+  syndrome (also known as \acro{BS}), which occurs in every one out of
+  100 members of the population. The doctor proposes you take a
+  super-accurate (and expensive!) test to be sure.  The scanner is
+  fairly reliable; 90\% of all Bayesians are identified as Bayesians,
+  and 90\% of non-Bayesians are identified as such.
+
+  The test comes back positive and the doctor tells you it's nearly
+  certain you're a Bayesian given that result, due to the accuracy of
+  the test. How do you respond?
+
+\item
+  Suppose $k$ has a Poisson distribution with unknown rate parameter
+  $\theta$
+  \[
+    \Pr(k \given \theta) = \frac{\theta^k e^{-\theta}}{k!},
+    \qquad
+    k = 0, 1, 2, \dotsc
+  \]
+
+  Let the prior for $\theta$ be a gamma distribution:
+  \[
+    p(\theta \given \alpha, \beta)
+    =
+    \frac{\beta^\alpha}
+         {\Gamma(\alpha)}
+    \theta^{\alpha - 1}e^{-\beta\theta},
+    \qquad \theta > 0
+  \]
+  where $\Gamma$ is the gamma function.  Show that, given an
+  observation $k$, the posterior $p(\theta \given k, \alpha, \beta)$
+  is a gamma distribution with updated parameters $(\alpha', \beta')$.
+
+  Hints:
+  \begin{itemize}
+  \item For nonnegative integer $k$, $k! = \Gamma(k + 1)$.
+  \item $\Gamma(x + 1) = x\Gamma(x)$ for all $x > 0$.
+  \item For common distributions (such as the gamma distribution),
+    Wikipedia has useful properties in an infobox.
+  \item Beware there are two common parameterizations of the gamma distribution.
+  \end{itemize}
+
+\item
+  Suppose that in the last question, we received a sample of $n$
+  observations $\{k_1, k_2, \dotsc, k_n\}$. What is the posterior
+  $p(\theta \given k_1, k_2, \dotsc, k_n, \alpha, \beta)$? What is the
+  posterior mean? The posterior mode?
+
+  In light of this and the previous question, can you give an
+  interpretation of the prior parameters $\alpha$ and $\beta$?
+  What happens in the limit as $n \to \infty$?
+
+\item
+  (Scenario quoted from Morey, et al.)  A 10-meter-long research
+  submersible with several people on board has lost contact with its
+  surface support vessel. The submersible has a rescue hatch exactly
+  halfway along its length, to which the support vessel will drop a
+  rescue line. Because the rescuers only get one rescue attempt, it is
+  crucial that when the line is dropped to the craft in the deep water
+  that the line be as close as possible to this hatch. The researchers
+  on the support vessel do not know where the submersible is, but they
+  do know that it forms distinctive bubbles. These bubbles could form
+  anywhere along the craft's length, independently, with equal
+  probability, and float to the surface where they can be seen by the
+  support vessel.
+
+  We wish to perform inference about the location of the rescue
+  hatch given observed bubbles; call this location $\theta$.
+
+  A common ``trick'' when wishing to express absolute prior ignorance
+  of a parameter is to use a so-called \emph{uninformative} prior. In
+  this case, we will consider the uninformative ``prior'' $p(\theta) =
+  1$. This prior does not normalize, but we will see that it does not
+  lead to major problems.
+
+  Suppose the researchers observe the locations of exactly two
+  bubbles, $x_1$ and $x_2$. Write down an appropriate likelihood for
+  these data given $\theta$ and derive the posterior distribution for
+  the location of the hatch, $p(\theta \given x_1, x_2)$, using the
+  uninformative prior described above.
+
+\end{enumerate}
+
+\end{document}
