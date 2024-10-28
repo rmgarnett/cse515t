@@ -99,9 +99,10 @@ If you wish to pursue this route, your project will comprise four parts:
 \item
   A one-page proposal outlining the problem you want to solve, its importance
   and motivation, your proposed solution, and the data will use for your
-  investigation. This will be due \textbf{Monday, 28 October 2024} (no extensions). We will
-  review your proposal and give you feedback.  At this stage we may also
-  \emph{reject} your proposal if we feel the problem is not appropriate.
+  investigation. This will be due \textbf{Monday, 4 November 2024} (no
+  extensions). We will review your proposal and give you feedback.  At this
+  stage we may also \emph{reject} your proposal if we feel the problem is not
+  appropriate.
 \item
   A two-page status report reporting on your current progress and detailing any
   issues/questions you may have, due \textbf{Friday, 22 November 2024} (no
@@ -130,18 +131,15 @@ You can work in teams of 2--3 on this project if you desire.
 The project will be an investigation into applying Bayesian optimization to
 automatic and efficient hyperparameter tuning of machine learning models.
 
-\textbf{Warning -- some details below will change!}
-
 We will use two sources of data for this investigation. The first is a classical
-synthetic benchmark function used in optimization, the \emph{Branin} (sometimes
-\emph{Branin--Hoo}) function.  See here for a description, formula, and some
-implementations:
+synthetic benchmark function used in optimization, the \emph{Goldstein--Price}
+function.  See here for a description, formula, and some implementations:
 \begin{quote}
-  \url{https://www.sfu.ca/~ssurjano/branin.html}
+  \url{https://www.sfu.ca/~ssurjano/goldpr.html}
 \end{quote}
 This is a function of a two-dimensional input and can be useful for visualizing
 the behavior of the methods you will implement. The goal is to minimize the
-function over the specified box-bounded domain.
+function over the specified box-bounded domain (defined on the page above).
 
 The second is real data from a hyperparameter tuning task on two different
 models: \acro{SVM} and online \acro{LDA}. These datasets were used in the paper
@@ -183,8 +181,8 @@ functions we are dealing with.
 
 \begin{itemize}
 \item
-  Make a heatmap of the value of the Branin function over the domain $\mc{X} =
-  [-5, 10] \times [0, 15]$ using a dense grid of values, with 1000 values per
+  Make a heatmap of the value of the Goldstein--Price function over the domain $\mc{X} =
+  [-2, 2] \times [-2, 2]$ using a dense grid of values, with 1000 values per
   dimension, forming a $1000 \times 1000$ image.
 \item
   Describe the behavior of the function. Does it appear \emph{stationary?} (That
@@ -206,14 +204,14 @@ build a useful model of the objective function. If we can't find an informative
 model that can make reasonable predictions, it would be foolish to try to use
 the model to make decisions.
 
-We begin with the Branin function where we can make useful diagnostic plots. For
+We begin with the Goldstein--Price function where we can make useful diagnostic plots. For
 this first series of steps, do not apply any transformation to the outputs of
 the function; use its output directly.
 
 \begin{itemize}
 \item
-  Select a set of 32 training points for the Branin function in the domain
-  $\mc{X} = [-5, 10] \times [0, 15]$ using a \emph{Sobol sequence.} This is a
+  Select a set of 32 training points for the Goldstein--Price function in the domain
+  $\mc{X} = [-2, 2] \times [-2, 2]$ using a \emph{Sobol sequence.} This is a
   so-called low-discrepancy sequence that produces ``quasirandom'' points that
   fill the space relatively evenly; see the Wikipedia article for more
   information, and note that this should be built into most scientific
@@ -249,7 +247,7 @@ the function; use its output directly.
   Gaussian process model is well calibrated this should be approximately
   standard normal. Is that the case?
 \item
-  Repeat the above using a log transformation to the output of the Branin
+  Repeat the above using a log transformation to the output of the Goldstein--Price
   function. Does the marginal likelihood improve? Does the model appear better
   calibrated?
 \end{itemize}
@@ -313,13 +311,14 @@ optimization procedure and observe its performance.
   maximization. We have minimization problems but we can make them maximization
   problems by negating if needed.
 \item
-  For the Branin function, make new heatmaps for the posterior mean and standard
-  deviation from the 32 datapoints we used before using the model you selected.
-  Make another heatmap for the \acro{EI} value, and place a mark where it is
-  maximized. Does the identified point seem like a good next observation location?
+  For the Goldstein--Price function, make new heatmaps for the posterior mean
+  and standard deviation from the 32 datapoints we used before using the model
+  you selected.  Make another heatmap for the \acro{EI} value, and place a mark
+  where it is maximized. Does the identified point seem like a good next
+  observation location?
 \item
-  For the Branin, \acro{SVM}, and \acro{LDA} functions, implement the following
-  experiment:
+  For the Goldstein--Price, \acro{SVM}, and \acro{LDA} functions, implement the
+  following experiment:
   \begin{itemize}
   \item
     select 5 randomly located initial observations, $\data$
@@ -328,10 +327,10 @@ optimization procedure and observe its performance.
     \begin{itemize}
     \item
       Find the point $x$ that maximizes the expected improvement acquisition
-      function given the current data. For the Branin function, you can simply
-      measure \acro{EI} on a dense grid or on a dense Sobol set and find the
-      maximum on that dense set.  For the other datasets, you can measure
-      \acro{EI} on the unlabeled points and maximize.
+      function given the current data. For the Goldstein--Price function, you
+      can simply measure \acro{EI} on a dense grid or on a dense Sobol set and
+      find the maximum on that dense set.  For the other datasets, you can
+      measure \acro{EI} on the unlabeled points and maximize.
     \item
       Add the observation $\bigl(x, f(x)\bigr)$ to your dataset.
     \end{itemize}
