@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage[T1]{fontenc}
+\usepackage[osf]{libertine}
+\usepackage[scaled=0.8]{beramono}
+\usepackage[margin=1.5in]{geometry}
+\usepackage{url}
+\usepackage{booktabs}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{nicefrac}
+\usepackage{microtype}
+\usepackage{bm}
+
+\usepackage{sectsty}
+\sectionfont{\large}
+\subsectionfont{\normalsize}
+
+\usepackage{titlesec}
+\titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+\titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{1ex}
+
+\newcommand{\acro}[1]{\textsc{\MakeLowercase{#1}}}
+\newcommand{\given}{\mid}
+\newcommand{\mc}[1]{\mathcal{#1}}
+\newcommand{\data}{\mc{D}}
+\newcommand{\intd}[1]{\,\mathrm{d}{#1}}
+\newcommand{\R}{\mathbb{R}}
+
+\begin{document}
+
+{\large \textbf{CSE 515T (Fall 2024) Assignment 3}} \\
+Due Wednesday, 13 November 2024 \\
+
+\begin{enumerate}
+
+\item
+
+  Replicate figure 2.1 in the Bayesian optimization book
+  (\url{bayesoptbook.com}) from scratch in an environment such as Python, R, or
+  Julia.  I will post hints to slack.  This should require less than 100 lines
+  of code.
+
+\item
+
+  Replicate figure 2.2 in the Bayesian optimization book
+  (\url{bayesoptbook.com}) from scratch in an environment such as Python, R, or
+  Julia.  I will post hints to slack.  This should require less than 100 lines
+  of code.
+
+\item
+
+  Replicate figure 2.3 in the Bayesian optimization book
+  (\url{bayesoptbook.com}) from scratch in an environment such as Python, R, or
+  Julia.  I will post hints to slack.  This should require less than 100 lines
+  of code.
+
+\item
+
+  Consider a Gaussian process on $f\colon \R^d \to \R$, $p(f) = \mc{GP}(f; \mu,
+  K).$ Suppose $\mu$ and $K$ are differentiable with respect to their
+  inputs. Consider the $i$th partial derivative of $f$ at some point $x$:
+  \[
+  f'_i = \begin{frac}{\partial f}{\partial x_i}(x)\end{frac}.
+  \]
+  Show that $f'_i$ has a Gaussian distribution. What is its mean and variance?
+  Hint: work from the definition of the partial derivative and use the fact that
+  a limiting sequence of Gaussian distributions is Gaussian.
+
+\end{enumerate}
+
+\end{document}
