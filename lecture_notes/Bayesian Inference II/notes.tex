@@ -1,13 +1,18 @@
 \documentclass{article}
 
+% font (currently libertine, will revisit!)
+\usepackage[semibold,lining]{libertine}
 \usepackage[T1]{fontenc}
-\usepackage[osf]{libertine}
-\usepackage[scaled=0.8]{beramono}
-\usepackage[margin=1.5in]{geometry}
+\usepackage{textcomp}
+\usepackage[varqu,varl,scaled=0.96,var0]{zi4}
+\usepackage[libertine,vvarbb,upint]{newtxmath}
+\usepackage{bm}
+\useosf
+
+\usepackage[margin=1.25in]{geometry}
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsmath}
-\usepackage{amssymb}
 \usepackage{nicefrac}
 \usepackage{microtype}
 
@@ -60,6 +65,16 @@
 \newcommand{\R}{\mathbb{R}}
 \newcommand{\ci}{\text{CI}}
 
+\usepackage{enumitem}
+\setlist[enumerate]{%
+  leftmargin=\itemindent,%
+  topsep=0.1\baselineskip,%
+  itemsep=0\baselineskip}
+\setlist[itemize]{%
+  leftmargin=\itemindent,%
+  topsep=0.1\baselineskip,%
+  itemsep=0\baselineskip}
+
 \DeclareMathOperator{\var}{var}
 \DeclareMathOperator*{\argmin}{arg\,min}
 \DeclareMathOperator*{\argmax}{arg\,max}
@@ -84,7 +99,7 @@ straightforward. We first derive the posterior distribution $p(\theta \given
 
 Let's consider an explicit example. Suppose we are interested in the unknown
 bias of a coin $\theta \in (0, 1)$, and begin with the uniform prior on the
-interval $(0, 1)$:
+interval $(0, 1)$ -- in other words, a beta prior with $\alpha = \beta = 1$:
 \[
   p(\theta) = \mc{U}\bigl(\theta; 0, 1\bigr)
             = \mc{B}(\theta; \alpha = 1, \beta = 1).
@@ -110,25 +125,27 @@ fair:
   =
   0.
 \]
-The posterior probability of the coin being \emph{exactly} fair is zero! This
-should not be surprising, as suggesting that we could possibly know the bias of
-the coin with infinite precision is unfathomable.
+The posterior probability of the coin being \emph{exactly} fair is zero!
+Although this might seem surprising at first glance, it is a reasonable
+conclusion, as the idea that a coin could be \emph{perfectly} fair is somewhat
+absurd, as is suggesting that we could possibly know the bias of a coin with
+infinite precision after making a finite number of observations.
 
 We may however relax the question a bit to get some more insight. One option
 would be to consider a parameterized family of hypotheses of the form
 \[
   \mc{H}(\varepsilon) = (\nicefrac{1}{2} - \varepsilon, \nicefrac{1}{2} + \varepsilon).
 \]
-Thus a high probability of the hypothesis $\mc{H}(\varepsilon)$ corresponds to
-the notion that the coin is ``near fair'' with an allowed error of
-$\varepsilon$. We may then compute the posterior probability of these hypotheses
-and consider how they vary as a function of $\varepsilon$. Figure
-\ref{near_fair_probabilities} shows the results for the coin-flipping example
-above. We can see that there's approximately a 50\% posterior probability that
-the bias of the coin is in the interval $(0.4, 0.6)$, corresponding to
-$\varepsilon = 0.1$. We also have evidence to conclude $\theta \in (0.25, 0.75)$
-with near certainty. These probabilities help constrain exactly how ``fair'' or
-``not fair'' we believe the coin to be in light of our evidence.
+Here $\mc{H}(\varepsilon)$ represents the hypothesis of the coin being
+``$\varepsilon$-close'' to fair.  We may then compute the posterior probability
+of these hypotheses and consider how they vary as a function of
+$\varepsilon$. Figure \ref{near_fair_probabilities} shows the results for the
+coin-flipping example above. We can see that there's approximately a 50\%
+posterior probability that the bias of the coin is in the interval $(0.4, 0.6)$,
+corresponding to $\varepsilon = 0.1$. We also have evidence to conclude $\theta
+\in (0.25, 0.75)$ with near certainty. These probabilities help quantify
+exactly how ``fair'' or ``not fair'' we believe the coin to be in light of our
+evidence.
 
 \begin{figure}
   \centering
@@ -138,71 +155,71 @@ with near certainty. These probabilities help constrain exactly how ``fair'' or
   \label{near_fair_probabilities}
 \end{figure}
 
-We briefly discussed the classical approach to hypothesis testing in the last
-lecture, and will expand upon that procedure here. The idea is to create a
-so-called ``null hypothesis'' $\mc{H}_0$ that serves to define what ``typical''
-data may look like assuming that hypothesis. For example, for reasoning about
-the fairness of a coin, we may choose the natural null hypothesis
-$\mc{H}_0\colon \theta = \nicefrac{1}{2}$. Now we can use the likelihood
-\[
-  \Pr(x \given n, \theta = \nicefrac{1}{2})
-\]
-to reason about what observed data would look like if this hypothesis were
-true. This is a critical point: the null hypothesis exists to define what sort
-of data we would expect to see under an assumed value of $\theta$.
+%% We briefly discussed the classical approach to hypothesis testing in the last
+%% lecture, and will expand upon that procedure here. The idea is to create a
+%% so-called ``null hypothesis'' $\mc{H}_0$ that serves to define what ``typical''
+%% data may look like assuming that hypothesis. For example, for reasoning about
+%% the fairness of a coin, we may choose the natural null hypothesis
+%% $\mc{H}_0\colon \theta = \nicefrac{1}{2}$. Now we can use the likelihood
+%% \[
+%%   \Pr(x \given n, \theta = \nicefrac{1}{2})
+%% \]
+%% to reason about what observed data would look like if this hypothesis were
+%% true. This is a critical point: the null hypothesis exists to define what sort
+%% of data we would expect to see under an assumed value of $\theta$.
 
-The classical procedure is then to define a statistic summarizing a given
-dataset $s(\data)$ in some way. An example for coin flipping would be the sample
-mean $s(\data) = \hat{\theta} = \nicefrac{x}{n}$. This happens to be a common
-estimator for $\theta$ as well, but this is a coincidence. We now compute a
-so-called \emph{critical set} $C(\alpha)$ with the property
-\[
-  \Pr\bigl(s(\data) \in C(\alpha) \given \mc{H}_0\bigr) = 1 - \alpha,
-\]
-where $\alpha$ is called the \emph{significance level} of the test. The
-interpretation of the critical set is that the statistic computed from datasets
-generated assuming the null hypothesis ``usually'' have values in this range.
+%% The classical procedure is then to define a statistic summarizing a given
+%% dataset $s(\data)$ in some way. An example for coin flipping would be the sample
+%% mean $s(\data) = \hat{\theta} = \nicefrac{x}{n}$. This happens to be a common
+%% estimator for $\theta$ as well, but this is a coincidence. We now compute a
+%% so-called \emph{critical set} $C(\alpha)$ with the property
+%% \[
+%%   \Pr\bigl(s(\data) \in C(\alpha) \given \mc{H}_0\bigr) = 1 - \alpha,
+%% \]
+%% where $\alpha$ is called the \emph{significance level} of the test. The
+%% interpretation of the critical set is that the statistic computed from datasets
+%% generated assuming the null hypothesis ``usually'' have values in this range.
 
-Finally, we compute the statistic for a particular set of observed data and
-determine whether it lay inside the critical set $C(\alpha)$ we have defined. If
-so, the dataset appears, according to the statistic, typical for datasets
-generated from the null hypothesis. If not, the dataset appears unusual, in the
-sense that data generated assuming the null hypothesis would have such extreme
-values of the statistic only a small portion of the time ($100\alpha$\%). In
-this case, you ``reject'' the null hypothesis with significance $1 - \alpha$.
+%% Finally, we compute the statistic for a particular set of observed data and
+%% determine whether it lay inside the critical set $C(\alpha)$ we have defined. If
+%% so, the dataset appears, according to the statistic, typical for datasets
+%% generated from the null hypothesis. If not, the dataset appears unusual, in the
+%% sense that data generated assuming the null hypothesis would have such extreme
+%% values of the statistic only a small portion of the time ($100\alpha$\%). In
+%% this case, you ``reject'' the null hypothesis with significance $1 - \alpha$.
 
-What is a $p$-value? It must be the probability that the null hypothesis is
-true, right? No, it can't be: the null hypothesis cannot be associated with a
-probability in the classical interpretation of probability. A $p$-value is
-actually the minimum $\alpha$ for which you would reject the null hypothesis
-using this procedure. That is, a $p$-value is not the probability that the null
-hypothesis is true, but rather the probability that we would observe results as
-extreme as those in our dataset, as measured by the chosen statistic, \emph{if
-  the null hypothesis were true!} The $p$-value is thus only a probability that
-is well-defined when already assuming the null hypothesis to be true.  A
-$p$-value does \emph{not} say how extreme our results would appear under
-alternative hypotheses.
+%% What is a $p$-value? It must be the probability that the null hypothesis is
+%% true, right? No, it can't be: the null hypothesis cannot be associated with a
+%% probability in the classical interpretation of probability. A $p$-value is
+%% actually the minimum $\alpha$ for which you would reject the null hypothesis
+%% using this procedure. That is, a $p$-value is not the probability that the null
+%% hypothesis is true, but rather the probability that we would observe results as
+%% extreme as those in our dataset, as measured by the chosen statistic, \emph{if
+%%   the null hypothesis were true!} The $p$-value is thus only a probability that
+%% is well-defined when already assuming the null hypothesis to be true.  A
+%% $p$-value does \emph{not} say how extreme our results would appear under
+%% alternative hypotheses.
 
-Bayesian model selection will eventually allow us to explicitly quantify the
-plausibility of a collection of models having generated the observed data.
+%% Bayesian model selection will eventually allow us to explicitly quantify the
+%% plausibility of a collection of models having generated the observed data.
 
-To interpret the above procedure in the frequency interpretation of probability,
-the critical sets are constructed by reasoning about the following experiment:
-\begin{itemize}
-\item
-  generate $\data$ assuming $\mc{H}_0$;
-\item
-  compute $s(\data)$;
-\item
-  state $s(\data) \in C(\alpha)$.
-\end{itemize}
-In the limit of infinitely many repetitions of this experiment, the final claim
-will be true exactly $100(1 - \alpha)\%$ of the time. Recall this is the
-definition of probability in this context: the frequency of occurrence in the
-limit of infinitely many trials. Note that the experiment we repeat here
-\emph{includes generating data from the null hypothesis} as its first step! This
-is not the experiment we are conducting, since we have a dataset in front of us
-that we want to analyze, which may have been generated in any number of ways.
+%% To interpret the above procedure in the frequency interpretation of probability,
+%% the critical sets are constructed by reasoning about the following experiment:
+%% \begin{itemize}
+%% \item
+%%   generate $\data$ assuming $\mc{H}_0$;
+%% \item
+%%   compute $s(\data)$;
+%% \item
+%%   state $s(\data) \in C(\alpha)$.
+%% \end{itemize}
+%% In the limit of infinitely many repetitions of this experiment, the final claim
+%% will be true exactly $100(1 - \alpha)\%$ of the time. Recall this is the
+%% definition of probability in this context: the frequency of occurrence in the
+%% limit of infinitely many trials. Note that the experiment we repeat here
+%% \emph{includes generating data from the null hypothesis} as its first step! This
+%% is not the experiment we are conducting, since we have a dataset in front of us
+%% that we want to analyze, which may have been generated in any number of ways.
 
 \section*{Summarizing Distributions}
 
@@ -212,12 +229,14 @@ in light of the observations $\data$.  A natural task is to provide a summary of
 the posterior distribution, for example to efficiently convey its relevant
 properties.
 
-In the next lecture we will consider point estimation, which is one common
-summarization method. Another commonly considered problem is \emph{interval
-  summarization,} where we provide an interval $(\ell, u)$ indicating plausible
-values of the parameter $\theta$ in light of the observed data. Classical
-interval estimates are known as \emph{confidence intervals,} and we will discuss
-them in more detail shortly.
+In the next lecture we will consider \emph{point estimation,} which is one
+common summarization method. Another commonly considered problem is
+\emph{interval summarization,} where we provide an interval $(\ell, u)$
+indicating plausible values of the parameter $\theta$ in light of the observed
+data. Classical interval estimates are known as \emph{confidence intervals,} and
+we will discuss them in more detail shortly.
+
+\subsection*{Bayesian approach}
 
 The Bayesian approach to interval estimation is straightforward. Again we use
 the posterior distribution $p(\theta \given \data)$ to guide the construction of
@@ -256,18 +275,25 @@ For example, we may want to construct the narrowest possible interval, or we may
 wish it to be centered on a particular point (such as the posterior mean,
 median, or mode), or we may wish the interval to have some other property.
 
+\subsection*{Classical approach}
+
 The classical approach to interval summarization is to construct a so-called
-confidence interval for the parameter of interest $\theta$. Again a confidence
-interval is described in terms of repeating a particular experiment infinitely
-many times. The experiment we consider will proceed as follows. First we are
-going to define a function $\ci(\data)$ that will map a given dataset $\data$ to
-an interval $(\ell, u) = \ci(\data)$. Now we consider repeating the following
-experiment:
+\emph{confidence interval} for the parameter of interest $\theta$. Recall that
+for any given dataset $\data$ and interval $(\ell, u)$, the (frequency)
+probability of $\theta \in (\ell, u)$ is either 0 or 1, which is not (yet)
+terribly useful for our goal.
+
+We can resolve this tension by embracing the frequency definition of probability
+and reason about the (frequency) probability of success when repeating a
+particular experiment infinitely many times. The experiment we consider will
+proceed as follows. Suppose we have some (for now, arbitrary) procedure
+$\ci(\data)$ that maps a given dataset $\data$ to an interval $(\ell, u) =
+\ci(\data)$. Now we consider repeating the following experiment:
 \begin{itemize}
 \item
   collect data $\data$
 \item
-  compute the interval $(\ell, u) = \ci(\data)$
+  compute the interval $(\ell, u) = \ci(\data)$ using the procedure
 \item
   state $\theta \in (\ell, u)$.
 \end{itemize}
@@ -295,17 +321,18 @@ conclusion in \eqref{wrong} is sometimes known as the \emph{fundamental
 and confuses the nature of prior information with that of posterior
 information. Namely, note that the experiment we consider when defining the
 confidence interval procedure \emph{includes gathering a random dataset} as its
-first step. All we know is that if we repeat the confidence interval procedure
-on \emph{infinitely many datasets,} that it will succeed with probability
-$\alpha$. However, we usually have only one particular dataset in front of us to
-analyze that we care about, and we cannot say anything about the interval
-produced for this dataset in isolation.
+first step. All we know is that if we apply the confidence interval procedure to
+\emph{infinitely many datasets,} that it will succeed with probability
+$\alpha$. However, we usually have only one \emph{particular} dataset in front
+of us to analyze that we care about! We cannot say anything about the confidence
+interval produced for this dataset in isolation -- the (frequency) probability
+of its validity is again either 0 or 1.
 
-Here is a simple example that shows how \eqref{wrong} can fail. Suppose we are
-going to observe two values $x_1, x_2 \in \R$ generated independently from some
-unknown distribution $p(x)$ and wish to construct a confidence interval for the
-mean of the distribution generating the data, $\theta = \E[x]$. Consider the
-following procedure:
+Here is a simple example that shows how \eqref{wrong} can fail. Suppose we will
+observe two values $x_1, x_2 \in \R$ generated independently from some unknown
+distribution $p(x)$ and wish to construct a confidence interval for the mean of
+the distribution generating the data, $\theta = \E[x]$. Consider the following
+procedure:
 \[
   \ci(\data) =
   \begin{cases}
@@ -320,14 +347,48 @@ of the time.  In this case, the absurdly large interval produced will
 will be empty, and \emph{definitely will not} contain $\theta$. Therefore the
 procedure succeeds exactly 50\% of the time. However, in half the cases, the
 posterior probability that $\theta$ is inside the interval produced is 100\%,
-and otherwise this probability is 0\%. In no case is this probability equal to
-the confidence level.
+and otherwise this probability is 0\%. In no case is this posterior probability
+equal to the confidence level.
 
 Another fallacy in the interpretation of confidence intervals is the so called
-\emph{precision fallacy,} that shorter confidence intervals indicate the data
-provide more precise information about $\theta$. A striking illustration of this
-fallacy is provided by the ``lost submarine'' example provided by Morey, et
-al.\ in the reference given below. I encourage you to read this paper and
-reflect!
+\emph{precision fallacy,} the supposition that shorter confidence intervals
+indicate the data provide more precise information about $\theta$. A striking
+illustration of this fallacy is provided by the ``lost submarine'' example
+provided by Morey, et al.\ in the reference given below. I encourage you to read
+this paper and reflect!
+
+(The tl;dr is that we can generate confidence interval procedures where
+precision is \emph{inversely} proportional to the width of the intervals.
+However, this disconnect cannot exist with Bayesian credible intervals.)
+
+\section*{Caveat to the caveats}
+
+In a course like this, the instructor will usually repeatedly point out that a
+$p$-value is \emph{not} the probability that the null hypothesis is true and
+that an isolated 95\% confidence interval does \emph{not} contain the parameter
+of interest with 95\% probability. I am obviously guilty as charged.
+
+However, this disconnect is \emph{not} necessary! In fact, for many classical
+procedures ($t$-tests, various ``exact'' tests, etc.), we can derive analogous
+Bayesian procedures for which frequentist confidence intervals \emph{serve as
+Bayesian credible intervals with the same confidence.} These procedures usually
+also offer reinterpreations of various frequentist $p$-values (one-sided,
+two-sided, etc.) in terms of the (Bayesian) posterior probability of natural
+hypotheses. Invariably, deriving these corresponding procedures entails
+selecting a ``uninformative'' -- and perhaps invalid -- ``prior'' distribution
+for the parameters of interest. (For example, for some real-valued parameter
+$\theta \in \R$, we might choose the flat ``prior'' $p(\theta) \propto 1$, which
+doesn't normalize. Although this distribution doesn't normalize, the likelihood
+normally will, so the posterior will still be well-formed.)
+
+When we can derive such analogous procedures, it can offer a great deal of
+insight into the frequentist procedure! For example, the Bayesian procedure will
+include some explicit choice of (usually ``uninformative'') prior distribution
+for $\theta$, which you may or may not deem reasonable in a given situation. If
+you're willing to be ``Bayesian'' (even temporarily), you could swap in a new
+prior and derive a more personalized procedure.
 
 \end{document}
+
+
+% https://en.wikipedia.org/wiki/Student%27s_t-test#Assumptions

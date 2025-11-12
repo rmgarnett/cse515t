@@ -1,9 +1,15 @@
 \documentclass{article}
 
+% font (currently libertine, will revisit!)
+\usepackage[semibold,lining]{libertine}
 \usepackage[T1]{fontenc}
-\usepackage[osf]{libertine}
-\usepackage[scaled=0.8]{beramono}
-\usepackage[margin=1.5in]{geometry}
+\usepackage{textcomp}
+\usepackage[varqu,varl,scaled=0.96,var0]{zi4}
+\usepackage[libertine,vvarbb,upint]{newtxmath}
+\usepackage{bm}
+\useosf
+
+\usepackage[margin=1.25in]{geometry}
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsmath}
@@ -17,6 +23,8 @@
 \usepackage{titlesec}
 \titlespacing{\section}{0pt}{10pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
 \titlespacing{\subsection}{0pt}{5pt plus 2pt minus 2pt}{0pt plus 2pt minus 0pt}
+
+\usepackage{mathtools}
 
 \usepackage{pgfplots}
 \pgfplotsset{
@@ -54,82 +62,119 @@
 \newcommand{\data}{\mc{D}}
 \newcommand{\intd}[1]{\,\mathrm{d}{#1}}
 \newcommand{\inv}{^{-1}}
+\newcommand{\E}{\mathbb{E}}
+
+\usepackage{enumitem}
+\setlist[enumerate]{%
+  leftmargin=\itemindent,%
+  topsep=0.2\baselineskip,%
+  itemsep=0.1\baselineskip}
+\setlist[itemize]{%
+  leftmargin=\itemindent,%
+  topsep=0.2\baselineskip,%
+  itemsep=0.1\baselineskip}
 
 \begin{document}
 
 \section*{Coin flipping}
 
-Suppose there is a coin that may be biased -- this coin has unknown
-probability $\theta$ of giving a ``heads.''  If we repeatedly flip
-this coin and observe the outcomes, how can we maintain our belief
-about $\theta$?
+Suppose there is a coin that may be biased; the coin has unknown probability
+$\theta$ of landing on ``heads.''  If we repeatedly flip this coin and observe
+the outcomes, how can we infer the likely values for the bias, $\theta$?
 
-Note that the coin-flipping problem can be seen as a simplification of
-the survey problem we discussed last time, where we assume that people
-always tell the truth, are sampled uniformly at random, and whose
-opinions are generated independently (by flipping a coin!).
+Note that the coin-flipping problem can be seen as a simplification of the
+survey or A/B problem we discussed last time, where we assume that people are
+sampled uniformly at random, always tell the truth, and have independent
+opinions (modeled as being determined by flipping a coin!).
 
-Before we select a prior for $\theta$, we write down the likelihood.
-For a particular problem, it is almost always easier to derive an
-appropriate likelihood than it is to identify an appropriate prior
-distribution.
+In the Bayesian approach to inference, the unknown bias $\theta$ -- like any
+other unknown quantity -- is treated as a random variable. Our inferential
+strategy will then be to inductively maintain a \emph{belief} about $\theta$ in
+the form of a probability distribution conditioned on relevant information (to
+include the outcomes of observed coin flips). We will begin with a prior
+distribution $p(\theta)$ reflecting any prior beliefs we might have (or lack
+thereof), then derive the posterior distribution given observations.
 
-Suppose we flip the coin $n$ times and observe $x$ ``heads.''  Every
-statistician, regardless of philosophy, would agree that the
-probability of this observation, given the value of $\theta$, comes
-from a binomial distribution:
-\begin{equation*}
+Before we select a prior for $\theta$, let us determine a likelihood.  It is
+often easier to derive an appropriate likelihood than it is to identify an
+appropriate prior distribution, as we can \emph{assume} a given realization of
+the relevant unknown quantity.
+
+To that end, suppose we flip the coin $n$ times and observe $x$ ``heads.''
+Assuming these are independent events with common bias $\theta$, every
+statistician, regardless of philosophy, would agree that a binomial
+distribution is the only reasonable model:
+\[
   \Pr(x \given n, \theta)
   =
-  \binom{n}{x} \theta^x (1 - \theta)^{n - x}.
-\end{equation*}
+  \binom{n}{x} \theta^x (1 - \theta)\mathrlap{^{n - x}}.
+\]
+(If you disagree, feel free to start a debate on Slack!)
 
 \subsection*{Classical method}
 
-Before we continue with the Bayesian approach, we pause to discuss how
-a classical statistician would proceed with this problem.  Recall that
-in the frequentist approach, the value $\theta$ can only be considered
-in terms of the frequency of success (``heads'') seen during an
-infinite number of trials.  It is not valid in this framework to represent
-a ``belief'' about $\theta$ in terms of probability.
+Before we continue with the Bayesian approach, we pause to discuss how a
+classical statistician might proceed with this problem.  Recall that in the
+frequentist approach, the value $\theta$ can only be considered in terms of the
+frequency of success (``heads'') seen during an infinite number of trials.  It
+is not valid in this framework to represent a ``belief'' about $\theta$ in terms
+of probability -- the only possible distributions for $\theta$ are Dirac delta
+distributions.
 
-Rather, the frequentist approach to reasoning about $\theta$ is to
-construct an \emph{estimator} for $\theta$, which in theory can be any
-function of the observed data: $\hat{\theta}(x, n)$.  Estimators are
-then analyzed in terms of their behavior as the number of observations
-goes to infinity (for example, we might prove that $\hat{\theta} \to
-\theta$ as $n \to \infty$).  The classical estimator in this case is
-the empirical frequency $\hat{\theta} = \nicefrac{x}{n}$.
+Rather, the frequentist approach to reasoning about $\theta$ is to construct an
+\emph{estimator} for $\theta$, which in theory can be any function of the
+observed data: $\hat{\theta}(x, n)$.  Estimators are then analyzed in terms of
+their behavior as the number of observations goes to infinity. For example, we
+might prove that:
+\begin{itemize}
+  \item
+    $\hat{\theta}$ is \emph{unbiased:} that is, that $\E[\hat{\theta}] = \theta$, or that
+  \item
+      $\hat{\theta}$ is \emph{consistent:} that is, that $\hat{\theta} \to \theta$ as $n
+    \to \infty$.
+\end{itemize}
+The classical estimator in this case is the empirical frequency $\hat{\theta} =
+\nicefrac{x}{n}$, which is indeed unbiased and consistent under the assumed
+data-generation procedure of independent coin flips with shared bias.
 
 \subsection*{Bayesian method}
 
-An interesting thing to note about the frequentist approach is that it
-ignores all prior information, opting instead to only look at the
-observed data.  To a Bayesian, every such problem is different and
-should be analyzed contextually given the known information.
+An interesting thing to note about the frequentist approach is that it ignores
+all prior information, opting instead to only look at the observed
+data. However, to a Bayesian, every such problem is \emph{different} and should
+be analyzed depending on its context and our prior knowledge/experience.
 
-With the likelihood decided, we must now choose a prior distribution
-$p(\theta)$.  A convenient prior in this case is the \emph{beta
-  distribution,} which has two parameters $\alpha$ and $\beta$:
-\begin{equation*}
+One mechanism we have available to shape an analysis is through the choice of
+prior distribution $p(\theta)$.  In the case of our coin flipping example, a
+mathematically convenient and flexible choice of prior is the \emph{beta
+distribution,} which has two parameters $\alpha$ and $\beta$:%
+\[
   p(\theta \given \alpha, \beta)
   =
   \mc{B}(\theta; \alpha, \beta)
   =
   \frac{1}{B(\alpha, \beta)}
-  \theta^{\alpha - 1}(1 - \theta)^{\beta - 1}.
-\end{equation*}
+  \theta^{\alpha - 1}(1 - \theta)\mathrlap{^{\beta - 1}}.
+\]
 Here the normalizing constant $B(\alpha, \beta)$ is the \emph{beta
-  function:}
+  function:}%
+%
+\footnote{The beta function is a special function that was
+\emph{defined} to equal the value of the given definite integral, which
+annoyingly has no closed form expression. So Euler simply gave it one!}
+%
 \begin{equation*}
   B(\alpha, \beta)
   =
   \int_{0}^{1} \theta^{\alpha - 1}(1 - \theta)^{\beta - 1} \intd{\theta}.
 \end{equation*}
 
-The support of the beta distribution is $\theta \in (0, 1)$, and by
-selecting various values of $\alpha$ and $\beta$, we can control its
-shape to represent a variety of different prior beliefs.
+The support of the beta distribution is $\theta \in (0, 1)$, and by selecting
+various values of $\alpha$ and $\beta$, we can control its shape to represent a
+variety of different prior beliefs, from completely flat (reflecting
+prior ignorance) to very peaked (reflecting strong prior beliefs).
+
+\subsection*{Deriving the posterior by brute force}
 
 Given our observations $\data = (x, n)$, we can now compute the
 posterior distribution of $\theta$:
@@ -138,11 +183,12 @@ posterior distribution of $\theta$:
   =
   \frac
       {     \Pr(x \given n, \theta) p(\theta \given \alpha, \beta)}
-      {\int \Pr(x \given n, \theta) p(\theta \given \alpha, \beta) \intd{\theta}}.
+      {\Pr(x \given n, \alpha, \beta)}.
 \end{equation*}
 
 First we handle the normalization constant $\Pr(x \given n, \alpha, \beta)$:
 \begin{align*}
+  \Pr(x \given n, \alpha, \beta) =
   \int \Pr(x \given n, \theta) p(\theta \given \alpha, \beta) \intd{\theta}
   &=
   \binom{n}{x}
@@ -154,6 +200,12 @@ First we handle the normalization constant $\Pr(x \given n, \alpha, \beta)$:
   \binom{n}{x}
   \frac{B(\alpha + x, \beta + n - x)}{B(\alpha, \beta)}.
 \end{align*}
+In the first step we applied the sum and product rules to rewrite an expression
+of the form $p(a \given b)$ as $\int p(a \given b, c) p(c \given b) \intd c$,
+and then used conditional independence to remove extraneous quantities behind
+the conditioning bar. (For example, $x$ is conditionally independent of the
+parameters of our prior belief $(\alpha, \beta)$ given $\theta$.) The following
+steps are then simply brute force calculus.
 
 Now we apply Bayes theorem:
 \begin{align*}
@@ -182,32 +234,45 @@ Now we apply Bayes theorem:
   &=
   \mc{B}(\alpha + x, \beta + n - x).
 \end{align*}
-The posterior is therefore another beta distribution with parameters
-$(\alpha + x, \beta + n - x)$; we have added the number of successes
-to the first parameter and the number of failures to the second.
+The posterior is therefore another beta distribution with updated parameters
+$(\alpha + x, \beta + n - x)$! Specifically, we added the number of observed
+successes to the first parameter and the number of observed failures to the
+second.
 
-The rather convenient fact that the posterior remains a beta
-distribution is because the beta distribution satisfies a property
-known as \emph{conjugacy} with the binomial likelihood.  This fact
-also leads to a common interpretation of the parameters $\alpha$ and
-$\beta$: they serve as ``pseudocounts,'' or fake observations we
-pretend to have seen before seeing the data.
+\subsection*{Conjugacy}
 
-Figure \ref{coin_flipping} shows the relevant functions for the coin
-flipping example for $(\alpha, \beta) = (3, 5)$ and $(x, n) = (5, 6)$.
-Notice that the likelihood favors higher values of $\theta$, whereas
-the prior had favored lower values of $\theta$.  The posterior, taking
-into account both sources of information, lies in between these
-extremes.  Notice also that the posterior has support over a narrower
-range of plausible $\theta$ values than the prior; this is because we
-can draw more confident conclusions from having access to more
+The rather convenient fact that the posterior remains a beta distribution is
+because the beta distribution satisfies a property known as \emph{conjugacy}
+with the binomial likelihood. Every member of the expansive \emph{exponential
+family} of distributions (which includes many commonly encountered
+distributions: normal, exponential, Poisson, binomial, chi-squared, etc.) has a
+``conjugate pair'' distribution. These are especially useful for inference: when
+using the conjugate prior for a given likelihood, the posterior distribution
+takes the same form as the prior with updated parameters.
+
+Very often, these parameters have natural interpretations in terms of
+``pseudo-observations,'' observations analogous to the data under study that
+occurred prior to the experiment in question. In the case of the beta
+distribution, we may interpret the parameters $\alpha$ and $\beta$ as serving as
+``pseudocounts'' of successes and failures observed a priori. Deriving the
+posterior distribution then entails simply incrementing these counts. This
+interpretation can aid in prior selection!
+
+\subsection*{Illustration}
+
+Figure \ref{coin_flipping} shows the relevant functions for the coin flipping
+example for $(\alpha, \beta) = (3, 5)$ and $(x, n) = (5, 6)$.  Notice that the
+likelihood favors higher values of $\theta$, whereas the prior had favored lower
+values of $\theta$.  The posterior, taking into account both sources of
+information, lies in between these extremes.  Notice also that the posterior has
+support over a narrower range of plausible $\theta$ values than the prior; this
+is because we can draw more confident conclusions from having access to more
 information.
 
 \begin{figure}
   \centering
   \input{figures/beta_example.tex}
-  \caption{An example of Bayesian updating for coin flipping.  Figure
-    produced by \texttt{plot\_beta\_example.m}.}
+  \caption{An example of Bayesian updating for coin flipping.}
   \label{coin_flipping}
 \end{figure}
 
@@ -215,33 +280,111 @@ information.
 
 We often wish to use our observed data to draw conclusions about the
 plausibility of various hypotheses.  For example, we might wish to
-know whether the parameter $\theta$ is less than $\nicefrac{1}{2}$.
+know whether the parameter $\theta$ is greater than $\nicefrac{1}{2}$.
+
+\subsection*{Bayesian method}
+
 The Bayesian method allows us to compute this value directly from the
 posterior distribution:
-\begin{equation*}
-  \Pr(\theta < \nicefrac{1}{2} \given x, n, \alpha, \beta)
+\begin{equation}
+  \Pr(\theta > \nicefrac{1}{2} \given x, n, \alpha, \beta)
   =
-  \int_{0}^{\nicefrac{1}{2}} p(\theta \given x, n, \alpha, \beta) \intd{\theta}.
-\end{equation*}
+  \int_{\nicefrac{1}{2}}^1 p(\theta \given x, n, \alpha, \beta) \intd{\theta}.
+  \label{posterior}
+\end{equation}
 For the example in Figure \ref{coin_flipping}, this probability is
-approximately 15\%.
+approximately 85\%.
 
-There is a sharp contrast between the simplicity of this approach and
-the frequentist method.  The classical approach to hypothesis testing
-uses the likelihood as a way of generating fake datasets of the same
-size as the observations.  The likelihood then serves as a so-called
-``null hypothesis'' that allows us to generate hypothetical datasets
-under some condition.
+\subsection*{Frequentist method as described by a rabid Bayesian}
 
-From these, we compute \emph{statistics,} which, like estimators, can
-be any function of the hypothesized data.  We then identify some
-critical set $C$ for this statistic which contains some large portion
-$(1 - \alpha)$ of the values corresponding to the datasets generated
-by our null hypothesis.  If the statistic computed from the observed
-data falls outside this set, we reject the null hypothesis with
-``confidence'' $\alpha$.  Note that the ``rejection'' of the null
-hypothesis in classical hypothesis testing is purely a statement about
-the observed data (that it looks ``unusual''), and not about the
-plausibility of alternative hypotheses!
+As we cannot gain traction by trying to quantify the ``probability'' that
+$\theta > \nicefrac{1}{2}$, we must find some other means to proceed.
+
+One frequentist approach (not the only approach!) to this question
+relies on the following general recipe:%
+%
+\footnote{What follows is a hand-wavy description of Fisher's approach to (null)
+hypothesis testing. Neyman and Pearson supported a somewhat different approach.}
+%
+\begin{enumerate}
+\item
+  we define a \emph{statistic,} which can be any arbitrary function computed from a dataset,
+\item
+  we form a \emph{null hypothesis,} which is a convenient assumed procedure for
+  generating data,
+\item
+  we derive the \emph{sampling distribution,} the distribution of the statistic if the null hypothesis were true -- this is allowed as it is defined by the outcomes of infinitely many well-defined experiments,
+\item
+  we compute the statistic for our observed dataset, and finally
+\item
+  we compute the probability of observing a value ``at least as extreme'' as our observed statistic if the null hypothesis were true.
+\end{enumerate}
+
+The value computed in the final step is called the \emph{p-value}, with low
+$p$-values (indicating remarkably ``unusual'' data) are interpreted as providing
+evidence against the null hypothesis.%
+%
+\footnote{Computing a $p$-value is only one (quite common) path forward. We will
+discuss the related concept of confidence intervals in a later lecture.}
+%
+
+For our example scenario of coin flipping, we can realize a simple hypothesis
+test following the above procedure. For example, we might assume a perfectly
+fair coin (that is, $\theta = \nicefrac{1}{2}$) coupled with a binomial
+likelihood as a convenient null hypothesis. Now given observations $(x, n)$, we
+can compute the probability of observing an empirical probability $\hat{\theta}
+= \nicefrac{x}{n}$ as extreme as our result -- that is, a $p$-value -- by
+examining the tail probabilities of the binomial distribution.
+
+\textbf{Quick aside.}  The so-called ``one-proportion $z$-test'' sometimes
+encountered in the classroom is based on a normal approximation to the binomial
+distribution in the above procedure. That's where the vague advice that you need
+a sufficiently large sample to apply that test comes from. The normal
+approximation was useful in the days when computers were not around and
+statisticians had to rely on precomputed tables of ``critical values'' when
+conducting tests. Nowadays we can just compute the $p$-value exactly.
+
+\subsection*{Caveat about \emph{p}-values}
+The $p$-value is \emph{not} the probability that the null hypothesis is true,
+nor can it be interpreted as offering any insight into the plausibility of any
+alternative hypothesis. In fact, it is derived assuming the null hypothesis was
+indeed true!
+
+The Bayesian posterior probability \eqref{posterior}, however, \emph{can} be
+interpreted as a (subjective) probability that $\theta > \nicefrac{1}{2}$.
+
+We will continue this discussion in the following weeks. There's still a lot
+to unpack here.
+
+%% In the case of inferring the average treatment effect from an A/B experiment,
+%% the classical approach is a two sample t-test, a realization of the above
+%% general procedure. Here the “t-statistic” (step 1) is a simple summary statistic
+%% of the outcomes of groups A and B, and the null hypothesis (step 2) is,
+%% hand-waving a bit, “the average treatment effect is zero (that is, E[A] = E[B])
+%% and we have collected enough data that the central limit theorem has kicked in.”
+%% This assumption renders deriving the sampling distribution (step 3) and
+%% computing p-values (step 4) feasible. The p-value, with low values indicating
+%% that the experimental outcomes would be statistically implausible if the ATE
+%% were in fact zero, then provides a workable solution to the first goal above of
+%% quantifying the weight of evidence for a positive average treatment effect.
+
+
+%% There is a sharp contrast between the simplicity of this approach and the
+%% analogous frequentist method.
+
+%% The classical approach to hypothesis testing uses the likelihood as a way of
+%% generating fake datasets of the same size as the observations.  The likelihood
+%% then serves as a so-called ``null hypothesis'' that allows us to generate
+%% hypothetical datasets under some condition.
+
+%% From these, we compute \emph{statistics,} which, like estimators, can be any
+%% function of the hypothesized data.  We then identify some critical set $C$ for
+%% this statistic which contains some large portion $(1 - \alpha)$ of the values
+%% corresponding to the datasets generated by our null hypothesis.  If the
+%% statistic computed from the observed data falls outside this set, we reject the
+%% null hypothesis with ``confidence'' $\alpha$.  Note that the ``rejection'' of
+%% the null hypothesis in classical hypothesis testing is purely a statement about
+%% the observed data (that it looks ``unusual''), and not about the plausibility of
+%% alternative hypotheses!
 
 \end{document}

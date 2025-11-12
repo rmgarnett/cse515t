@@ -1,13 +1,17 @@
 \documentclass{article}
 
+% font (currently libertine, will revisit!)
+\usepackage[semibold,lining]{libertine}
 \usepackage[T1]{fontenc}
-\usepackage[osf]{libertine}
-\usepackage[scaled=0.8]{beramono}
-\usepackage[margin=1.5in]{geometry}
+\usepackage{textcomp}
+\usepackage[varqu,varl,scaled=0.96,var0]{zi4}
+\usepackage[libertine,vvarbb,upint]{newtxmath}
+\usepackage{bm}
+\useosf
+\usepackage[margin=1.25in]{geometry}
 \usepackage{url}
 \usepackage{booktabs}
 \usepackage{amsmath}
-\usepackage{amssymb}
 \usepackage{nicefrac}
 \usepackage{microtype}
 \usepackage{subcaption}
@@ -91,16 +95,14 @@
 
 \section*{Linear regression}
 
-We are ready to consider our first machine-learning problem:
-\emph{linear regression.}  Suppose that we are interested in the
-values of a function $y(\vec{x})\colon \R^d \to \R$, where $\vec{x}$ is
-a $d$-dimensional vector-valued input.  We assume that we have made
-some observations of this mapping, $\data = \bigl\{ (\vec{x}_i, y_i)
-\bigr\}_{i = 1}^N$, to serve as training data.  Given these examples,
-the goal of regression is to be able to predict the value of $y$ at a
-new input location $\vec{x}_\ast$.  In other words, we want to learn
-from $\data$ a (hopefully accurate!) prediction function (also called
-a \emph{regression function}) $\hat{y}(\vec{x}_\ast)$.
+Suppose that we are interested in the values of a function $y(\vec{x})\colon
+\R^d \to \R$, where $\vec{x}$ is a $d$-dimensional vector-valued input.  We
+assume that we have made some observations of this mapping, $\data = \smash{\bigl\{
+(\vec{x}_i, y_i) \bigr\}_{i = 1}^N}$, to serve as training data.  Given these
+examples, the goal of regression is to be able to predict the value of $y$ at a
+new input location $\vec{x}_\ast$.  In other words, we want to learn from
+$\data$ a (hopefully accurate!) prediction function (also called a
+\emph{regression function}) $\hat{y}(\vec{x}_\ast)$.
 
 Without any further restrictions on $\hat{y}$, the problem is not
 well-posed.  In general, I could choose any function $\hat{y}$.  How
@@ -123,22 +125,23 @@ underlying linear trend closely matches the data, we can expect small
 residuals.
 
 Note that this model does not explicitly contain an intercept term.
-Instead, we normally add a constant feature to the input vector
-$\vec{x}$ as in $\vec{x}' = [1, \vec{x}]\trans$.  In this case, the value
+Instead, we normally add a constant feature to the input vector,
+transforming
+$\vec{x} \mapsto [1, \vec{x}]\trans$.  In this case, the value
 $w_1$ may be seen as an intercept term, allowing the hyperplane to
-avoid passing through the origin at $\vec{x} = 0$.  To avoid messy
-notation, we will not explicitly write the prime on the inputs and
-rather assume this expansion has already been done.
+avoid passing through the origin at $\vec{x} = 0$.
 
 In general, we can imagine applying any function to $\vec{x}$ to serve
 as the inputs to our linear regression model.  For example, to
-accomplish polynomial regression of a given degree $k$, we might take
-$\vec{x}' = [1, \vec{x}, \vec{x}^2, \dots, \vec{x}^k]\trans$, where
-exponentiation is pointwise.  A transformation of this type may be
-summarized by a map $\vec{x} \mapsto \phi(\vec{x})$; this is known as
-a \emph{basis expansion.}  With a nonlinear basis expansion, we can
-learn nonlinear regression functions.  We assume in the following that
-such an expansion, if desired, has already been applied to the inputs.
+accomplish polynomial regression of a given degree $k$, we might transform
+$\vec{x} \mapsto [1, \vec{x}, \vec{x}^2, \dots, \vec{x}^k]\trans$, where
+exponentiation is pointwise.
+
+In general, an augmentation transformation of this type may be summarized by a
+map $\vec{x} \mapsto \phi(\vec{x})$; this is known as a \emph{basis expansion.}
+With a nonlinear basis expansion, we can learn nonlinear regression functions.
+We assume in the following that such an expansion, if desired, has already been
+applied to the inputs.
 
 Let us collect the $N$ training examples into a matrix of training
 inputs $\vec{X} \in \R^{N \times d}$ and a vector of associated outputs
@@ -195,7 +198,6 @@ estimate of the parameter vector into \eqref{linear_assumption}:
   \vec{x}_\ast\trans (\mat{X}\trans\mat{X})\inv \mat{X}\trans \vec{y}
   .
 \end{equation*}
-
 Ordinary least squares is by far the most commonly applied linear
 regression procedure.
 
@@ -246,10 +248,7 @@ estimator converges to the ordinary least squares estimator.  As
 $\lambda \to \infty$ (corresponding to very large penalties on the
 magnitude of $\vec{w}$ entries), the estimator converges to $\vec{0}$.
 
-This approach is known as \emph{ridge regression,} named for the
-additional term $\lambda \mat{I}$ in the estimator, which when viewed
-from ``above'' can whimsically be described as resembling a mountain
-ridge.
+This approach is known as \emph{ridge regression.}
 
 \subsection*{Bayesian linear regression}
 
